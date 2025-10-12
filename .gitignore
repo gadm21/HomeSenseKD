@@ -1,1 +1,31 @@
-venv
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Results and data
+results/
+*.csv
+*.npy
+*.pkl
+*.h5
+*.hdf5
+*.pth
+*.pt
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
