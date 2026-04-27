@@ -5,8 +5,8 @@ __pycache__/
 *$py.class
 
 # Results and data
-results/
-*.csv
+
+
 *.npy
 *.pkl
 *.h5
