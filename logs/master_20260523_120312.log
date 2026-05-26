@@ -1,0 +1,55 @@
+[2026-05-23 12:03:12] ============================================================
+[2026-05-23 12:03:12]   Global run — all phases
+[2026-05-23 12:03:12]   Run started : 2026-05-23 12:03:12
+[2026-05-23 12:03:12]   Host        : WIN-VP35KLEOC2D
+[2026-05-23 12:03:12]   OS          : MINGW64_NT-10.0-26200 WIN-VP35KLEOC2D 3.6.5-22c95533.x86_64 2025-10-10 12:02 UTC x86_64 Msys
+[2026-05-23 12:03:13]   CPU         : 12 logical cores
+[2026-05-23 12:03:13]   RAM         : N/A
+[2026-05-23 12:03:13]   GPU         : N/A (nvidia-smi not found)
+[2026-05-23 12:03:13]   Python      : Python 3.11.1
+[2026-05-23 12:03:13]   Phase       : 2   Jobs: 2   Dry-run: false
+[2026-05-23 12:03:13]   Log dir     : /c/Users/ggad/Desktop/HomeSenseKD/logs
+[2026-05-23 12:03:13]   Results dir : 
+[2026-05-23 12:03:13]   Master log  : /c/Users/ggad/Desktop/HomeSenseKD/logs/master_20260523_120312.log
+[2026-05-23 12:03:13] ============================================================
+[2026-05-23 12:03:13]   Scope : 7 algorithms x 3 heterogeneity distributions
+[2026-05-23 12:03:13] ============================================================
+[2026-05-23 12:03:13]   JOB START   : home_occupancy_fedmd_uniform
+[2026-05-23 12:03:13]   PID         : 2237
+[2026-05-23 12:03:13]   Log         : /c/Users/ggad/Desktop/HomeSenseKD/logs/phase2/home_occupancy_fedmd_uniform.log
+[2026-05-23 12:03:13]   Results dir : /c/Users/ggad/Desktop/HomeSenseKD/results/phase2
+[2026-05-23 12:03:13]   Fig dir     : /c/Users/ggad/Desktop/HomeSenseKD/results/phase2/figures
+[2026-05-23 12:03:13]   Cmd         : /c/Users/ggad/Desktop/HomeSenseKD/venv/Scripts/python.exe /c/Users/ggad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-23 12:03:13]                   --config /c/Users/ggad/Desktop/HomeSenseKD/config/home_occupancy.yaml \
+[2026-05-23 12:03:13]                   --algorithm fedmd --heterogeneity uniform \
+[2026-05-23 12:03:13]                   --override experiment.results_dir=/c/Users/ggad/Desktop/HomeSenseKD/results/phase2 \
+[2026-05-23 12:03:13]                              experiment.fig_dir=/c/Users/ggad/Desktop/HomeSenseKD/results/phase2/figures
+[2026-05-23 12:03:13] ============================================================
+[2026-05-23 12:03:13] ============================================================
+[2026-05-23 12:03:13]   JOB START   : home_occupancy_fedmd_all_small
+[2026-05-23 12:03:13]   PID         : 2236
+[2026-05-23 12:03:13]   Log         : /c/Users/ggad/Desktop/HomeSenseKD/logs/phase2/home_occupancy_fedmd_all_small.log
+[2026-05-23 12:03:13]   Results dir : /c/Users/ggad/Desktop/HomeSenseKD/results/phase2
+[2026-05-23 12:03:13]   Fig dir     : /c/Users/ggad/Desktop/HomeSenseKD/results/phase2/figures
+[2026-05-23 12:03:13]   Cmd         : /c/Users/ggad/Desktop/HomeSenseKD/venv/Scripts/python.exe /c/Users/ggad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-23 12:03:13]                   --config /c/Users/ggad/Desktop/HomeSenseKD/config/home_occupancy.yaml \
+[2026-05-23 12:03:13]                   --algorithm fedmd --heterogeneity all_small \
+[2026-05-23 12:03:13]                   --override experiment.results_dir=/c/Users/ggad/Desktop/HomeSenseKD/results/phase2 \
+[2026-05-23 12:03:13]                              experiment.fig_dir=/c/Users/ggad/Desktop/HomeSenseKD/results/phase2/figures
+[2026-05-23 12:03:13] ============================================================
+[2026-05-23 12:03:14] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-05-23 12:03:14] I0000 00:00:1779552194.775139   26652 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-05-23 12:03:14] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-05-23 12:03:14] I0000 00:00:1779552194.775172   22432 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-05-23 12:03:19] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-05-23 12:03:19] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-05-23 12:03:19] I0000 00:00:1779552199.335255   22432 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-05-23 12:03:19] I0000 00:00:1779552199.335250   26652 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-05-23 12:03:23] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[2026-05-23 12:03:23] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[2026-05-23 12:06:08] I0000 00:00:1779552368.625382   26652 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2026-05-23 12:06:08] To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2026-05-23 12:06:08] I0000 00:00:1779552368.665899   22432 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2026-05-23 12:06:08] To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2026-05-23 12:06:08] WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+[2026-05-23 12:06:08] WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.

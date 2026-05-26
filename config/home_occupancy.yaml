@@ -1,0 +1,8 @@
+# HomeOccupancy CSI dataset — target; HomeHAR used as public KD pool
+data:
+  dataset: home_occupancy
+  public_dataset: home_har
+  n_classes: 3
+  n_samples_per_class: 30
+  window_size: 1500
+  n_stft_bins: 8          # STFT freq bins retained; n_features = 4 + n_stft_bins = 12

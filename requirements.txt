@@ -6,5 +6,7 @@ scikit-learn
 scipy
 tensorflow
 torch
-torchvision 
+torchvision
 datasets
+pyyaml
+flwr

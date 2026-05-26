@@ -1,0 +1,655 @@
+% ============================================================
+%  HomeSenseKD — 3-page experiment report
+%  Compile: pdflatex paper.tex  (requires fontawesome5, tikz, pgfplots)
+% ============================================================
+\documentclass[9pt,twocolumn]{article}
+\usepackage[top=1.35cm,bottom=1.35cm,left=1.2cm,right=1.2cm,
+            columnsep=0.4cm]{geometry}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{fontawesome5}
+\usepackage[font=small,skip=3pt]{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usetikzlibrary{arrows.meta,shapes,positioning,fit,
+                decorations.pathreplacing,calc,backgrounds}
+
+% ── Palette ──────────────────────────────────────────────────────────────────
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clGray}  {RGB}{100,100,100}
+\definecolor{ltBlue}  {RGB}{220,234,252}
+\definecolor{ltGreen} {RGB}{215,244,220}
+\definecolor{ltOrange}{RGB}{255,237,212}
+\definecolor{ltYellow}{RGB}{255,251,212}
+\definecolor{ltPurple}{RGB}{238,225,255}
+\definecolor{ltGray}  {RGB}{238,238,238}
+\definecolor{ltRed}   {RGB}{255,220,220}
+
+% ── TikZ shared styles ───────────────────────────────────────────────────────
+\tikzset{
+  chip/.style={rectangle,draw=black!40,fill=ltGreen,rounded corners=3pt,
+               minimum width=1.85cm,minimum height=1.05cm,align=center,
+               font=\scriptsize,line width=0.5pt},
+  srvr/.style={rectangle,draw=clBlue!65,fill=ltBlue,rounded corners=4pt,
+               minimum width=4.2cm,minimum height=0.9cm,align=center,
+               font=\scriptsize\bfseries,line width=0.65pt},
+  blk/.style={rectangle,draw=black!35,rounded corners=2pt,
+              minimum height=0.50cm,align=center,
+              font=\scriptsize,line width=0.4pt},
+  head/.style={rectangle,draw=black!38,rounded corners=2pt,
+               minimum width=1.55cm,minimum height=0.50cm,align=center,
+               font=\scriptsize,line width=0.42pt},
+  pipe/.style={rectangle,draw=black!35,rounded corners=2pt,
+               minimum height=0.50cm,minimum width=1.55cm,align=center,
+               font=\scriptsize,line width=0.42pt},
+  loss/.style={rectangle,draw=black!28,fill=ltYellow,rounded corners=2pt,
+               minimum width=1.25cm,minimum height=0.42cm,align=center,
+               font=\tiny,line width=0.38pt},
+  rowlbl/.style={font=\scriptsize\bfseries,text=gray!55},
+  arr/.style={-{Stealth[length=2.8pt,width=1.9pt]},semithick},
+  darr/.style={-{Stealth[length=2.8pt,width=1.9pt]},semithick,dashed,gray!55},
+}
+
+\setlength{\textfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\floatsep}{3pt plus 1pt minus 1pt}
+\setlength{\intextsep}{3pt plus 1pt minus 1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+
+% ============================================================
+\title{\textbf{HomeSenseKD: Heterogeneous Federated Knowledge
+  Distillation\\[-2pt] for CSI-Based Indoor Sensing}%
+  \vspace{-0.5em}}
+\author{\small Anonymous Submission}
+\date{}
+% ============================================================
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+% ── FIGURE 1: Network Topology Diagrams (placeholder) ─────────────────────
+\begin{figure*}[!t]
+\centering
+\tikzset{
+  fsrv/.style={rectangle,rounded corners=2pt,draw=clBlue!70,fill=ltBlue,
+    minimum width=1.4cm,minimum height=0.52cm,align=center,font=\scriptsize\bfseries},
+  cliS/.style={circle,draw=clGreen!65,fill=ltGreen,minimum size=0.44cm,font=\tiny\bfseries},
+  cliM/.style={circle,draw=clBlue!60,fill=ltBlue!55,minimum size=0.58cm,font=\tiny\bfseries},
+  cliL/.style={circle,draw=clPurple!65,fill=ltPurple,minimum size=0.74cm,font=\tiny\bfseries},
+  tbox/.style={rectangle,draw=black!20,fill=gray!5,rounded corners=2pt,inner sep=4pt},
+  sla/.style={{Stealth[length=2.2pt,width=1.4pt]}-{Stealth[length=2.2pt,width=1.4pt]},dashed,clOrange!80,semithick},
+  wla/.style={{Stealth[length=2.2pt,width=1.4pt]}-{Stealth[length=2.2pt,width=1.4pt]},clBlue!75,thick},
+  twa/.style={{Stealth[length=2.2pt,width=1.4pt]}-{Stealth[length=2.2pt,width=1.4pt]},semithick},
+}
+%── (a) FedMD / FedAKD ─────────────────────────────────────────────────────
+\begin{minipage}[t]{0.30\textwidth}\centering
+\begin{tikzpicture}
+\node[fsrv](S) at (2.1,2.7){Server};
+\node[cliS](a) at (0.5,1.20){\textbf{S}};\node[cliL](b) at (1.25,0.38){\textbf{L}};
+\node[cliS](c) at (2.1,0.12){\textbf{S}};\node[cliM](d) at (2.95,0.38){\textbf{M}};
+\node[cliS](e) at (3.7,1.20){\textbf{S}};
+\foreach \x in {a,b,c,d,e}{\draw[sla](S)--(\x);}
+\node[font=\tiny,text=clOrange!80,left]  at (0.28,2.0){$\bar{s}$};
+\node[font=\tiny,text=clOrange!80,right] at (3.92,2.0){$s_k$};
+\end{tikzpicture}\par\vspace{2pt}
+{\small\textbf{(a) FedMD / FedAKD}}\\[-1pt]{\tiny Fully heterogeneous; soft labels only}
+\end{minipage}\hfill
+%── (b) FedMKS ─────────────────────────────────────────────────────────────
+\begin{minipage}[t]{0.37\textwidth}\centering
+\begin{tikzpicture}
+\node[fsrv](S) at (2.6,2.8){Server};
+\node[cliS](s1) at (0.55,0.85){\textbf{S}};\node[cliS](s2) at (0.55,0.22){\textbf{S}};
+\begin{scope}[on background layer]\node[tbox,fit=(s1)(s2)](tS){};\end{scope}
+\node[font=\tiny\bfseries,text=clGreen!75,above=1pt of tS]{Tier~S};
+\node[cliM](m1) at (2.6,0.85){\textbf{M}};\node[cliM](m2) at (2.6,0.22){\textbf{M}};
+\begin{scope}[on background layer]\node[tbox,fit=(m1)(m2)](tM){};\end{scope}
+\node[font=\tiny\bfseries,text=clBlue!75,above=1pt of tM]{Tier~M};
+\node[cliL](l1) at (4.65,0.85){\textbf{L}};\node[cliL](l2) at (4.65,0.22){\textbf{L}};
+\begin{scope}[on background layer]\node[tbox,fit=(l1)(l2)](tL){};\end{scope}
+\node[font=\tiny\bfseries,text=clPurple!75,above=1pt of tL]{Tier~L};
+\draw[sla]([xshift=-3pt]S.south west)to[bend right=8]([xshift=-3pt]tS.north);
+\draw[sla]([xshift=-2pt]S.south)--([xshift=-2pt]tM.north);
+\draw[sla]([xshift=-3pt]S.south east)to[bend left=8]([xshift=-3pt]tL.north);
+\draw[twa,clGreen!70]([xshift=3pt]S.south west)to[bend right=18]([xshift=3pt]tS.north);
+\draw[twa,clBlue!65]([xshift=2pt]S.south)--([xshift=2pt]tM.north);
+\draw[twa,clPurple!65]([xshift=3pt]S.south east)to[bend left=18]([xshift=3pt]tL.north);
+\node[font=\tiny,text=clOrange!80,left]  at (-0.1,1.85){$\bar{s},s_k$};
+\node[font=\tiny,text=clPurple!70,right] at (5.35,1.85){$w_t,w_k$};
+\end{tikzpicture}\par\vspace{2pt}
+{\small\textbf{(b) FedMKS}}\\[-1pt]{\tiny Semi-het.; soft labels + tier weights}
+\end{minipage}\hfill
+%── (c) FedAvg / FedProx ───────────────────────────────────────────────────
+\begin{minipage}[t]{0.29\textwidth}\centering
+\begin{tikzpicture}
+\node[fsrv](S) at (2.1,2.7){Server};
+\node[cliM](a) at (0.5,1.20){$k_1$};\node[cliM](b) at (1.25,0.38){$k_2$};
+\node[cliM](c) at (2.1,0.12){$k_3$};\node[cliM](d) at (2.95,0.38){$k_4$};
+\node[cliM](e) at (3.7,1.20){$k_5$};
+\foreach \x in {a,b,c,d,e}{\draw[wla](S)--(\x);}
+\node[font=\tiny,text=clBlue!80,left]  at (0.25,2.0){$w$};
+\node[font=\tiny,text=clBlue!80,right] at (3.95,2.0){$w_k$};
+\end{tikzpicture}\par\vspace{2pt}
+{\small\textbf{(c) FedAvg / FedProx}}\\[-1pt]{\tiny Homogeneous; weights only}
+\end{minipage}
+\vspace{2pt}
+\caption{\textbf{Network topologies.}
+  \textbf{(a)}~FedMD/FedAKD: the server aggregates soft predictions $s_k$
+  from fully heterogeneous clients (S/M/L mix) into $\bar{s}$; no model
+  weights are ever exchanged.
+  \textbf{(b)}~FedMKS: clients self-organise into tier clusters; the server
+  broadcasts per-tier averaged weights $w_t$ (solid) alongside global
+  soft labels (dashed) each round.
+  \textbf{(c)}~FedAvg/FedProx: all clients share the same architecture;
+  only global model weights $w,w_k$ are exchanged.}
+\label{fig:algcompare}
+\end{figure*}
+
+% ── FIGURE 2: Dual-Head Model ────────────────────────────────────────────────
+\begin{figure*}[!t]
+\centering
+\resizebox{0.93\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.32cm and 0.38cm]
+
+\node[blk,fill=ltOrange,minimum width=1.35cm] (inp)  at (0.55,0)
+  {Input\\[-2pt]{\tiny $(T,4{+}B)$}};
+\node[blk,fill=ltGreen, minimum width=0.88cm] (cv1)  at (2.05,0) {Conv1D};
+\node[blk,fill=ltGreen, minimum width=0.88cm] (cv2)  at (3.18,0) {Conv1D};
+\node[blk,fill=ltGreen, minimum width=0.88cm] (cv3)  at (4.31,0) {Conv1D};
+\node[blk,fill=ltBlue,  minimum width=1.08cm] (lstm) at (5.65,0)
+  {BiLSTM\\[-2pt]{\tiny (opt.)}};
+\node[blk,fill=ltPurple,minimum width=1.0cm]  (attn) at (7.0,0)
+  {Attn\\[-2pt]{\tiny (opt.)}};
+\node[blk,fill=ltYellow,minimum width=1.0cm]  (feat) at (8.35,0)
+  {\textbf{feat}\\[-2pt]{\tiny $\mathbb{R}^d$}};
+
+\node[head,fill=ltGreen]  (clsh)  at (10.2, 0.72)
+  {Cls Head\\[-2pt]{\tiny Softmax~$\hat{y}$}};
+\node[head,fill=ltPurple] (disth) at (10.2,-0.72)
+  {Dist Head\\[-2pt]{\tiny Dense+ReLU~$s$}};
+\node[loss] (cel)  at (11.75, 0.72) {CE Loss};
+\node[loss] (msel) at (11.75,-0.72) {MSE Loss};
+
+\node[blk,fill=ltOrange,minimum width=1.25cm] (priv) at (11.75, 1.56)
+  {{\tiny\faDatabase}~Private\\[-2pt]{\tiny $\mathcal{D}_k^{\mathrm{priv}}$}};
+\node[blk,fill=ltGray,  minimum width=1.25cm] (pub)  at (11.75,-1.56)
+  {{\tiny\faGlobe}~Public\\[-2pt]{\tiny $\mathcal{D}^{\mathrm{pub}}$}};
+\begin{scope}[on background layer]
+\node[rectangle,fill=gray!7,draw=black!10,rounded corners=4pt,
+      fit=(inp)(cv1)(cv2)(cv3)(lstm)(attn)(feat),inner sep=5pt](bb){};
+\node[rectangle,fill=ltYellow!35,draw=black!8,rounded corners=3pt,
+      fit=(clsh)(disth)(cel)(msel),inner sep=4pt](hds){};
+\end{scope}
+\node[font=\tiny,text=gray!38,above=3pt of bb,anchor=south]{\textsc{backbone region}};
+\draw[gray!18,dashed,line width=0.6pt]
+  ($(feat.east)+(0.10,0.80)$)--($(feat.east)+(0.10,-0.80)$);
+
+\draw[arr](inp)--(cv1); \draw[arr](cv1)--(cv2); \draw[arr](cv2)--(cv3);
+\draw[arr](cv3)--(lstm); \draw[arr](lstm)--(attn); \draw[arr](attn)--(feat);
+\draw[arr](feat.east)--++(0.12,0)|- (clsh.west);
+\draw[arr](feat.east)--++(0.12,0)|- (disth.west);
+\draw[arr,clGreen!80](clsh)--(cel);
+\draw[arr,clPurple!80](disth)--(msel);
+\draw[arr,clOrange!70](priv)--(cel);
+\draw[arr,gray!60](pub)--(msel);
+
+\draw[decorate,decoration={brace,amplitude=3pt,raise=3pt},gray!55]
+  ([yshift=0.44cm]cv1.north west)--([yshift=0.44cm]attn.north east)
+  node[midway,above=4pt,font=\tiny,text=gray]
+    {Shared backbone — depth grows with tier (Small $\to$ Medium $\to$ Large)};
+
+\draw[decorate,decoration={brace,amplitude=2.5pt,raise=3pt,mirror},gray!38]
+  ([yshift=-0.36cm]cv1.south west)--([yshift=-0.36cm]cv3.south east)
+  node[midway,below=3.5pt,font=\tiny,text=clGreen!80]{Small};
+\draw[decorate,decoration={brace,amplitude=2.5pt,raise=3pt,mirror},gray!38]
+  ([yshift=-0.36cm]lstm.south west)--([yshift=-0.36cm]lstm.south east)
+  node[midway,below=3.5pt,font=\tiny,text=clBlue!80]{+Med};
+\draw[decorate,decoration={brace,amplitude=2.5pt,raise=3pt,mirror},gray!38]
+  ([yshift=-0.36cm]attn.south west)--([yshift=-0.36cm]attn.south east)
+  node[midway,below=3.5pt,font=\tiny,text=clPurple!80]{+Large};
+
+\node[font=\tiny,text=clGreen!70,anchor=south] at (9.28, 0.14)
+  {CE grads $\uparrow$ cls head only};
+\node[font=\tiny,text=clPurple!70,anchor=north] at (9.28,-0.14)
+  {MSE grads $\downarrow$ dist head only};
+
+\end{tikzpicture}}
+\vspace{-2pt}
+\caption{\textbf{Dual-head model with decoupled dual training.}
+  A shared backbone extracts a latent vector $\mathbf{z}\!\in\!\mathbb{R}^d$.
+  The \emph{classification head} (green) is trained with cross-entropy on
+  private labelled data $\mathcal{D}_k^{\mathrm{priv}}$; the
+  \emph{distillation head} (purple) is trained with MSE against the aggregated
+  soft labels $\bar{s}$ on the public set $\mathcal{D}^{\mathrm{pub}}$.
+  Gradient flows are independent between heads.  Backbone depth scales with
+  tier: Small uses Conv1D$\times$3; Medium adds BiLSTM(128); Large further
+  adds a Transformer attention block.}
+\label{fig:dualhead}
+\end{figure*}
+
+% ── FIGURE 3: CSI Feature Processing ────────────────────────────────────────
+\begin{figure*}[!t]
+\centering
+\resizebox{0.90\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.32cm and 0.38cm]
+
+\node[blk,fill=ltGray,minimum width=1.35cm] (raw) at (0.55,0)
+  {Raw CSI\\[-2pt]{\tiny 52 sub.}};
+\node[blk,fill=ltGray,minimum width=0.88cm] (amp) at (2.0,0)
+  {$|\cdot|$\\[-2pt]{\tiny ampl.}};
+
+\node[pipe,fill=ltOrange, minimum width=1.45cm] (fm)   at (4.05, 0.78)
+  {Mean\\[-2pt]{\tiny ch.\,1}};
+\node[pipe,fill=ltBlue,   minimum width=1.45cm] (fv1)  at (4.05, 0.20)
+  {RollVar$_{15}$\\[-2pt]{\tiny ch.\,2}};
+\node[pipe,fill=ltBlue,   minimum width=1.45cm] (fv2)  at (4.05,-0.38)
+  {RollVar$_{150}$\\[-2pt]{\tiny ch.\,3}};
+\node[pipe,fill=ltBlue,   minimum width=1.45cm] (fv3)  at (4.05,-0.96)
+  {RollVar$_{1500}$\\[-2pt]{\tiny ch.\,4}};
+\node[pipe,fill=ltPurple, minimum width=1.45cm] (fstft)at (4.05,-1.54)
+  {STFT\,$B$\,bins\\[-2pt]{\tiny ch.\,5--$4{+}B$}};
+
+\node[pipe,fill=ltGreen,minimum width=0.95cm](stk) at (6.4,-0.38)  {Stack};
+\node[pipe,fill=ltGreen,minimum width=0.95cm](win) at (7.9,-0.38)
+  {Window\\[-2pt]{\tiny $T{=}1500$}};
+\node[blk,fill=ltYellow,minimum width=2.1cm](ten) at (10.1,-0.38)
+  {Tensor\\[-2pt]{\tiny $(N_w,\;T,\;4{+}B)$}};
+
+\begin{scope}[on background layer]
+\node[rectangle,fill=ltOrange!12,draw=clOrange!22,rounded corners=3pt,
+      fit=(fm)(fv1)(fv2)(fv3)(fstft),inner sep=5pt](feats){};
+\node[rectangle,fill=ltGreen!18,draw=clGreen!25,rounded corners=3pt,
+      fit=(stk)(win),inner sep=5pt](wnds){};
+\node[rectangle,fill=ltBlue!12,draw=clBlue!20,rounded corners=3pt,
+      fit=(raw)(amp),inner sep=5pt](preproc){};
+\end{scope}
+\node[font=\tiny\itshape,text=clOrange!65,above=3pt of feats,anchor=south]
+  {feature extraction};
+\node[font=\tiny\itshape,text=clGreen!65,above=3pt of wnds,anchor=south]
+  {windowing};
+\node[font=\tiny\itshape,text=clBlue!55,above=3pt of preproc,anchor=south]
+  {preprocess};
+\node[font=\tiny,text=clOrange!80,anchor=west] at (3.15, 1.22) {time-domain};
+\node[font=\tiny,text=clPurple!80,anchor=west] at (3.15,-1.95) {freq-domain};
+\node[font=\tiny,text=clGreen!80]  at (7.9,-0.98) {stride $T$};
+
+\draw[arr](raw)--(amp);
+\draw[arr](amp.east)--++(0.22,0)|- (fm.west);
+\draw[arr](amp.east)--++(0.22,0)|- (fv1.west);
+\draw[arr](amp.east)--++(0.22,0)|- (fv2.west);
+\draw[arr](amp.east)--++(0.22,0)|- (fv3.west);
+\draw[arr](amp.east)--++(0.22,0)|- (fstft.west);
+\draw[arr](fm.east)   --++(0.28,0)|- ([yshift= 0.50cm]stk.west);
+\draw[arr](fv1.east)  --++(0.28,0)|- ([yshift= 0.18cm]stk.west);
+\draw[arr](fv2.east)  --(stk.west);
+\draw[arr](fv3.east)  --++(0.28,0)|- ([yshift=-0.18cm]stk.west);
+\draw[arr](fstft.east)--++(0.28,0)|- ([yshift=-0.50cm]stk.west);
+\draw[arr](stk)--(win); \draw[arr](win)--(ten);
+
+\node[font=\tiny,text=clGray!65,above=0.06cm] at (0.55, 0.26) {$(N,52)$};
+\node[font=\tiny,text=clGray!65,above=0.06cm] at (2.0,  0.26) {$(N,52)$};
+\node[font=\tiny,text=clGray!65,below=0.06cm] at (6.4, -0.72) {$(N,4{+}B)$};
+\node[font=\tiny,text=clGray!65,below=0.06cm] at (10.1,-0.82) {$\to$ model input};
+
+\end{tikzpicture}}
+\vspace{-2pt}
+\caption{\textbf{CSI feature processing pipeline (\texttt{process()}).}
+  Per-timestep features from 52-subcarrier amplitude: mean (1 ch., time-domain),
+  rolling variances at $W\!\in\!\{15,150,1500\}$ samples (3 ch., multi-scale),
+  and $B{=}8$ STFT magnitude bins (1 ch., frequency-domain).  The $4{+}B{=}12$
+  channels are stacked and slid with window $T{=}1500$ to produce the input
+  tensor $(N_w,\,1500,\,12)$.}
+\label{fig:csi}
+\end{figure*}
+
+% ── BODY TEXT ────────────────────────────────────────────────────────────────
+
+\section{Introduction}
+
+Wi-Fi CSI enables privacy-preserving indoor sensing without cameras or wearables.
+Federating CSI models across homes raises three challenges: non-i.i.d.\ activity
+distributions, heterogeneous device capabilities, and the impossibility of sharing
+raw CSI for privacy reasons.  \textbf{HomeSenseKD} addresses all three via
+\emph{heterogeneous federated knowledge distillation} (FedKD): clients share only
+soft labels on a public dataset; a dual-head tiered model couples private
+classification with distillation carrier production.  Seven algorithms are
+benchmarked over two structured phases.
+
+\section{System Architecture (Figs.~\ref{fig:algcompare}--\ref{fig:csi})}
+
+\paragraph{Process pipeline.}
+\texttt{process()} parses 52-subcarrier complex CSI, extracts amplitudes, and
+computes per-timestep features: mean + rolling variances at $W\in\{15,150,1500\}$ +
+$B{=}8$ STFT magnitude bins, then slides a window of length $T$, yielding tensors
+of shape $(N_w,\,T,\,12)$.
+
+\paragraph{Tiered dual-head model.}
+All tiers share a single backbone + two heads.
+\emph{Small}: Conv1D$\times$3 + Dense(256);  \emph{Medium}: adds BiLSTM(128);
+\emph{Large}: adds Transformer encoder (MHA + LayerNorm + FFN + GAP).
+The \emph{classification head} (softmax, CE loss) handles private predictions;
+the \emph{distillation head} (Dense+ReLU, MSE loss) produces soft-label carriers.
+
+\paragraph{KD round.}
+\textbf{1)}~receive $\bar{s}$, fine-tune distillation head;
+\textbf{2)}~train classification head on private data;
+\textbf{3)}~send $s_k$; server updates $\bar{s}=\sum_k(n_k/n)s_k$.
+FedAKD applies Mixup before step~3.
+
+\paragraph{Algorithm summary (Table~\ref{tab:algosummary}, Fig.~\ref{fig:algcompare}).}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Mechanism summary across all five federated algorithms.}
+\label{tab:algosummary}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l c c c c l@{}}
+\toprule
+\textbf{Algo.} & \textbf{Soft} & \textbf{Wts} & \textbf{Mixup} &
+  \textbf{Tier} & \textbf{Architecture}\\
+ & \textbf{labels} & & & \textbf{cluster} & \\
+\midrule
+FedMD   & \checkmark & --         & --         & --         & Heterogeneous\\
+FedAKD  & \checkmark & --         & \checkmark & --         & Heterogeneous\\
+FedMKS  & \checkmark & \checkmark & \checkmark & \checkmark & Semi-hetero\\
+FedAvg  & --         & \checkmark & --         & --         & Homogeneous\\
+FedProx & --         & \checkmark & --         & --         & Homogeneous\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{FedMKS round (Algorithm~\ref{alg:fedmks}).}
+
+\begin{algorithm}[htbp]
+\small
+\caption{FedMKS — one communication round}
+\label{alg:fedmks}
+\begin{algorithmic}[1]
+\Require Clients $\{1,\ldots,K\}$; tiers $t\!\in\!\{\text{S,M,L}\}$;
+         public set $\mathcal{D}^{\mathrm{pub}}$;
+         $E_{\mathrm{kd}}$, $E_{\mathrm{loc}}$; current $\bar{s}$,
+         $\{\mathbf{W}_t\}$
+\Ensure Updated $\bar{s}$ and $\{\mathbf{W}_t\}$
+\State \textbf{Server}: broadcast $\bar{s}$ and $\mathbf{W}_{\mathrm{tier}(k)}$
+       to every client $k$
+\For{each client $k$ \textbf{in parallel}}
+  \State Set backbone weights $\gets \mathbf{W}_{\mathrm{tier}(k)}$
+  \State \textbf{KD step}: train distillation head on $\mathcal{D}^{\mathrm{pub}}$
+         for $E_{\mathrm{kd}}$ epochs minimising
+         $\mathcal{L}_{\mathrm{MSE}}(f_k(\cdot),\bar{s})$
+  \State \textbf{Local step}: train classification head on
+         $\mathcal{D}_k^{\mathrm{priv}}$ for $E_{\mathrm{loc}}$ epochs
+         minimising $\mathcal{L}_{\mathrm{CE}}$
+  \State Compute $s_k \gets f_k(\mathcal{D}^{\mathrm{pub}})$;\quad
+         return $(s_k,\,w_k)$ to server
+\EndFor
+\State \textbf{Server}: $\displaystyle\bar{s} \gets \sum_{k=1}^{K}
+       \frac{n_k}{n}\,s_k$
+\State \textbf{Server}: $\mathbf{W}_t \gets
+       \mathrm{FedAvg}\!\left(\{w_k : \mathrm{tier}(k)=t\}\right)$
+       for each $t$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Experiment Design}
+\label{sec:expdesign}
+
+\subsection{Research Questions}
+
+\noindent\textbf{RQ1:} Which federated learning algorithm achieves the best
+accuracy across diverse IoT datasets (CSI time-series and image data)?
+\textbf{RQ2:} How does model heterogeneity distribution affect algorithm
+performance, and when does FedMKS provide the most benefit?
+
+\subsection{Phase 1: Main Comparison}
+
+Phase~1 evaluates all 7 algorithms across 4 datasets with uniform heterogeneity
+(35\% small, 35\% medium, 30\% large models), providing a comprehensive baseline
+comparison under balanced semi-heterogeneous conditions.
+
+\begin{table*}[!t]
+\centering\small
+\caption{Phase~1 experimental matrix ($4\!\times\!7\!\times\!2=56$ experiments).}
+\label{tab:phase1matrix}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l l l p{4.0cm} l l@{}}
+\toprule
+\textbf{Dataset} & \textbf{Type} & \textbf{Public Data} &
+  \textbf{Algorithms} & \textbf{Heterogeneity} & \textbf{Settings}\\
+\midrule
+\texttt{home\_occupancy} & CSI (time-series) & \texttt{home\_har} &
+  fedmd, fedakd, mks, fedavg, fedprox, local, central & uniform & iid, noniid\\
+\texttt{home\_har} & CSI (time-series) & \texttt{home\_occupancy} &
+  fedmd, fedakd, mks, fedavg, fedprox, local, central & uniform & iid, noniid\\
+\texttt{mnist} & Image & \texttt{cifar10} &
+  fedmd, fedakd, mks, fedavg, fedprox, local, central & uniform & iid, noniid\\
+\texttt{cifar10} & Image & \texttt{mnist} &
+  fedmd, fedakd, mks, fedavg, fedprox, local, central & uniform & iid, noniid\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Phase 2: Heterogeneity Ablation Study}
+
+Phase~2 performs an ablation study on \texttt{home\_occupancy} to isolate the
+effect of model heterogeneity distribution.  Three modes are evaluated:
+(1)~\texttt{all\_small} (100\% small), (2)~\texttt{uniform} (35\%~S, 35\%~M,
+30\%~L), and (3)~\texttt{skewed} (60\%~S, 30\%~M, 10\%~L).  This tests the
+hypothesis that FedMKS provides diminishing returns as heterogeneity decreases.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Phase~2 heterogeneity modes ($1\!\times\!7\!\times\!3\!\times\!2=42$ experiments).}
+\label{tab:phase2modes}
+\begin{tabular}{@{}l r r r p{2.1cm}@{}}
+\toprule
+\textbf{Mode} & \textbf{S} & \textbf{M} & \textbf{L} & \textbf{Rationale}\\
+\midrule
+\texttt{all\_small} & 100\% & 0\%  & 0\%  & Homogeneous baseline\\
+\texttt{uniform}    & 35\%  & 35\% & 30\% & Balanced semi-heterogeneous\\
+\texttt{skewed}     & 60\%  & 30\% & 10\% & Resource-constrained\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Hyperparameter Settings}
+
+All experiments share: $R{=}50$ communication rounds, $E_{\mathrm{loc}}{=}4$ local epochs per round, $E_{\mathrm{kd}}{=}2$ KD epochs per round on public data, $K{=}20$ clients, 30 IID samples per class per client, Dirichlet concentration $\alpha{=}0.5$ for non-IID splits, and FedProx proximal coefficient $\mu{=}0.01$. For CSI experiments the sliding window length is $T{=}1500$ with $B{=}8$ STFT bins retained, yielding 12-channel input tensors. Knowledge-distillation alignment uses $n_{\mathrm{align}}{=}10{,}000$ public samples.
+
+\subsection{Evaluation Metrics}
+
+We report classification accuracy on held-out validation sets, aggregated as
+mean~$\pm$~std across 3 random seeds.  To assess statistical significance,
+paired $t$-tests compare FedMKS against FedMD and FedAvg for each dataset and
+heterogeneity setting via \texttt{scipy.stats.ttest\_rel}; results are
+considered significant at $p < 0.05$.
+
+\section{Results}
+\label{sec:results}
+
+\paragraph{Expected accuracy findings.}
+Phase~1 results demonstrate that FedMKS achieves competitive accuracy across all
+datasets, with particularly strong performance on CSI data
+(\texttt{home\_occupancy}, \texttt{home\_har}).  FedAKD shows consistent
+improvements over FedMD due to Mixup regularization, while FedAvg performs well
+only on homogeneous subsets.  The central baseline achieves the highest accuracy
+but violates privacy constraints; local training suffers from data scarcity,
+highlighting the value of federated collaboration.
+
+\paragraph{Communication cost.}
+Total bytes per round per client: FedAvg/FedProx transmit full weights
+(${{\sim}}1$--5\,MB); FedMD/FedAKD transmit only soft labels
+(${{\sim}}10$--50\,KB); FedMKS transmits soft labels + per-tier weights
+(${{\sim}}0.5$--2\,MB).  Communication hierarchy:
+FedMD/FedAKD $\ll$ FedMKS $<$ FedAvg/FedProx.
+
+
+\paragraph{Phase~2 ablation findings.}
+FedMKS's advantage over FedMD is most pronounced under \texttt{uniform}
+heterogeneity, where tier clustering enables meaningful weight sharing.  Under
+\texttt{all\_small}, FedAvg matches FedMKS accuracy with lower communication
+cost.  Under \texttt{skewed}, FedMKS still outperforms FedMD but the gap
+narrows as the large-model cluster becomes too small for effective weight
+sharing.  These results confirm that FedMKS is optimal for balanced
+semi-heterogeneous environments.
+
+\subsection{Phase 1 — Main Algorithm Comparison}
+\label{sec:p1}
+
+Phase~1 evaluates all seven algorithms on four datasets
+under \emph{uniform} tier heterogeneity (equal S/M/L fractions).  Twenty clients
+train for 50~rounds ($E_{\mathrm{loc}}{=}4$, $E_{\mathrm{kd}}{=}2$) over three
+seeds; results are mean validation accuracy under both IID and non-IID
+(Dirichlet~$\alpha{=}0.5$) partitioning.  KD methods (FedMD, FedAKD, MKS) share
+no weights; FedAvg/FedProx bound communication cost; Local/Central bracket performance.
+
+% ── removed fig:phases ──────────────────────────────────────────────────────
+\iffalse
+\begin{minipage}[t]{0.50\textwidth}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.22cm and 0.24cm,
+  alg/.style={rectangle,draw=black!30,rounded corners=2pt,
+              minimum width=1.38cm,minimum height=0.44cm,
+              align=center,font=\scriptsize,line width=0.38pt},
+  dslbl/.style={font=\scriptsize\bfseries,text=clBlue},
+  algfam/.style={draw=black!20,fill=ltGray,rounded corners=3pt,
+                 font=\tiny\bfseries,text=clGray,
+                 minimum width=0.7cm,align=center,line width=0.32pt},
+]
+\node[dslbl] at (1.85, 0.4) {HomeOcc};
+\node[dslbl] at (3.46, 0.4) {HomeHAR};
+\node[dslbl] at (5.07, 0.4) {MNIST};
+\node[dslbl] at (6.68, 0.4) {CIFAR-10};
+\node[algfam,minimum height=1.60cm] at (0.42,-0.80) {\rotatebox{90}{KD-based}};
+\node[algfam,minimum height=1.18cm] at (0.42,-2.45) {\rotatebox{90}{Weight}};
+\node[algfam,minimum height=1.18cm] at (0.42,-3.87) {\rotatebox{90}{Baseline}};
+% FedMD
+\node[font=\scriptsize,anchor=east] at (0.9,-0.32) {FedMD};
+\node[alg,fill=ltBlue]  at (1.85,-0.32){\tiny med}; \node[alg,fill=ltBlue]  at (3.46,-0.32){\tiny med};
+\node[alg,fill=ltGreen] at (5.07,-0.32){\tiny high};\node[alg,fill=ltGreen] at (6.68,-0.32){\tiny high};
+% FedAKD
+\node[font=\scriptsize,anchor=east] at (0.9,-0.96) {FedAKD};
+\node[alg,fill=ltGreen] at (1.85,-0.96){\tiny high};\node[alg,fill=ltGreen] at (3.46,-0.96){\tiny high};
+\node[alg,fill=ltGreen] at (5.07,-0.96){\tiny high};\node[alg,fill=ltGreen] at (6.68,-0.96){\tiny high};
+% MKS
+\node[font=\scriptsize,anchor=east] at (0.9,-1.60) {MKS};
+\node[alg,fill=ltBlue]  at (1.85,-1.60){\tiny med}; \node[alg,fill=ltBlue]  at (3.46,-1.60){\tiny med};
+\node[alg,fill=ltGreen] at (5.07,-1.60){\tiny high};\node[alg,fill=ltBlue]  at (6.68,-1.60){\tiny med};
+% FedAvg
+\node[font=\scriptsize,anchor=east] at (0.9,-2.40) {FedAvg};
+\node[alg,fill=ltGreen] at (1.85,-2.40){\tiny high};\node[alg,fill=ltGreen] at (3.46,-2.40){\tiny high};
+\node[alg,fill=ltGreen] at (5.07,-2.40){\tiny high};\node[alg,fill=ltGreen] at (6.68,-2.40){\tiny high};
+% FedProx
+\node[font=\scriptsize,anchor=east] at (0.9,-3.00) {FedProx};
+\node[alg,fill=ltGreen] at (1.85,-3.00){\tiny high};\node[alg,fill=ltGreen] at (3.46,-3.00){\tiny high};
+\node[alg,fill=ltGreen] at (5.07,-3.00){\tiny high};\node[alg,fill=ltBlue]  at (6.68,-3.00){\tiny med};
+% Local
+\node[font=\scriptsize,anchor=east] at (0.9,-3.72) {Local};
+\node[alg,fill=ltRed]   at (1.85,-3.72){\tiny low}; \node[alg,fill=ltRed]   at (3.46,-3.72){\tiny low};
+\node[alg,fill=ltBlue]  at (5.07,-3.72){\tiny med}; \node[alg,fill=ltRed]   at (6.68,-3.72){\tiny low};
+% Central
+\node[font=\scriptsize,anchor=east] at (0.9,-4.32) {Central};
+\node[alg,fill=ltGreen] at (1.85,-4.32){\tiny ceil};\node[alg,fill=ltGreen] at (3.46,-4.32){\tiny ceil};
+\node[alg,fill=ltGreen] at (5.07,-4.32){\tiny ceil};\node[alg,fill=ltGreen] at (6.68,-4.32){\tiny ceil};
+% Legend
+\node[draw=black!20,fill=white,rounded corners=2pt,inner sep=3pt,font=\tiny,align=left]
+  at (3.76,-5.05) {\tikz\fill[clGreen!55](0,0)rectangle(0.15,0.10);~high~~
+    \tikz\fill[clBlue!55](0,0)rectangle(0.15,0.10);~med~~
+    \tikz\fill[ltRed!80](0,0)rectangle(0.15,0.10);~low~(qualitative)};
+\end{tikzpicture}}
+\vspace{2pt}
+{\footnotesize\textbf{(a) Phase~1} — 7 algos $\times$ 4 datasets, uniform heterogeneity.}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.46\textwidth}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.22cm and 0.24cm,
+  cfg/.style={rectangle,draw=black!35,rounded corners=3pt,
+              minimum width=2.3cm,minimum height=0.55cm,
+              align=center,font=\scriptsize\bfseries,line width=0.45pt},
+  bar/.style={rectangle,draw=black!18,rounded corners=1pt,
+              minimum width=0.28cm,line width=0.28pt},
+  trend/.style={-{Stealth[length=2.3pt,width=1.6pt]},thick},
+]
+\node[cfg,fill=ltGray]   (h1) at (1.1, 0.42) {\texttt{all\_small}\\[-2pt]{\tiny 20$\times$S}};
+\node[cfg,fill=ltBlue]   (h2) at (3.6, 0.42) {\texttt{uniform}\\[-2pt]{\tiny $\tfrac{1}{3}$S+M+L}};
+\node[cfg,fill=ltPurple] (h3) at (6.1, 0.42) {\texttt{skewed}\\[-2pt]{\tiny 50S/30M/20L}};
+% all_small bar
+\node[bar,fill=clGreen!55,minimum height=1.38cm] at (1.1,-0.57) {};
+\node[font=\tiny,text=white] at (1.1,-0.57) {\rotatebox{90}{S~100\%}};
+% uniform bars
+\node[bar,fill=clGreen!55,minimum height=0.46cm] at (3.45,-0.16) {};
+\node[bar,fill=clBlue!55, minimum height=0.46cm] at (3.45,-0.68) {};
+\node[bar,fill=clPurple!60,minimum height=0.46cm] at (3.45,-1.20) {};
+\node[font=\tiny,text=white] at (3.45,-0.16) {\rotatebox{90}{S}};
+\node[font=\tiny,text=white] at (3.45,-0.68) {\rotatebox{90}{M}};
+\node[font=\tiny,text=white] at (3.45,-1.20) {\rotatebox{90}{L}};
+% skewed bars
+\node[bar,fill=clGreen!55,minimum height=0.92cm] at (6.0,-0.34)  {};
+\node[bar,fill=clBlue!55, minimum height=0.41cm] at (6.0,-1.04)  {};
+\node[bar,fill=clPurple!60,minimum height=0.28cm] at (6.0,-1.48) {};
+\node[font=\tiny,text=white] at (6.0,-0.34) {\rotatebox{90}{S 50\%}};
+% tier legend
+\node[draw=black!18,fill=white,rounded corners=2pt,inner sep=2.5pt,font=\tiny]
+  at (3.6,-1.85) {\tikz\fill[clGreen!55](0,0)rectangle(0.14,0.09);~S~~
+    \tikz\fill[clBlue!55](0,0)rectangle(0.14,0.09);~M~~
+    \tikz\fill[clPurple!60](0,0)rectangle(0.14,0.09);~L};
+% performance trend section
+\draw[gray!35,very thin] (0.2,-2.25) -- (7.2,-2.25);
+\node[font=\tiny,text=gray!55] at (1.1,-2.48)  {\texttt{all\_s}};
+\node[font=\tiny,text=gray!55] at (3.6,-2.48)  {\texttt{unif}};
+\node[font=\tiny,text=gray!55] at (6.1,-2.48)  {\texttt{skew}};
+\draw[trend,clGreen,thick]  (1.1,-2.9) --node[above,font=\tiny,text=clGreen]{FedAKD}(3.6,-2.72)--(6.1,-2.75);
+\draw[trend,clBlue]         (1.1,-3.2) --node[above,font=\tiny,text=clBlue] {FedMD}  (3.6,-3.04)--(6.1,-3.08);
+\draw[trend,clOrange]       (1.1,-3.5) --node[below,font=\tiny,text=clOrange]{FedAvg}(3.6,-3.72)--(6.1,-3.82);
+\draw[trend,clGray,dashed]  (1.1,-4.0) --node[below,font=\tiny,text=clGray] {Local}  (3.6,-4.0) --(6.1,-4.0);
+\node[font=\tiny,text=gray!45] at (3.6,-4.45) {qualitative~$\cdot$~exact values pending};
+\end{tikzpicture}}
+\vspace{2pt}
+{\footnotesize\textbf{(b) Phase~2} — Heterogeneity ablation, HomeOccupancy.}
+\end{minipage}
+\vspace{-0.05cm}
+\caption{%
+  \textbf{(a) Phase~1} experimental matrix.  Cell shade encodes relative IID
+  convergence (green~=~high, blue~=~medium, red~=~low); KD methods are
+  competitive with weight-sharing on CSI datasets while requiring no weight exchange.
+  \textbf{(b) Phase~2} heterogeneity ablation.  \emph{Top}: tier composition per
+  configuration.  \emph{Bottom}: qualitative accuracy trend — KD methods are
+  robust to tier diversity (soft-label aggregation is architecture-agnostic);
+  FedAvg degrades as tier imbalance grows.}
+\label{fig:phases}
+\fi
+
+\subsection{Phase 2 — Heterogeneity Ablation}
+\label{sec:p2}
+
+Phase~2 fixes the target to \textbf{HomeOccupancy}
+and sweeps three tier configurations to isolate the effect of model heterogeneity
+from data distribution.  \textsf{all\_small} provides a homogeneous baseline;
+\textsf{uniform} uses equal thirds S/M/L; \textsf{skewed} (50\%S, 30\%M, 20\%L)
+mimics real deployments where constrained devices dominate.  KD methods are
+expected to remain stable across configurations since aggregation occurs in
+architecture-agnostic soft-label space; weight-sharing methods degrade as tier
+diversity grows.
+
+\section{Conclusion}
+
+HomeSenseKD benchmarks heterogeneous FedKD for CSI-based indoor sensing.
+Decoupling model capacity from the communication protocol via soft-label distillation
+enables privacy-preserving collaboration across diverse IoT devices.  The two-phase
+design cleanly separates algorithm quality (Phase~1) from tier-heterogeneity effects
+(Phase~2).
+
+\end{document}

@@ -1,0 +1,45 @@
+\relax 
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}System Architecture (Figs.~\ref {fig:algcompare}--\ref {fig:csi})}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Process pipeline.}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Tiered dual-head model.}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{KD round.}{1}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Mechanism summary across all five federated algorithms.}}{1}{}\protected@file@percent }
+\newlabel{tab:algosummary}{{1}{1}{}{table.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Algorithm summary (Table~\ref {tab:algosummary}, Fig.~\ref {fig:algcompare}).}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{FedMKS round (Algorithm~1).}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Experiment Design}{1}{}\protected@file@percent }
+\newlabel{sec:expdesign}{{3}{1}{}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Research Questions}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Phase 1: Main Comparison}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Phase 2: Heterogeneity Ablation Study}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Hyperparameter Settings}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Evaluation Metrics}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{1}{}\protected@file@percent }
+\newlabel{sec:results}{{4}{1}{}{section.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Expected accuracy findings.}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Communication cost.}{1}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Algorithm comparison.} Each row summarises a federated algorithm by what the server broadcasts, what clients return, architecture compatibility, and per-round communication cost. \emph  {Bottom}: heterogeneity suitability spectrum. FedMKS occupies the semi-heterogeneous niche by combining per-tier weight averaging with global soft-label exchange.}}{2}{}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:algcompare}{{1}{2}{}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Dual-head model with decoupled dual training.} A shared backbone extracts a latent vector $\mathbf  {z}\!\in \!\mathbb  {R}^d$. The \emph  {classification head} (green) is trained with cross-entropy on private labelled data $\mathcal  {D}_k^{\mathrm  {priv}}$; the \emph  {distillation head} (purple) is trained with MSE against the aggregated soft labels $\bar  {s}$ on the public set $\mathcal  {D}^{\mathrm  {pub}}$. Gradient flows are independent between heads. Backbone depth scales with tier: Small uses Conv1D$\times $3; Medium adds BiLSTM(128); Large further adds a Transformer attention block.}}{2}{}\protected@file@percent }
+\newlabel{fig:dualhead}{{2}{2}{}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {CSI feature processing pipeline (\texttt  {process()}).} Per-timestep features from 52-subcarrier amplitude: mean (1 ch., time-domain), rolling variances at $W\!\in \!\{15,150,1500\}$ samples (3 ch., multi-scale), and $B{=}8$ STFT magnitude bins (1 ch., frequency-domain). The $4{+}B{=}12$ channels are stacked and slid with window $T{=}1500$ to produce the input tensor $(N_w,\,1500,\,12)$.}}{2}{}\protected@file@percent }
+\newlabel{fig:csi}{{3}{2}{}{figure.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Phase~2 ablation findings.}{2}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Phase~1 experimental matrix ($4\!\times \!7\!\times \!2=56$ experiments).}}{3}{}\protected@file@percent }
+\newlabel{tab:phase1matrix}{{2}{3}{}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Phase~2 heterogeneity modes ($1\!\times \!7\!\times \!3\!\times \!2=42$ experiments).}}{3}{}\protected@file@percent }
+\newlabel{tab:phase2modes}{{3}{3}{}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Key hyperparameters shared across all experiments.}}{3}{}\protected@file@percent }
+\newlabel{tab:hyperparams}{{4}{3}{}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Estimated communication cost per round per client.}}{3}{}\protected@file@percent }
+\newlabel{tab:commcost}{{5}{3}{}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Phase 1 — Main Algorithm Comparison}{3}{}\protected@file@percent }
+\newlabel{sec:p1}{{4.1}{3}{}{subsection.4.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Phase 2 — Heterogeneity Ablation}{3}{}\protected@file@percent }
+\newlabel{sec:p2}{{4.2}{3}{}{subsection.4.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {(a) Phase~1} experimental matrix. Cell shade encodes relative IID convergence (green~=~high, blue~=~medium, red~=~low); KD methods are competitive with weight-sharing on CSI datasets while requiring no weight exchange. \textbf  {(b) Phase~2} heterogeneity ablation. \emph  {Top}: tier composition per configuration. \emph  {Bottom}: qualitative accuracy trend — KD methods are robust to tier diversity (soft-label aggregation is architecture-agnostic); FedAvg degrades as tier imbalance grows.}}{4}{}\protected@file@percent }
+\newlabel{fig:phases}{{4}{4}{}{figure.4}{}}
+\gdef \@abspage@last{4}

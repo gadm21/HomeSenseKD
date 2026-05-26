@@ -1,0 +1,14 @@
+# CIFAR-10 benchmark — MNIST images resized to (32,32,3) used as public KD pool
+data:
+  dataset: cifar10
+  public_dataset: mnist
+  n_classes: 10
+  n_samples_per_class: 100
+  img_size: 32
+  in_channels: 3
+
+federated:
+  n_rounds: 50
+  local_epochs: 5
+  kd_epochs: 3
+  n_alignment: 5000
