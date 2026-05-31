@@ -1,0 +1,12 @@
+[2026-05-30 16:44:28] ============================================================
+[2026-05-30 16:44:28]   JOB START   : home_har_central_uniform
+[2026-05-30 16:44:28]   PID         : 1213348
+[2026-05-30 16:44:28]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_central_uniform.log
+[2026-05-30 16:44:28]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-05-30 16:44:28]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-30 16:44:28]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-30 16:44:28]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-05-30 16:44:28]                   --algorithm central --heterogeneity uniform \
+[2026-05-30 16:44:28]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-05-30 16:44:28]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-30 16:44:28] ============================================================

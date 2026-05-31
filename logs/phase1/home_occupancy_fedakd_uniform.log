@@ -1,0 +1,26 @@
+[2026-05-28 15:21:24] ============================================================
+[2026-05-28 15:21:24]   JOB START   : home_occupancy_fedakd_uniform
+[2026-05-28 15:21:24]   PID         : 34149
+[2026-05-28 15:21:24]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_occupancy_fedakd_uniform.log
+[2026-05-28 15:21:24]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-05-28 15:21:24]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-28 15:21:24]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-28 15:21:24]                   --config /home/gad/Desktop/HomeSenseKD/config/home_occupancy.yaml \
+[2026-05-28 15:21:24]                   --algorithm fedakd --heterogeneity uniform \
+[2026-05-28 15:21:24]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-05-28 15:21:24]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-28 15:21:24] ============================================================
+[2026-05-29 18:16:30] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-05-29 18:16:30] I0000 00:00:1779996084.829432   34191 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-05-29 18:16:30] I0000 00:00:1779996084.832065   34191 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+[2026-05-29 18:16:30] I0000 00:00:1779996085.051626   34191 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2026-05-29 18:16:30] To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2026-05-29 18:16:30] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-05-29 18:16:30] I0000 00:00:1779996086.059555   34191 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-05-29 18:16:30] I0000 00:00:1779996086.061015   34191 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+[2026-05-29 18:16:30] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[2026-05-29 18:16:30] E0000 00:00:1779996179.417555   34191 cuda_platform.cc:52] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected
+[2026-05-29 18:16:30] ============================================================
+[2026-05-29 18:16:30]   JOB FAILED  : home_occupancy_fedakd_uniform  (exit 137)
+[2026-05-29 18:16:30]   Full log    : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_occupancy_fedakd_uniform.log
+[2026-05-29 18:16:30] ============================================================

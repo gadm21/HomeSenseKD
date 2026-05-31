@@ -1,0 +1,65 @@
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24]   Global run — all phases
+[2026-05-31 16:14:24]   Run started : 2026-05-31 16:14:24
+[2026-05-31 16:14:24]   Host        : gad-XPS-8960
+[2026-05-31 16:14:24]   OS          : Linux gad-XPS-8960 6.17.0-23-generic #23~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Apr 14 16:11:48 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-05-31 16:14:24]   CPU         : 28 logical cores
+[2026-05-31 16:14:24]   RAM         : 30Gi
+[2026-05-31 16:14:24]   GPU         : NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.
+[2026-05-31 16:14:24] 
+[2026-05-31 16:14:24] N/A
+[2026-05-31 16:14:24]   Python      : Python 3.12.3
+[2026-05-31 16:14:24]   Phase       : 1   Jobs: 4   Dry-run: false
+[2026-05-31 16:14:24]   Log dir     : /home/gad/Desktop/HomeSenseKD/logs
+[2026-05-31 16:14:24]   Results dir : 
+[2026-05-31 16:14:24]   Master log  : /home/gad/Desktop/HomeSenseKD/logs/master_20260531_161424.log
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24]   Scope : 2 datasets x 7 algorithms
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24]   JOB START   : mnist_fedmd_uniform
+[2026-05-31 16:14:24]   PID         : 578731
+[2026-05-31 16:14:24]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/mnist_fedmd_uniform.log
+[2026-05-31 16:14:24]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-05-31 16:14:24]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-31 16:14:24]                   --config /home/gad/Desktop/HomeSenseKD/config/mnist.yaml \
+[2026-05-31 16:14:24]                   --algorithm fedmd --heterogeneity uniform \
+[2026-05-31 16:14:24]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-05-31 16:14:24]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24]   JOB START   : mnist_fedakd_uniform
+[2026-05-31 16:14:24]   PID         : 578735
+[2026-05-31 16:14:24]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/mnist_fedakd_uniform.log
+[2026-05-31 16:14:24]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-05-31 16:14:24]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-31 16:14:24]                   --config /home/gad/Desktop/HomeSenseKD/config/mnist.yaml \
+[2026-05-31 16:14:24]                   --algorithm fedakd --heterogeneity uniform \
+[2026-05-31 16:14:24]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-05-31 16:14:24]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24]   JOB START   : mnist_mks_uniform
+[2026-05-31 16:14:24]   PID         : 578741
+[2026-05-31 16:14:24]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/mnist_mks_uniform.log
+[2026-05-31 16:14:24]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-05-31 16:14:24]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-31 16:14:24]                   --config /home/gad/Desktop/HomeSenseKD/config/mnist.yaml \
+[2026-05-31 16:14:24]                   --algorithm mks --heterogeneity uniform \
+[2026-05-31 16:14:24]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-05-31 16:14:24]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24] ============================================================
+[2026-05-31 16:14:24]   JOB START   : mnist_fedavg_uniform
+[2026-05-31 16:14:24]   PID         : 578748
+[2026-05-31 16:14:24]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/mnist_fedavg_uniform.log
+[2026-05-31 16:14:24]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-05-31 16:14:24]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-05-31 16:14:24]                   --config /home/gad/Desktop/HomeSenseKD/config/mnist.yaml \
+[2026-05-31 16:14:24]                   --algorithm fedavg --heterogeneity uniform \
+[2026-05-31 16:14:24]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-05-31 16:14:24]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-05-31 16:14:24] ============================================================

@@ -30,7 +30,7 @@ done
 
 # ── Locate Python in venv ──────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$SCRIPT_DIR/venv"
+VENV="$SCRIPT_DIR/myenv"
 LOG_DIR="$SCRIPT_DIR/logs"
 RUNNER="$SCRIPT_DIR/run_fedkd.py"
 
@@ -163,7 +163,8 @@ run_pool() {
     wait
 }
 
-DATASETS=(home_occupancy home_har mnist cifar10)
+# DATASETS=(home_occupancy home_har mnist cifar10)
+DATASETS=(mnist cifar10)
 ALGORITHMS=(fedmd fedakd mks fedavg fedprox local central)
 HETEROS=(all_small uniform skewed)
 
