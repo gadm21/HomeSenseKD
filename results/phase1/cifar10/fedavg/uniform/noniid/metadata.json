@@ -1,0 +1,32 @@
+{
+  "algorithm": "fedavg",
+  "dataset": {
+    "private": "cifar10",
+    "public": "mnist",
+    "n_classes": 10,
+    "n_parties": 20
+  },
+  "setting": "noniid",
+  "heterogeneity": "uniform",
+  "model_sharing": true,
+  "knowledge_distillation": false,
+  "training": {
+    "n_rounds": 50,
+    "local_epochs": 5,
+    "kd_epochs": 3,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 100,
+    "dirichlet_alpha": 0.5,
+    "window_size": 100,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "final_avg_accuracy": 0.49065499752759933,
+    "final_min_accuracy": 0.4032999873161316,
+    "final_max_accuracy": 0.572700023651123,
+    "final_std_accuracy": 0.038767585703868374,
+    "n_clients": 20
+  }
+}

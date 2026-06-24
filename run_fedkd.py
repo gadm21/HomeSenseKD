@@ -22,6 +22,7 @@ python run_fedkd.py --config config/cifar10.yaml \\
 import os
 import sys
 import argparse
+import json
 from copy import deepcopy
 
 import numpy as np
@@ -458,6 +459,46 @@ def _make_exp_dir(results_dir, dataset, algo, hetero):
     return os.path.join(results_dir, dataset, algo, hetero)
 
 
+def save_metadata(exp_dir, setting, cfg, algo, hetero, stats):
+    """Save experiment metadata to a JSON file."""
+    metadata = {
+        "algorithm": algo,
+        "dataset": {
+            "private": cfg["data"]["dataset"],
+            "public": cfg["data"]["public_dataset"],
+            "n_classes": cfg["data"]["n_classes"],
+            "n_parties": cfg["data"]["n_parties"],
+        },
+        "setting": setting,
+        "heterogeneity": hetero,
+        "model_sharing": algo in ("fedavg", "fedprox", "central"),
+        "knowledge_distillation": algo in ("fedmd", "fedakd", "mks"),
+        "training": {
+            "n_rounds": cfg["federated"]["n_rounds"],
+            "local_epochs": cfg["federated"]["local_epochs"],
+            "kd_epochs": cfg["federated"]["kd_epochs"],
+            "fedprox_mu": cfg["federated"]["fedprox_mu"],
+        },
+        "data_config": {
+            "n_samples_per_class": cfg["data"]["n_samples_per_class"],
+            "dirichlet_alpha": cfg["data"]["dirichlet_alpha"],
+            "window_size": cfg["data"].get("window_size", None),
+            "n_stft_bins": cfg["data"].get("n_stft_bins", None),
+        },
+        "results": {
+            "last_round_avg_accuracy": float(stats["avg"][-1]) if stats["avg"] else None,
+            "last_round_min_accuracy": float(stats["min"][-1]) if stats["min"] else None,
+            "last_round_max_accuracy": float(stats["max"][-1]) if stats["max"] else None,
+            "final_avg_accuracy": float(np.mean(stats["avg"][-5:])) if len(stats["avg"]) >= 5 else None,
+        },
+    }
+    
+    metadata_path = os.path.join(exp_dir, setting, "metadata.json")
+    with open(metadata_path, "w") as f:
+        json.dump(metadata, f, indent=2)
+    print(f"  Metadata saved to {metadata_path}")
+
+
 def run_one_algo(algo, cfg, tiers, tier_map,
                  partitions, pub_data, val_data, input_shape):
     """Run a single algorithm on both settings (iid + noniid).
@@ -491,11 +532,13 @@ def run_one_algo(algo, cfg, tiers, tier_map,
             nodes  = [Node(models[i], (pri_x[i], pri_y[i]), pub_data, val_data)
                       for i in range(n_par)]
             all_stats[setting] = run_local(nodes, n_rnd, l_ep, exp_dir, setting)
+            save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
 
         elif algo == "central":
             all_stats[setting] = run_central(
                 pri_x, pri_y, val_data, n_rnd, l_ep,
                 input_shape, n_cls, exp_dir, setting)
+            save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
 
         elif algo in ("fedavg", "fedprox"):
             models  = build_client_models(algo, tiers, input_shape, n_cls)
@@ -508,6 +551,7 @@ def run_one_algo(algo, cfg, tiers, tier_map,
                        for i in range(n_par)]
             all_stats[setting] = run_weight_sharing(
                 clients, n_rnd, f"{algo.upper()} — {setting.upper()}")
+            save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
 
         elif algo in ("fedmd", "fedakd"):
             use_mixup = (algo == "fedakd")
@@ -522,6 +566,7 @@ def run_one_algo(algo, cfg, tiers, tier_map,
                          for i in range(n_par)]
             all_stats[setting] = run_kd(
                 clients, n_rnd, f"{algo.upper()} — {setting.upper()}")
+            save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
 
         elif algo == "mks":
             models  = build_client_models(algo, tiers, input_shape, n_cls)
@@ -535,6 +580,7 @@ def run_one_algo(algo, cfg, tiers, tier_map,
                        for i in range(n_par)]
             all_stats[setting] = run_mks(
                 clients, n_rnd, f"MKS — {setting.upper()}", tier_map)
+            save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
 
         else:
             raise ValueError(f"Unknown algorithm: {algo!r}")
