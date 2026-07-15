@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1784073191.76623 "c:/Users/ggad/Desktop/HomeSenseKD/paper.tex" "paper.pdf" "paper" 1784073194.74527 0
+["pdflatex"] 1784146762.0534 "c:/Users/ggad/Desktop/HomeSenseKD/paper.tex" "paper.pdf" "paper" 1784146767.12844 0
   "C:/Users/ggad/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1779527646 83609 ebbc432e6cbbb238d39535255db2c8bd ""
   "C:/Users/ggad/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1772935024 13333002 0a6fd8d7b63ba33e2f11414e0b9fdaf5 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -61,6 +61,7 @@
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1247596666 32716 08e384dc442464e7285e891af9f45947 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb" 1247596667 32626 5abc8bb2f28aa647d4c70f8ea38cc0d3 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb" 1247596666 32442 c975af247b6702f7ca0c299af3616b80 ""
+  "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex7.pfb" 1247596670 30457 bc0868ebece724ed7c3d37e3d9bff7bd ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex9.pfb" 1247596670 30212 f7062d6da71d1ec66ffb8906891648f7 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb" 1247596673 31764 459c573c03a4949a528c2cc7f557e217 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb" 1247596673 34694 870c211f62cb72718a00e353f14f254d ""
@@ -249,14 +250,15 @@
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/tex/latex/psnfss/ot1ptm.fd" 1585253778 1007 15056f4a61917ceed3a44e4ac11fcc52 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/tex/latex/psnfss/ts1ptm.fd" 1585253778 653 96f56dc5d1ef1fe1121f1cfeec70ee0c ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/tex/latex/tools/array.sty" 1761901070 15651 9d7c62df82cb29a555c00550babfe364 ""
+  "C:/Users/ggad/AppData/Local/Programs/MiKTeX/tex/latex/tools/tabularx.sty" 1761901070 7243 a2c17f18e2c9b702b84fad03d5f9c78b ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/ggad/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "assets/FedMKS_overview.png" 1778787114 141707 a8147fe9ce888eb78e1aee4c45640c2a ""
+  "assets/FedMKS_overview.png" 1784146723 333532 9284bb15d545f827d76d9e1b472f6789 ""
   "assets/FedMKS_timeline.png" 1778787114 153217 2c847a3056958fedf5d1467aa1bb2040 ""
   "assets/fed_har_intro.png" 1778787114 418045 8730967633d5a588fdc86e5f1228f10b ""
-  "c:/Users/ggad/Desktop/HomeSenseKD/paper.tex" 1784072603 79076 74788cc445c52afddfa8cfd5805c30ca ""
-  "paper.aux" 1784073194 19677 f4bab1dacee45213063017236e932392 "pdflatex"
-  "paper.tex" 1784072603 79076 74788cc445c52afddfa8cfd5805c30ca ""
+  "c:/Users/ggad/Desktop/HomeSenseKD/paper.tex" 1784146577 85559 81daac3d5b552fc0f7c5ae466f62daff ""
+  "paper.aux" 1784146766 20716 864afe936d28724f5b035a4eacc09a2a "pdflatex"
+  "paper.tex" 1784146577 85559 81daac3d5b552fc0f7c5ae466f62daff ""
   (generated)
   "paper.aux"
   "paper.log"

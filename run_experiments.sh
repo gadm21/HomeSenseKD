@@ -4,12 +4,14 @@
 #
 # Phase 1: all 4 datasets x 7 algorithms (uniform heterogeneity)
 # Phase 2: home_occupancy x 7 algorithms x 3 heterogeneity distributions
+# Phase 3: FedMKS vs FedDF on all datasets (accuracy + compute + communication)
 #
 # Usage:
-#   bash run_experiments.sh               # both phases, 4 parallel jobs
+#   bash run_experiments.sh               # all phases, 4 parallel jobs
 #   bash run_experiments.sh --jobs 8      # more parallelism
 #   bash run_experiments.sh --phase 1     # main comparison only
 #   bash run_experiments.sh --phase 2     # heterogeneity ablation only
+#   bash run_experiments.sh --phase 3     # FedMKS vs FedDF efficiency comparison
 #   bash run_experiments.sh --dry-run     # print commands without running
 # =============================================================================
 
@@ -47,6 +49,7 @@ PHASE_LOG_DIR=""        # per-job logs land here
 PHASE_MASTER=""         # phase-level master log
 PHASE_RESULTS_DIR=""    # --override experiment.results_dir
 PHASE_FIG_DIR=""        # --override experiment.fig_dir
+PHASE_EXTRA_OVERRIDES=()  # extra KEY=VAL pairs appended to --override
 
 RUN_TS="$(date '+%Y%m%d_%H%M%S')"
 
@@ -129,6 +132,7 @@ run_job() {
         --override \
             "experiment.results_dir=$PHASE_RESULTS_DIR" \
             "experiment.fig_dir=$PHASE_FIG_DIR" \
+            "${PHASE_EXTRA_OVERRIDES[@]}" \
         2>&1 \
       | log_ts \
       | tee -a "$log" \
@@ -163,12 +167,12 @@ run_pool() {
     wait
 }
 
-# DATASETS=(home_occupancy home_har mnist cifar10)
-DATASETS=(mnist cifar10)
+DATASETS=(home_occupancy home_har mnist cifar10)
 ALGORITHMS=(fedmd fedakd mks fedavg fedprox local central)
 HETEROS=(all_small uniform skewed)
 
 run_phase1() {
+    PHASE_EXTRA_OVERRIDES=()
     PHASE_LOG_DIR="$LOG_DIR/phase1"
     PHASE_MASTER="$PHASE_LOG_DIR/master_${RUN_TS}.log"
     PHASE_RESULTS_DIR="$SCRIPT_DIR/results/phase1"
@@ -200,6 +204,7 @@ run_phase1() {
 }
 
 run_phase2() {
+    PHASE_EXTRA_OVERRIDES=()
     PHASE_LOG_DIR="$LOG_DIR/phase2"
     PHASE_MASTER="$PHASE_LOG_DIR/master_${RUN_TS}.log"
     PHASE_RESULTS_DIR="$SCRIPT_DIR/results/phase2"
@@ -230,13 +235,53 @@ run_phase2() {
     } | log_ts | tee -a "$PHASE_MASTER" | tee -a "$GLOBAL_MASTER"
 }
 
+run_phase3() {
+    # NOTE: algorithm key 'feddf' must be implemented in run_fedkd.py
+    PHASE_EXTRA_OVERRIDES=("experiment.profile_compute=true")
+    PHASE_LOG_DIR="$LOG_DIR/phase3"
+    PHASE_MASTER="$PHASE_LOG_DIR/master_${RUN_TS}.log"
+    PHASE_RESULTS_DIR="$SCRIPT_DIR/results/phase3"
+    PHASE_FIG_DIR="$SCRIPT_DIR/results/phase3/figures"
+    mkdir -p "$PHASE_LOG_DIR" "$PHASE_RESULTS_DIR" "$PHASE_FIG_DIR"
+
+    local P3_DATASETS=(home_occupancy home_har mnist cifar10)
+    local P3_ALGORITHMS=(mks feddf)
+    local P3_HETERO=uniform
+
+    print_sys_info "$PHASE_MASTER" \
+        "Phase 3 -- FedMKS vs FedDF (accuracy + server/client compute + communication)"
+    {
+        echo "  Scope : ${#P3_DATASETS[@]} datasets x ${#P3_ALGORITHMS[@]} algorithms (${P3_HETERO} heterogeneity)"
+        echo "  Extra : ${PHASE_EXTRA_OVERRIDES[*]}"
+    } | log_ts | tee -a "$PHASE_MASTER" | tee -a "$GLOBAL_MASTER"
+
+    local jobs=()
+    for ds in "${P3_DATASETS[@]}"; do
+        for algo in "${P3_ALGORITHMS[@]}"; do
+            jobs+=("$ds,$algo,$P3_HETERO")
+        done
+    done
+    run_pool "${jobs[@]}"
+
+    {
+        echo "============================================================"
+        echo "  Phase 3 complete."
+        echo "  Logs    -> $PHASE_LOG_DIR"
+        echo "  Results -> $PHASE_RESULTS_DIR"
+        echo "  Figures -> $PHASE_FIG_DIR"
+        echo "  Master  -> $PHASE_MASTER"
+        echo "============================================================"
+    } | log_ts | tee -a "$PHASE_MASTER" | tee -a "$GLOBAL_MASTER"
+}
+
 print_sys_info "$GLOBAL_MASTER" "Global run — all phases"
 
 case "$PHASE" in
     1|phase1) run_phase1 ;;
     2|phase2) run_phase2 ;;
-    all)      run_phase1; run_phase2 ;;
-    *) echo "[error] Unknown --phase '$PHASE'  (use 1, 2, or all)"; exit 1 ;;
+    3|phase3) run_phase3 ;;
+    all)      run_phase1; run_phase2; run_phase3 ;;
+    *) echo "[error] Unknown --phase '$PHASE'  (use 1, 2, 3, or all)"; exit 1 ;;
 esac
 
 {
@@ -244,8 +289,10 @@ esac
     echo "  All experiments complete."
     echo "  Phase 1 logs    -> $LOG_DIR/phase1/"
     echo "  Phase 2 logs    -> $LOG_DIR/phase2/"
+    echo "  Phase 3 logs    -> $LOG_DIR/phase3/"
     echo "  Phase 1 results -> $SCRIPT_DIR/results/phase1/"
     echo "  Phase 2 results -> $SCRIPT_DIR/results/phase2/"
+    echo "  Phase 3 results -> $SCRIPT_DIR/results/phase3/"
     echo "  Global master   -> $GLOBAL_MASTER"
     echo "============================================================"
 } | log_ts | tee -a "$GLOBAL_MASTER"

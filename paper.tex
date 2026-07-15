@@ -12,6 +12,7 @@
 \usepgfplotslibrary{groupplots}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{tabularx}
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{xcolor}
@@ -160,13 +161,16 @@ semi-heterogeneous settings.
     algorithms, revealing the failure mode of all algorithms on HomeHAR.
   \item \textbf{Phase 2}: heterogeneity-distribution ablation of FedMD on
     HomeOccupancy (results to be added).
+  \item \textbf{Phase 3}: direct FedMKS vs.\ FedDF efficiency comparison
+    reporting accuracy, server/client compute load, and communication
+    overhead (results to be added).
 \end{itemize}
 
 The remainder of this paper is structured as follows.
 Section~\ref{sec:related} surveys related work.
 Section~\ref{sec:sysmodel} defines the system model.
 Section~\ref{sec:methods} describes all algorithms and the shared model.
-Section~\ref{sec:experiments} presents experimental design and results.
+Section~\ref{sec:experiments} presents three-phase experimental design and results.
 Section~\ref{sec:conclusion} concludes.
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -238,9 +242,14 @@ distillation framework---training a student to match teacher soft outputs---on
 which FedMD, FedAKD, and FedMKS build.
 Shen~et~al.~\cite{shen2020fedml} proposed federated mutual learning, enabling
 peer-to-peer distillation between clients without a public dataset.
-Lin~et~al.~\cite{lin2020ensemble} demonstrated that ensemble distillation of
-client predictions at the server side improves accuracy and robustness
-compared to naive averaging.
+Lin~et~al.~\cite{lin2020ensemble} proposed \textbf{FedDF}, in which the
+server collects client model outputs on a shared public dataset, constructs
+an ensemble prediction, and trains a fused student model via server-side
+knowledge distillation, improving accuracy and robustness compared to naive
+averaging.  Unlike FedDF, which concentrates all distillation on the server,
+FedMKS distributes distillation across clients (Table~\ref{tab:fedmks_feddf}),
+substantially reducing server computation at the cost of higher client workload
+and communication overhead.
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{System Model}
@@ -491,29 +500,114 @@ Algorithm~\ref{alg:fedmks} formalises one FedMKS round.
 \end{algorithmic}
 \end{algorithm}
 
-Table~\ref{tab:algosummary} summarises all seven evaluated algorithms.
+\textbf{Comparison with FedDF.}  FedDF~\cite{lin2020ensemble} addresses the
+same heterogeneous FL problem via server-side ensemble distillation: the server
+runs all client models on $\mathcal{D}^{\text{pub}}$, forms an ensemble
+$\bar{s}^{(r)} = \sum_k \beta_k f(\mathcal{D}^{\text{pub}};\theta_k)$, and
+trains a fused student by minimising
+$D_{\mathrm{KL}}(\bar{s}_\tau \| f_\tau(\mathcal{D}^{\text{pub}};\theta))$.
+This centralises both inference and gradient computation on the server,
+incurring $O(KP\mathcal{F} + E_{\text{kd}}\,P(\mathcal{F}{+}\mathcal{B}))$
+operations per round, where $P{=}|\mathcal{D}^{\text{pub}}|$ and
+$\mathcal{F}$, $\mathcal{B}$ denote forward- and backward-pass costs.
+FedMKS inverts this design: the server performs only tensor aggregation
+$O(\sum_t |\mathbf{W}_t| + KPd)$ with no neural-network passes, shifting
+the distillation burden to clients---making it far more suitable when the
+coordinator is a lightweight edge gateway (Table~\ref{tab:fedmks_feddf}).
+
+Table~\ref{tab:algosummary} summarises all evaluated algorithms.
 
 \begin{table}[t]
 \centering\small
-\caption{Algorithm summary ($\checkmark$ = feature used).}
+\caption{Algorithm summary ($\checkmark$ = feature used;
+  $\dagger$~Phase~3 only).}
 \label{tab:algosummary}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lccl@{}}
 \toprule
 \textbf{Algo.} & \textbf{Soft} & \textbf{Wts} & \textbf{Topology}\\
 \midrule
-FedMD    & \checkmark & --         & Heterogeneous \\
-FedAKD   & \checkmark & --         & Heterogeneous \\
-FedMKS   & \checkmark & \checkmark & Semi-het.     \\
-FedAvg   & --         & \checkmark & Homogeneous   \\
-FedProx  & --         & \checkmark & Homogeneous   \\
-Local    & --         & --         & Isolated      \\
-Central  & --         & --         & Centralised   \\
+FedMD           & \checkmark & --         & Heterogeneous \\
+FedAKD          & \checkmark & --         & Heterogeneous \\
+FedMKS          & \checkmark & \checkmark & Semi-het.     \\
+FedDF$^\dagger$ & \checkmark & \checkmark & Heterogeneous \\
+FedAvg          & --         & \checkmark & Homogeneous   \\
+FedProx         & --         & \checkmark & Homogeneous   \\
+Local           & --         & --         & Isolated      \\
+Central         & --         & --         & Centralised   \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+\begin{table*}[t]
+\centering
+\caption{FedMKS vs.\ FedDF: algorithmic comparison using the notation of
+  Section~\ref{sec:sysmodel}.
+  $P\!\triangleq\!|\mathcal{D}^{\text{pub}}|$ (public samples);
+  $\mathcal{F}$, $\mathcal{B}$: forward- and backward-pass costs
+  (distinct from CSI window $T$ and STFT bins $B$).}
+\label{tab:fedmks_feddf}
+\small\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{%
+  >{\raggedright\arraybackslash}p{0.17\textwidth}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Aspect} & \textbf{FedMKS (proposed)} & \textbf{FedDF~\cite{lin2020ensemble}} \\
+\midrule
+Objective &
+  Intra-tier weight sharing combined with cross-tier feature-carrier
+  distillation on $\mathcal{D}^{\text{pub}}$. &
+  Server-side ensemble distillation: a fused model is trained to match the
+  ensemble of client outputs on $\mathcal{D}^{\text{pub}}$. \\[2pt]
+Weight aggregation &
+  Per-tier FedAvg:
+  $\mathbf{W}_t^{(r)} =
+   \frac{\sum_{k:\,t_k=t} n_k\,\theta_k}{\sum_{k:\,t_k=t} n_k}$. &
+  Compatible client models may be averaged first; not the primary
+  fusion mechanism. \\[2pt]
+Knowledge aggregation &
+  Clients upload $s_k^{(r)}$; server computes
+  $\bar{s}^{(r)} = \sum_k \tfrac{n_k}{n}\,s_k^{(r)}$;
+  no server-side inference. &
+  Server runs all client models on $\mathcal{D}^{\text{pub}}$:
+  $\bar{s}^{(r)} = \sum_k \beta_k\,
+   f(\mathcal{D}^{\text{pub}};\theta_k)$. \\[2pt]
+Distillation &
+  Each client $k$ minimises
+  $\mathcal{L}_k = \mathcal{L}_{\text{CE}} +
+   \lambda\,\mathcal{L}_{\text{KD}}(\theta_k;\bar{s}^{(r-1)})$
+  locally for $E_{\text{kd}}$ epochs. &
+  Server trains a fused model:
+  $\theta^{*} = \arg\min_{\theta}
+   D_{\mathrm{KL}}\!\left(\bar{s}_\tau\,\|\,
+   f_\tau(\mathcal{D}^{\text{pub}};\theta)\right)$. \\[2pt]
+KD location    & Clients, in parallel.   & Central server only. \\[2pt]
+Server workload &
+  Tensor aggregation only:
+  $O\!\bigl(\sum_t|\mathbf{W}_t|+KPd\bigr)$;
+  no forward or backward passes. &
+  Client inference $+$ student optimisation:
+  $O\!\bigl(KP\mathcal{F}+
+             E_{\text{kd}}P(\mathcal{F}+\mathcal{B})\bigr)$. \\[2pt]
+Communication &
+  Per client: $|\theta_k|$ weights $+$ $P{\times}d$
+  feature-carrier matrix. &
+  Per client: $|\theta_k|$ weights; soft labels
+  remain on the server. \\[2pt]
+Main trade-off &
+  Lower server compute; higher client compute and
+  communication overhead. &
+  Lower client KD workload; higher server compute
+  and memory. \\[2pt]
+Suitable setting &
+  Resource-constrained IoT or edge coordinator. &
+  Computationally capable central server. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
 \section{Experiments and Results}
 \label{sec:experiments}
 
@@ -564,6 +658,11 @@ heterogeneity (35\%~S/35\%~M/30\%~L) for both IID and non-IID data partitions.
 \textbf{Phase 2} ablates tier-heterogeneity distribution on HomeOccupancy for
 FedMD across three configurations: \texttt{all\_small} (100\%~S),
 \texttt{uniform} (35/35/30), and \texttt{skewed} (60\%~S/30\%~M/10\%~L).
+\textbf{Phase 3} directly compares FedMKS and FedDF on HomeOccupancy and
+HomeHAR under both IID and non-IID partitions (uniform tier distribution),
+reporting (i)~validation accuracy, (ii)~per-round server computation time,
+(iii)~per-round mean client computation time, and (iv)~total communication
+bytes per round.
 
 \subsection{Results}
 
@@ -1029,6 +1128,41 @@ Fig.~\ref{fig:phase2} is a placeholder.
 \label{fig:phase2}
 \end{figure}
 
+\subsubsection{Phase 3 --- FedMKS vs.\ FedDF}
+
+Phase~3 provides a direct empirical comparison of FedMKS and FedDF on
+HomeOccupancy and HomeHAR under both IID and non-IID settings
+(uniform tier distribution, $R{=}50$ rounds).
+Beyond validation accuracy, the evaluation records
+(ii)~per-round server computation time (aggregation only for FedMKS
+vs.\ client inference and student optimisation for FedDF),
+(iii)~per-round mean client computation time, and
+(iv)~total communication bytes per round, enabling the complexity
+analysis of Table~\ref{tab:fedmks_feddf} to be validated
+experimentally.
+\emph{Experiments are ongoing; results will be added upon completion.}
+Fig.~\ref{fig:phase3} is a placeholder.
+
+\begin{figure}[t]
+\centering
+\setlength{\fboxsep}{12pt}
+\fbox{%
+  \parbox{0.85\columnwidth}{\centering
+    \vspace{0.6cm}
+    {\large\textcolor{gray}{Phase 3 Results}}\\[4pt]
+    \textcolor{gray}{\small (FedMKS vs.\ FedDF: accuracy, server/client}\\[2pt]
+    \textcolor{gray}{\small compute, and communication overhead per round;}\\[2pt]
+    \textcolor{gray}{\small to be added after experiment completion)}
+    \vspace{0.6cm}
+  }%
+}
+\caption{\textbf{Phase 3 placeholder.}  Validation accuracy and
+  efficiency metrics (server compute, client compute, communication
+  bytes per round) for FedMKS vs.\ FedDF on HomeOccupancy and HomeHAR
+  under IID and non-IID data partitions.  Results to be added.}
+\label{fig:phase3}
+\end{figure}
+
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1043,6 +1177,10 @@ expose a clear hierarchy: weight-sharing methods dominate under IID;
 soft-label methods are more robust under non-IID when distributions are
 highly skewed; and HomeHAR reveals that data scarcity, not algorithm design,
 is the binding constraint for challenging 7-class CSI recognition.
+Phase~3 will validate the theoretical efficiency advantage of FedMKS over
+FedDF by measuring server compute, client compute, and communication overhead
+directly, providing empirical grounding for the analysis in
+Table~\ref{tab:fedmks_feddf}.
 The public benchmark, code, and datasets provide a reproducible foundation
 for future work on privacy-preserving sensing.
 

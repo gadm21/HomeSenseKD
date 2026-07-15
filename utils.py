@@ -456,7 +456,7 @@ def aggregate_by_cluster(client_ids, weights_list, n_samples_list):
 
 
 def aggregate_soft_labels(soft_labels_list, accuracies):
-    return np.average(soft_labels_list, weights=np.array(accuracies, dtype=np.float64), axis=0)
+    return np.average(soft_labels_list,  axis=0)
 
 
 # ── PLOTTING ──────────────────────────────────────────────────────
