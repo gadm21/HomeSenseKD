@@ -1,45 +1,102 @@
 \relax 
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}System Architecture (Figs.~\ref {fig:algcompare}--\ref {fig:csi})}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Process pipeline.}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Tiered dual-head model.}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{KD round.}{1}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Mechanism summary across all five federated algorithms.}}{1}{}\protected@file@percent }
-\newlabel{tab:algosummary}{{1}{1}{}{table.1}{}}
-\@writefile{toc}{\contentsline {paragraph}{Algorithm summary (Table~\ref {tab:algosummary}, Fig.~\ref {fig:algcompare}).}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{FedMKS round (Algorithm~1).}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Experiment Design}{1}{}\protected@file@percent }
-\newlabel{sec:expdesign}{{3}{1}{}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Research Questions}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Phase 1: Main Comparison}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Phase 2: Heterogeneity Ablation Study}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Hyperparameter Settings}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Evaluation Metrics}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{1}{}\protected@file@percent }
-\newlabel{sec:results}{{4}{1}{}{section.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Expected accuracy findings.}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Communication cost.}{1}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Algorithm comparison.} Each row summarises a federated algorithm by what the server broadcasts, what clients return, architecture compatibility, and per-round communication cost. \emph  {Bottom}: heterogeneity suitability spectrum. FedMKS occupies the semi-heterogeneous niche by combining per-tier weight averaging with global soft-label exchange.}}{2}{}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:algcompare}{{1}{2}{}{figure.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Dual-head model with decoupled dual training.} A shared backbone extracts a latent vector $\mathbf  {z}\!\in \!\mathbb  {R}^d$. The \emph  {classification head} (green) is trained with cross-entropy on private labelled data $\mathcal  {D}_k^{\mathrm  {priv}}$; the \emph  {distillation head} (purple) is trained with MSE against the aggregated soft labels $\bar  {s}$ on the public set $\mathcal  {D}^{\mathrm  {pub}}$. Gradient flows are independent between heads. Backbone depth scales with tier: Small uses Conv1D$\times $3; Medium adds BiLSTM(128); Large further adds a Transformer attention block.}}{2}{}\protected@file@percent }
-\newlabel{fig:dualhead}{{2}{2}{}{figure.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {CSI feature processing pipeline (\texttt  {process()}).} Per-timestep features from 52-subcarrier amplitude: mean (1 ch., time-domain), rolling variances at $W\!\in \!\{15,150,1500\}$ samples (3 ch., multi-scale), and $B{=}8$ STFT magnitude bins (1 ch., frequency-domain). The $4{+}B{=}12$ channels are stacked and slid with window $T{=}1500$ to produce the input tensor $(N_w,\,1500,\,12)$.}}{2}{}\protected@file@percent }
-\newlabel{fig:csi}{{3}{2}{}{figure.3}{}}
-\@writefile{toc}{\contentsline {paragraph}{Phase~2 ablation findings.}{2}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Phase~1 experimental matrix ($4\!\times \!7\!\times \!2=56$ experiments).}}{3}{}\protected@file@percent }
-\newlabel{tab:phase1matrix}{{2}{3}{}{table.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Phase~2 heterogeneity modes ($1\!\times \!7\!\times \!3\!\times \!2=42$ experiments).}}{3}{}\protected@file@percent }
-\newlabel{tab:phase2modes}{{3}{3}{}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Key hyperparameters shared across all experiments.}}{3}{}\protected@file@percent }
-\newlabel{tab:hyperparams}{{4}{3}{}{table.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Estimated communication cost per round per client.}}{3}{}\protected@file@percent }
-\newlabel{tab:commcost}{{5}{3}{}{table.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Phase 1 — Main Algorithm Comparison}{3}{}\protected@file@percent }
-\newlabel{sec:p1}{{4.1}{3}{}{subsection.4.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Phase 2 — Heterogeneity Ablation}{3}{}\protected@file@percent }
-\newlabel{sec:p2}{{4.2}{3}{}{subsection.4.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{3}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {(a) Phase~1} experimental matrix. Cell shade encodes relative IID convergence (green~=~high, blue~=~medium, red~=~low); KD methods are competitive with weight-sharing on CSI datasets while requiring no weight exchange. \textbf  {(b) Phase~2} heterogeneity ablation. \emph  {Top}: tier composition per configuration. \emph  {Bottom}: qualitative accuracy trend — KD methods are robust to tier diversity (soft-label aggregation is architecture-agnostic); FedAvg degrades as tier imbalance grows.}}{4}{}\protected@file@percent }
-\newlabel{fig:phases}{{4}{4}{}{figure.4}{}}
-\gdef \@abspage@last{4}
+\citation{ma2019survey,yousefi2017survey}
+\citation{mcmahan2017fedavg}
+\citation{ma2019survey}
+\citation{yousefi2017survey}
+\citation{adib2013seewall}
+\citation{wang2014eyes}
+\citation{chen2018gesture}
+\citation{han2020healthcare}
+\citation{jiang2021envind}
+\citation{liu2020deepmtd}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{}{section.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Federated learning for CSI-based HAR. Each home client has access only to a subset of activity classes. FL enables a client to recognise \emph  {activities it has never observed locally} by absorbing knowledge from peers via soft-label distillation.}}{1}{}\protected@file@percent }
+\newlabel{fig:fedhar}{{1}{1}{}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{1}{}\protected@file@percent }
+\newlabel{sec:related}{{II}{1}{}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Wi-Fi Sensing}{1}{}\protected@file@percent }
+\citation{sozinov2018fedhar}
+\citation{wu2021fedcsi}
+\citation{ek2020fedwifi}
+\citation{ouyang2021clusterfl}
+\citation{presotto2022semfed}
+\citation{zhao2018noniid}
+\citation{mcmahan2017fedavg}
+\citation{li2020fedprox}
+\citation{li2019fedmd}
+\citation{hinton2015distill}
+\citation{shen2020fedml}
+\citation{lin2020ensemble}
+\citation{mcmahan2017fedavg}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Federated Learning for Sensing}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Federated Learning with Knowledge Distillation}{2}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Symbol table.}}{2}{}\protected@file@percent }
+\newlabel{tab:symbols}{{I}{2}{}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}System Model}{2}{}\protected@file@percent }
+\newlabel{sec:sysmodel}{{III}{2}{}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Notation}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Network and Data Model}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Heterogeneous Model Architecture}{2}{}\protected@file@percent }
+\citation{li2020fedprox}
+\citation{li2019fedmd}
+\citation{homesensekd2024}
+\citation{homesensekd2024}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Traditional FL Objective and Its Limitations}{3}{}\protected@file@percent }
+\newlabel{eq:fedavg}{{1}{3}{}{equation.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Knowledge-Distillation-Based FL Objective}{3}{}\protected@file@percent }
+\newlabel{eq:fedkd}{{2}{3}{}{equation.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Problem Definition}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {FedMKS overview.} In a heterogeneous network (Small, Medium, Large clients), FedAvg must impose a single small architecture; FedMD shares only carriers but loses weight-sharing benefits. FedMKS partitions clients into tier clusters, applying intra-tier weight aggregation alongside cross-tier feature-carrier distillation, achieving the best of both paradigms.}}{3}{}\protected@file@percent }
+\newlabel{fig:fedmksoverview}{{2}{3}{}{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Methods}{3}{}\protected@file@percent }
+\newlabel{sec:methods}{{IV}{3}{}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Tiered Dual-Head Architecture}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}FedMKS: Mixed Knowledge Sharing}{3}{}\protected@file@percent }
+\expandafter \gdef \csname pgfplots@legend@to@name@globalLegend\endcsname {\begingroup \def \pgfplots@legend@to@name {\pgfkeysdef {/pgfplots/every axis legend}{\pgfkeysalso {cells={anchor=center},inner xsep={3pt},inner ysep={2pt},nodes={inner sep=2pt,text depth=0.15em},anchor={north east},shape={rectangle},fill={white},draw={black},at={(0.98,0.98)},font={\tiny },/tikz/every even column/.append style={column sep=0.3em}}}\pgfkeysdef {/pgfplots/every legend image post}{}\def \numplots {7}\def \plotnum {0}\def \plotnumofactualtype {0}\matrix [/pgfplots/every axis legend]{\begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {black={\pgfkeysnovalue },thick={\pgfkeysnovalue },dashed={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{Central};\pgfmatrixnextcell \begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {clBlue={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{FedMD};\pgfmatrixnextcell \begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {clTeal={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{FedAKD};\pgfmatrixnextcell \begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {clRed={\pgfkeysnovalue },thick={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{FedMKS};\pgfmatrixnextcell \begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {clPurple={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{FedAvg};\pgfmatrixnextcell \begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {clOlive={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{FedProx};\pgfmatrixnextcell \begingroup \def \pgfplots@draw@image {\def \tikz@plot@handler {\pgfkeys {/pgf/plots/@handler options/.cd, start=\relax , end macro=\relax , point macro=\pgfutil@gobble , jump macro=\relax , special macro=\pgfutil@gobble , point macro=\pgf@plot@line@handler , jump=\global \let \pgf@plotstreampoint \pgf@plot@line@handler@move }\begingroup \escapechar =-1 \edef \pgfplotsplothandlername {\string \pgfplothandlerlineto }\pgfmath@smuggleone \pgfplotsplothandlername \endgroup \def \pgfplotsplothandlerLUAfactory {function(axis, pointmetainputhandler) return pgfplots.GenericPlothandler.new("\pgfplotsplothandlername ", axis,pointmetainputhandler) end}\def \pgfplotsplothandlerLUAvisualizerfactory {pgfplots.defaultPlotVisualizerFactory}}\pgfkeysdef {/pgfplots/legend image code}{\draw [/pgfplots/mesh=false,bar width=3pt,bar shift=0pt,mark repeat=2,mark phase=2,] plot coordinates { (0cm,0cm) (0.3cm,0cm) (0.6cm,0cm)};}\pgfkeysdef {/pgfplots/every legend image post}{}\pgfkeyssetvalue {/pgfplots/mark list fill}{.!80!black}\pgfplots@show@small@legendplots {clGray={\pgfkeysnovalue },dotted={\pgfkeysnovalue }}{}}\ifpgfpicture \pgfplots@draw@image \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz []{\pgfplots@draw@image }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup \pgfmatrixnextcell \node []{Local};\\};}\ifpgfpicture \pgfplots@legend@to@name \else \expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \begingroup \tikzappendtofigurename {_crossref}\fi \tikz [/pgfplots/every legend to name picture/.try]{\pgfplots@legend@to@name }\expandafter \ifx \csname tikzappendtofigurename\endcsname \relax \else \endgroup \fi \fi \endgroup }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {FedMKS round timeline.} From round $r{=}2$ onward, every client receives the global carrier $\bar  {s}$ and its tier's averaged classifier weights $\mathbf  {W}_{t_k}$ from the server; runs $E_{\text  {kd}}$ KD epochs on the public set using $\bar  {s}$ as targets; runs $E_{\text  {loc}}$ local epochs on private data; then returns its updated carrier $s_k$ and classifier weights $w_k$ to the server. Round $r{=}1$ bootstraps by local training only, producing the first carriers and weights.}}{4}{}\protected@file@percent }
+\newlabel{fig:fedmkstimeline}{{3}{4}{}{figure.3}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces FedMKS â€” one communication round}}{4}{}\protected@file@percent }
+\newlabel{alg:fedmks}{{1}{4}{}{algorithm.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Experiments and Results}{4}{}\protected@file@percent }
+\newlabel{sec:experiments}{{V}{4}{}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Experiment Design}{4}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Algorithm summary ($\text  {$\mathsurround \z@ \mathchar "458$}$ = feature used).}}{4}{}\protected@file@percent }
+\newlabel{tab:algosummary}{{II}{4}{}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Hyperparameter settings (all experiments).}}{4}{}\protected@file@percent }
+\newlabel{tab:hyperparam}{{III}{4}{}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Results}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}1}Phase 1 â€” Algorithm Comparison}{4}{}\protected@file@percent }
+\newlabel{globalLegend}{{\expandafter\protect\csname pgfplots@legend@to@name@globalLegend\endcsname}{5}{}{subsubsection.5.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {Phase 1: Validation accuracy over 50 federated rounds} (mean across 3 seeds). Left column: IID; right column: non-IID (Dirichlet $\alpha {=}0.5$). Rows: HomeOccupancy, HomeHAR, MNIST, CIFAR-10. All algorithms use uniform tier distribution (35\%~S/35\%~M/30\%~L). HomeHAR curves collapse to the majority-class baseline (${\approx }31\%$), revealing a dataset-level challenge independent of algorithm choice. On HomeOccupancy IID, FedMKS and FedAvg match the centralised ceiling; under non-IID, weight-sharing methods degrade sharply while Local and FedMD remain more robust. On MNIST, all FL methods approach centralised accuracy under IID; non-IID separates FedMKS/FedAvg/FedProx from FedMD/FedAKD/Local. On CIFAR-10, the task difficulty suppresses all federated methods by $>10\%$ relative to Central, underscoring the limits of knowledge distillation with small per-client datasets. \dag  ~FedAKD and FedMKS curves on HomeOccupancy non-IID terminated early (16 and 20 rounds respectively) due to training instability.}}{5}{}\protected@file@percent }
+\newlabel{fig:phase1}{{4}{5}{}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}2}Phase 2 â€” Heterogeneity Ablation}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion}{5}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{VI}{5}{}{section.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \textbf  {Phase 2 placeholder.} Validation accuracy of FedMD under three tier-heterogeneity configurations (\texttt  {all\_small}, \texttt  {uniform}, \texttt  {skewed}) on HomeOccupancy IID and non-IID. Results to be added.}}{5}{}\protected@file@percent }
+\newlabel{fig:phase2}{{5}{5}{}{figure.5}{}}
+\bibcite{ma2019survey}{1}
+\bibcite{yousefi2017survey}{2}
+\bibcite{adib2013seewall}{3}
+\bibcite{wang2014eyes}{4}
+\bibcite{chen2018gesture}{5}
+\bibcite{han2020healthcare}{6}
+\bibcite{jiang2021envind}{7}
+\bibcite{liu2020deepmtd}{8}
+\bibcite{sozinov2018fedhar}{9}
+\bibcite{wu2021fedcsi}{10}
+\bibcite{ek2020fedwifi}{11}
+\bibcite{ouyang2021clusterfl}{12}
+\bibcite{presotto2022semfed}{13}
+\bibcite{zhao2018noniid}{14}
+\bibcite{mcmahan2017fedavg}{15}
+\bibcite{li2020fedprox}{16}
+\bibcite{li2019fedmd}{17}
+\bibcite{hinton2015distill}{18}
+\bibcite{shen2020fedml}{19}
+\bibcite{lin2020ensemble}{20}
+\bibcite{homesensekd2024}{21}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Limitations and Future Work}{6}{}\protected@file@percent }
+\newlabel{sec:limitations}{{VII}{6}{}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{References}{6}{}\protected@file@percent }
+\gdef \@abspage@last{6}
