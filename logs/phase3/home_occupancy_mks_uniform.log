@@ -1,0 +1,12 @@
+[2026-07-27 08:57:44] ============================================================
+[2026-07-27 08:57:44]   JOB START   : home_occupancy_mks_uniform
+[2026-07-27 08:57:44]   PID         : 553199
+[2026-07-27 08:57:44]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase3/home_occupancy_mks_uniform.log
+[2026-07-27 08:57:44]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase3
+[2026-07-27 08:57:44]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase3/figures
+[2026-07-27 08:57:44]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:57:44]                   --config /home/gad/Desktop/HomeSenseKD/config/home_occupancy.yaml \
+[2026-07-27 08:57:44]                   --algorithm mks --heterogeneity uniform \
+[2026-07-27 08:57:44]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase3 \
+[2026-07-27 08:57:44]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase3/figures
+[2026-07-27 08:57:44] ============================================================

@@ -23,6 +23,7 @@ import os
 import sys
 import argparse
 import json
+import logging
 from copy import deepcopy
 
 import numpy as np
@@ -56,6 +57,30 @@ from utils import (
     # misc
     CLASS_NAMES,
 )
+
+# ── Logging setup ──────────────────────────────────────────────────────────────
+
+LOGGER = logging.getLogger("fedkd")
+
+
+def configure_logging(log_path=None):
+    """Route run_fedkd logs to a file (and stdout)."""
+    LOGGER.setLevel(logging.INFO)
+    if LOGGER.handlers:
+        return
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    if log_path:
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        fh = logging.FileHandler(log_path, mode="a")
+        fh.setFormatter(fmt)
+        LOGGER.addHandler(fh)
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setFormatter(fmt)
+    LOGGER.addHandler(sh)
+
 
 # ── Default configuration ──────────────────────────────────────────────────────
 
@@ -148,6 +173,8 @@ def get_dataset(dc):
     ds = dc["dataset"]
     pub_ds = dc["public_dataset"]
     input_shape, is_image = _get_input_shape(dc)
+    LOGGER.info("Loading target dataset: %r  public dataset: %r", ds, pub_ds)
+    LOGGER.info("Input shape: %s  is_image: %s", input_shape, is_image)
 
     # ── Load target ──────────────────────────────────────────────────
     nstft = dc.get("n_stft_bins", 8)
@@ -199,6 +226,8 @@ def get_dataset(dc):
         pass  # same window_size/n_features assumed for CSI datasets
 
     y_te_cat = tf.keras.utils.to_categorical(y_te, num_classes=dc["n_classes"])
+    LOGGER.info("Dataset loaded: x_train=%s  y_train=%s  x_test=%s  x_public=%s",
+                x_tr.shape, y_tr.shape, x_te.shape, pub_x.shape)
     return x_tr, y_tr, x_te, y_te_cat, pub_x, pub_y
 
 
@@ -208,6 +237,8 @@ def make_partitions(x_tr, y_tr, dc, fc):
     n_par = dc["n_parties"]
     spc   = dc["n_samples_per_class"]
     alpha = dc["dirichlet_alpha"]
+    LOGGER.info("Partitioning data: n_classes=%d n_parties=%d iid_spc=%d alpha=%.3f",
+                n_cls, n_par, spc, alpha)
 
     pri_x_iid, pri_y_iid = iid_partition(
         x_tr, y_tr, n_par, spc,
@@ -228,6 +259,7 @@ def build_client_models(algo, tiers, input_shape, n_classes):
     FedAvg / FedProx: all clients use 'small' (smallest common architecture).
     KD algorithms   : each client uses their assigned tier architecture.
     """
+    LOGGER.info("Building %d client models for algo=%s  tiers=%s", len(tiers), algo, tiers)
     if algo in ("fedavg", "fedprox"):
         return [build_tiered_model("small", input_shape, n_classes) for _ in tiers]
     return [build_tiered_model(t, input_shape, n_classes) for t in tiers]
@@ -257,19 +289,23 @@ class KDClient:
         seed          = int(config.get("seed", 0))
         alpha         = float(config.get("alpha", 0.5))
         use_cluster_w = bool(config.get("use_cluster_weights", False))
+        LOGGER.info("KDClient %s fit round %d (tier=%s)", self.cid, rnd, self.tier)
 
         if rnd > 1 and len(parameters) > 0:
             self.node.receive_training_metadata(parameters[0])
             if use_cluster_w and len(parameters) > 1:
                 self.node.model[0].set_weights(parameters[1:])
+            LOGGER.info("KDClient %s round %d public KD (epochs=%d)", self.cid, rnd, self.kd_epochs)
             self.node.train_on_public(epochs=self.kd_epochs, verbose=False)
 
         log = os.path.join(self.exp_dir, self.setting, f"train_{self.cid}.csv")
+        LOGGER.info("KDClient %s round %d local training (epochs=%d)", self.cid, rnd, self.local_epochs)
         self.node.train_on_target(epochs=self.local_epochs, verbose=False,
                                   logger_file=log, evaluate=True)
         scores, acc = self.node.get_training_metadata(seed, alpha)
         weights      = self.node.model[0].get_weights()
         n            = len(self.node.local_target_dataset[0])
+        LOGGER.info("KDClient %s round %d completed (acc=%.4f, n=%d)", self.cid, rnd, acc, n)
         return [scores] + weights, n, {"accuracy": float(acc)}
 
 
@@ -292,6 +328,7 @@ class WeightClient:
 
     def fit(self, parameters, config):
         rnd = int(config["round_num"])
+        LOGGER.info("WeightClient %s fit round %d (fedprox=%s)", self.cid, rnd, self.fedprox)
         if rnd > 1 and len(parameters) > 0:
             self.node.model[0].set_weights(parameters)
 
@@ -308,6 +345,7 @@ class WeightClient:
                                       logger_file=log, evaluate=True)
 
         acc = self.node.evaluate_on_validation_set(save=False)[1]
+        LOGGER.info("WeightClient %s round %d completed (acc=%.4f)", self.cid, rnd, acc)
         return self.node.model[0].get_weights(), len(x), {"accuracy": float(acc)}
 
 
@@ -325,10 +363,12 @@ def _log_round(rnd, total, accs, stats):
 
 def run_kd(clients, n_rounds, name):
     """FedMD / FedAKD: exchange soft labels only."""
+    LOGGER.info("Starting %s (%d rounds, %d clients)", name, n_rounds, len(clients))
     print(f"\n{'='*65}\n  {name}\n{'='*65}")
     soft_labels = None
     stats = {"avg": [], "min": [], "max": []}
     for rnd in range(1, n_rounds + 1):
+        LOGGER.info("%s: round %d/%d starting", name, rnd, n_rounds)
         seed  = int(np.random.randint(0, 10000))
         alpha = float(np.random.rand())
         params_in   = [soft_labels] if soft_labels is not None else []
@@ -352,12 +392,14 @@ def run_mks(clients, n_rounds, name, tier_map):
       2. Server: global soft-label average + per-tier FedAvg.
       3. Server returns cluster model + global soft labels to each client.
     """
+    LOGGER.info("Starting %s (%d rounds, %d clients)", name, n_rounds, len(clients))
     print(f"\n{'='*65}\n  {name}\n{'='*65}")
     soft_labels    = None
     cluster_w      = {}           # tier -> averaged weights
     stats          = {"avg": [], "min": [], "max": []}
 
     for rnd in range(1, n_rounds + 1):
+        LOGGER.info("%s: round %d/%d starting", name, rnd, n_rounds)
         seed  = int(np.random.randint(0, 10000))
         alpha = float(np.random.rand())
         all_scores, all_w, all_n, accs = [], [], [], []
@@ -390,6 +432,7 @@ def run_mks(clients, n_rounds, name, tier_map):
         soft_labels = aggregate_soft_labels(all_scores, accs)
         cluster_w   = {t: fedavg_aggregate(d["w"], d["n"])
                        for t, d in tier_results.items()}
+        LOGGER.info("%s: round %d/%d aggregated %d cluster weights", name, rnd, n_rounds, len(cluster_w))
         _log_round(rnd, n_rounds, accs, stats)
 
     print(f"  {name} done.")
@@ -398,11 +441,13 @@ def run_mks(clients, n_rounds, name, tier_map):
 
 def run_weight_sharing(clients, n_rounds, name):
     """FedAvg / FedProx: global model broadcast each round."""
+    LOGGER.info("Starting %s (%d rounds, %d clients)", name, n_rounds, len(clients))
     print(f"\n{'='*65}\n  {name}\n{'='*65}")
     global_w = []
     stats    = {"avg": [], "min": [], "max": []}
 
     for rnd in range(1, n_rounds + 1):
+        LOGGER.info("%s: round %d/%d starting", name, rnd, n_rounds)
         all_w, all_n, accs = [], [], []
         for c in clients:
             res, n, m = c.fit(global_w, {"round_num": rnd})
@@ -418,10 +463,12 @@ def run_weight_sharing(clients, n_rounds, name):
 
 def run_local(nodes, n_rounds, local_epochs, exp_dir, setting):
     """Standalone local training — no communication."""
+    LOGGER.info("Starting Local %s (%d rounds, %d nodes)", setting.upper(), n_rounds, len(nodes))
     print(f"\n{'='*65}\n  Local — {setting.upper()}\n{'='*65}")
     os.makedirs(os.path.join(exp_dir, setting), exist_ok=True)
     stats = {"avg": [], "min": [], "max": []}
     for rnd in range(1, n_rounds + 1):
+        LOGGER.info("Local %s: round %d/%d starting", setting.upper(), rnd, n_rounds)
         accs = []
         for i, node in enumerate(nodes):
             log = os.path.join(exp_dir, setting, f"train_{i}.csv")
@@ -436,6 +483,7 @@ def run_local(nodes, n_rounds, local_epochs, exp_dir, setting):
 def run_central(pri_x_list, pri_y_list, val_data, n_rounds, local_epochs,
                 input_shape, n_classes, exp_dir, setting):
     """Centralised training — all private data pooled on server."""
+    LOGGER.info("Starting Central %s (%d rounds)", setting.upper(), n_rounds)
     print(f"\n{'='*65}\n  Central — {setting.upper()}\n{'='*65}")
     os.makedirs(os.path.join(exp_dir, setting), exist_ok=True)
     x_all = np.concatenate([x for x in pri_x_list if len(x)])
@@ -444,6 +492,7 @@ def run_central(pri_x_list, pri_y_list, val_data, n_rounds, local_epochs,
     log = os.path.join(exp_dir, setting, "central.csv")
     stats = {"avg": [], "min": [], "max": []}
     for rnd in range(1, n_rounds + 1):
+        LOGGER.info("Central %s: round %d/%d starting", setting.upper(), rnd, n_rounds)
         cbs = [tf.keras.callbacks.CSVLogger(log, append=True)]
         model.fit(x_all, y_all, epochs=local_epochs, verbose=False,
                   validation_data=val_data, callbacks=cbs)
@@ -505,6 +554,7 @@ def run_one_algo(algo, cfg, tiers, tier_map,
 
     Returns {setting: stats_dict}.
     """
+    LOGGER.info("run_one_algo: algorithm=%s  settings=%s", algo, cfg["data"]["settings"])
     dc = cfg["data"]
     fc = cfg["federated"]
     mc = cfg["models"]
@@ -521,6 +571,7 @@ def run_one_algo(algo, cfg, tiers, tier_map,
     all_stats = {}
 
     for setting in dc["settings"]:
+        LOGGER.info("run_one_algo: algorithm=%s  setting=%s", algo, setting)
         pri_x = pri_x_iid if setting == "iid" else pri_x_nid
         pri_y = pri_y_iid if setting == "iid" else pri_y_nid
         exp_dir = _make_exp_dir(rdir, dc["dataset"], algo, hetero)
@@ -605,6 +656,8 @@ def run_multiseed(algo, cfg, seeds):
     for seed in seeds:
         np.random.seed(seed)
         tf.random.set_seed(seed)
+        LOGGER.info("run_multiseed: seed=%d  algo=%s  dataset=%s  hetero=%s",
+                    seed, algo, dc['dataset'], hetero)
         print(f"\n[seed={seed}]  {algo.upper()}  dataset={dc['dataset']}  hetero={hetero}")
 
         x_tr, y_tr, x_te, y_te_cat, pub_x, pub_y = get_dataset(dc)
@@ -674,6 +727,13 @@ def parse_args():
 def main():
     args = parse_args()
     cfg  = load_config(args.config, args.overrides)
+
+    log_dir = cfg["experiment"]["log_dir"]
+    os.makedirs(log_dir, exist_ok=True)
+    log_path = os.path.join(log_dir, f"{cfg['experiment']['name']}.log")
+    configure_logging(log_path)
+    LOGGER.info("Experiment started: %s", cfg["experiment"]["name"])
+    LOGGER.info("Configuration: %s", json.dumps(cfg, sort_keys=True, default=str))
 
     # CLI arg overrides
     if args.dataset:
@@ -779,4 +839,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        LOGGER.exception("Experiment crashed")
+        raise

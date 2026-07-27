@@ -1,0 +1,111 @@
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   Phase 1 — Main comparison (heterogeneity=uniform)
+[2026-07-27 08:58:30]   Run started : 2026-07-27 08:58:30
+[2026-07-27 08:58:30]   Host        : gad-XPS-8960
+[2026-07-27 08:58:30]   OS          : Linux gad-XPS-8960 6.17.0-35-generic #35~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue May 26 19:30:42 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-07-27 08:58:30]   CPU         : 28 logical cores
+[2026-07-27 08:58:30]   RAM         : 30Gi
+[2026-07-27 08:58:30]   GPU         : N/A (nvidia-smi failed to query)
+[2026-07-27 08:58:30]   Python      : Python 3.12.3
+[2026-07-27 08:58:30]   Phase       : 1   Jobs: 8   Dry-run: false
+[2026-07-27 08:58:30]   Log dir     : /home/gad/Desktop/HomeSenseKD/logs/phase1
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Master log  : /home/gad/Desktop/HomeSenseKD/logs/phase1/master_20260727_085830.log
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   Scope : 3 datasets x 7 algorithms
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_fedmd_uniform
+[2026-07-27 08:58:30]   PID         : 554609
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_fedmd_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm fedmd --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_fedakd_uniform
+[2026-07-27 08:58:30]   PID         : 554612
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_fedakd_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm fedakd --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_mks_uniform
+[2026-07-27 08:58:30]   PID         : 554618
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_mks_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm mks --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_fedavg_uniform
+[2026-07-27 08:58:30]   PID         : 554627
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_fedavg_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm fedavg --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_local_uniform
+[2026-07-27 08:58:30]   PID         : 554649
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_local_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm local --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_central_uniform
+[2026-07-27 08:58:30]   PID         : 554657
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_central_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm central --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : home_har_fedprox_uniform
+[2026-07-27 08:58:30]   PID         : 554635
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/home_har_fedprox_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/home_har.yaml \
+[2026-07-27 08:58:30]                   --algorithm fedprox --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30] ============================================================
+[2026-07-27 08:58:30]   JOB START   : mnist_fedmd_uniform
+[2026-07-27 08:58:30]   PID         : 554668
+[2026-07-27 08:58:30]   Log         : /home/gad/Desktop/HomeSenseKD/logs/phase1/mnist_fedmd_uniform.log
+[2026-07-27 08:58:30]   Results dir : /home/gad/Desktop/HomeSenseKD/results/phase1
+[2026-07-27 08:58:30]   Fig dir     : /home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30]   Cmd         : /home/gad/Desktop/HomeSenseKD/myenv/bin/python /home/gad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-07-27 08:58:30]                   --config /home/gad/Desktop/HomeSenseKD/config/mnist.yaml \
+[2026-07-27 08:58:30]                   --algorithm fedmd --heterogeneity uniform \
+[2026-07-27 08:58:30]                   --override experiment.results_dir=/home/gad/Desktop/HomeSenseKD/results/phase1 \
+[2026-07-27 08:58:30]                              experiment.fig_dir=/home/gad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-07-27 08:58:30] ============================================================

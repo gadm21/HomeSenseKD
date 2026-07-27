@@ -1,0 +1,32 @@
+{
+  "algorithm": "fedmd",
+  "dataset": {
+    "private": "home_har",
+    "public": "home_occupancy",
+    "n_classes": 7,
+    "n_parties": 20
+  },
+  "setting": "noniid",
+  "heterogeneity": "uniform",
+  "model_sharing": false,
+  "knowledge_distillation": true,
+  "training": {
+    "n_rounds": 50,
+    "local_epochs": 4,
+    "kd_epochs": 2,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 30,
+    "dirichlet_alpha": 0.5,
+    "window_size": 1500,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "final_avg_accuracy": 0.22781818360090256,
+    "final_min_accuracy": 0.0,
+    "final_max_accuracy": 0.3090909123420715,
+    "final_std_accuracy": 0.13193675048809958,
+    "n_clients": 20
+  }
+}
