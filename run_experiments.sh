@@ -32,14 +32,31 @@ done
 
 # ── Locate Python in venv ──────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$SCRIPT_DIR/myenv"
 LOG_DIR="$SCRIPT_DIR/logs"
 RUNNER="$SCRIPT_DIR/run_fedkd.py"
 
-if   [[ -f "$VENV/Scripts/python.exe" ]]; then PYTHON="$VENV/Scripts/python.exe"
-elif [[ -f "$VENV/Scripts/python"     ]]; then PYTHON="$VENV/Scripts/python"
-elif [[ -f "$VENV/bin/python"         ]]; then PYTHON="$VENV/bin/python"
-else echo "[error] venv not found at $VENV"; exit 1; fi
+# Prefer currently activated venv, then check common local venv paths
+PYTHON=""
+if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+    if   [[ -f "$VIRTUAL_ENV/Scripts/python.exe" ]]; then PYTHON="$VIRTUAL_ENV/Scripts/python.exe"
+    elif [[ -f "$VIRTUAL_ENV/Scripts/python"     ]]; then PYTHON="$VIRTUAL_ENV/Scripts/python"
+    elif [[ -f "$VIRTUAL_ENV/bin/python"         ]]; then PYTHON="$VIRTUAL_ENV/bin/python"
+    fi
+fi
+
+if [[ -z "$PYTHON" ]]; then
+    for VENV in "$SCRIPT_DIR/venv" "$SCRIPT_DIR/myenv"; do
+        if   [[ -f "$VENV/Scripts/python.exe" ]]; then PYTHON="$VENV/Scripts/python.exe"; break
+        elif [[ -f "$VENV/Scripts/python"     ]]; then PYTHON="$VENV/Scripts/python"; break
+        elif [[ -f "$VENV/bin/python"         ]]; then PYTHON="$VENV/bin/python"; break
+        fi
+    done
+fi
+
+if [[ -z "$PYTHON" ]]; then
+    echo "[error] venv not found at $SCRIPT_DIR/venv or $SCRIPT_DIR/myenv, and no active virtual environment"
+    exit 1
+fi
 
 export PYTHONIOENCODING=utf-8
 
