@@ -1,0 +1,456 @@
+[2026-08-11 06:07:29] ============================================================
+[2026-08-11 06:07:29]   JOB START   : mnist_local_uniform
+[2026-08-11 06:07:29]   PID         : 829
+[2026-08-11 06:07:29]   Log         : /c/Users/ggad/Desktop/HomeSenseKD/logs/phase1/mnist_local_uniform.log
+[2026-08-11 06:07:29]   Results dir : /c/Users/ggad/Desktop/HomeSenseKD/results/phase1
+[2026-08-11 06:07:29]   Fig dir     : /c/Users/ggad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-08-11 06:07:29]   Cmd         : C:\Users\ggad\Desktop\HomeSenseKD\venv/Scripts/python.exe /c/Users/ggad/Desktop/HomeSenseKD/run_fedkd.py \
+[2026-08-11 06:07:29]                   --config /c/Users/ggad/Desktop/HomeSenseKD/config/mnist.yaml \
+[2026-08-11 06:07:29]                   --algorithm local --heterogeneity uniform \
+[2026-08-11 06:07:29]                   --override experiment.results_dir=/c/Users/ggad/Desktop/HomeSenseKD/results/phase1 \
+[2026-08-11 06:07:29]                              experiment.fig_dir=/c/Users/ggad/Desktop/HomeSenseKD/results/phase1/figures
+[2026-08-11 06:07:29] ============================================================
+[2026-08-11 06:07:52] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-08-11 06:07:52] I0000 00:00:1786442872.429131   41816 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-08-11 06:08:35] WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[2026-08-11 06:08:35] I0000 00:00:1786442915.071135   41816 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[2026-08-11 06:09:20] 2026-08-11 06:09:20 | INFO     | Experiment started: fedkd_experiment
+[2026-08-11 06:09:20] 2026-08-11 06:09:20 | INFO     | Configuration: {"algorithms": ["fedmd", "fedakd", "mks", "fedavg", "fedprox", "local", "central"], "data": {"dataset": "mnist", "dirichlet_alpha": 0.5, "img_size": 28, "in_channels": 1, "n_classes": 10, "n_parties": 20, "n_samples_per_class": 30, "n_stft_bins": 8, "public_dataset": "cifar10", "settings": ["iid", "noniid"], "window_size": 100}, "experiment": {"fig_dir": "C:/Users/ggad/Desktop/HomeSenseKD/results/phase1/figures", "log_dir": "logs", "name": "fedkd_experiment", "results_dir": "C:/Users/ggad/Desktop/HomeSenseKD/results/phase1", "seeds": [42, 123, 456]}, "federated": {"fedprox_mu": 0.01, "kd_epochs": 2, "local_epochs": 3, "n_alignment": 10000, "n_rounds": 40}, "models": {"distributions": {"all_small": [1.0, 0.0, 0.0], "skewed": [0.6, 0.3, 0.1], "uniform": [0.35, 0.35, 0.3]}, "heterogeneity": "uniform"}}
+[2026-08-11 06:09:21]   Saved tiers_mnist_uniform.png
+[2026-08-11 06:09:21] =================================================================
+[2026-08-11 06:09:21]   Dataset    : mnist  (public: cifar10)
+[2026-08-11 06:09:21]   Algorithms : ['local']
+[2026-08-11 06:09:21]   Heterogen. : uniform  ->  ['small', 'small', 'small', 'small', 'small', 'small']...
+[2026-08-11 06:09:21]   Seeds      : [42, 123, 456]
+[2026-08-11 06:09:21]   Settings   : ['iid', 'noniid']
+[2026-08-11 06:09:21] =================================================================
+[2026-08-11 06:09:21] 2026-08-11 06:09:21 | INFO     | run_multiseed: seed=42  algo=local  dataset=mnist  hetero=uniform
+[2026-08-11 06:09:21] 
+[2026-08-11 06:09:21] [seed=42]  LOCAL  dataset=mnist  hetero=uniform
+[2026-08-11 06:09:21] 2026-08-11 06:09:21 | INFO     | Loading target dataset: 'mnist'  public dataset: 'cifar10'
+[2026-08-11 06:09:21] 2026-08-11 06:09:21 | INFO     | Input shape: (28, 28, 1)  is_image: True
+[2026-08-11 06:09:39] I0000 00:00:1786442979.844234   41816 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+[2026-08-11 06:09:39] To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[2026-08-11 06:09:45] Loading MNIST...
+[2026-08-11 06:09:45]   -> 60000 train, 10000 test
+[2026-08-11 06:09:45] Loading CIFAR-10...
+[2026-08-11 06:09:45]   -> 50000 train, 10000 test
+[2026-08-11 06:09:45] 2026-08-11 06:09:45 | INFO     | Dataset loaded: x_train=(60000, 28, 28, 1)  y_train=(60000,)  x_test=(10000, 28, 28, 1)  x_public=(50000, 28, 28, 1)
+[2026-08-11 06:09:45] 2026-08-11 06:09:45 | INFO     | Partitioning data: n_classes=10 n_parties=20 iid_spc=30 alpha=0.500
+[2026-08-11 06:09:46] 2026-08-11 06:09:46 | INFO     | run_one_algo: algorithm=local  settings=['iid', 'noniid']
+[2026-08-11 06:09:46] 2026-08-11 06:09:46 | INFO     | run_one_algo: algorithm=local  setting=iid
+[2026-08-11 06:09:46] WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+[2026-08-11 06:09:51] 2026-08-11 06:09:51 | INFO     | Starting Local IID (40 rounds, 20 nodes)
+[2026-08-11 06:09:51] 
+[2026-08-11 06:09:51] =================================================================
+[2026-08-11 06:09:51]   Local — IID
+[2026-08-11 06:09:51] =================================================================
+[2026-08-11 06:09:51] 2026-08-11 06:09:51 | INFO     | Local IID: round 1/40 starting
+[2026-08-11 06:23:19]   Round   1/40 | Avg: 0.7999 | Min: 0.7359 | Max: 0.8424
+[2026-08-11 06:23:19] 2026-08-11 06:23:19 | INFO     | Local IID: round 2/40 starting
+[2026-08-11 06:33:58]   Round   2/40 | Avg: 0.8820 | Min: 0.8380 | Max: 0.9227
+[2026-08-11 06:33:58] 2026-08-11 06:33:58 | INFO     | Local IID: round 3/40 starting
+[2026-08-11 06:43:37]   Round   3/40 | Avg: 0.8949 | Min: 0.8438 | Max: 0.9300
+[2026-08-11 06:43:37] 2026-08-11 06:43:37 | INFO     | Local IID: round 4/40 starting
+[2026-08-11 06:53:24]   Round   4/40 | Avg: 0.8974 | Min: 0.8410 | Max: 0.9305
+[2026-08-11 06:53:24] 2026-08-11 06:53:24 | INFO     | Local IID: round 5/40 starting
+[2026-08-11 07:03:33]   Round   5/40 | Avg: 0.9016 | Min: 0.8461 | Max: 0.9344
+[2026-08-11 07:03:33] 2026-08-11 07:03:33 | INFO     | Local IID: round 6/40 starting
+[2026-08-11 07:12:35]   Round   6/40 | Avg: 0.9003 | Min: 0.8518 | Max: 0.9346
+[2026-08-11 07:12:35] 2026-08-11 07:12:35 | INFO     | Local IID: round 7/40 starting
+[2026-08-11 07:23:25]   Round   7/40 | Avg: 0.9048 | Min: 0.8487 | Max: 0.9382
+[2026-08-11 07:23:25] 2026-08-11 07:23:25 | INFO     | Local IID: round 8/40 starting
+[2026-08-11 07:33:09]   Round   8/40 | Avg: 0.9046 | Min: 0.8543 | Max: 0.9409
+[2026-08-11 07:33:09] 2026-08-11 07:33:09 | INFO     | Local IID: round 9/40 starting
+[2026-08-11 07:43:05]   Round   9/40 | Avg: 0.9060 | Min: 0.8504 | Max: 0.9427
+[2026-08-11 07:43:05] 2026-08-11 07:43:05 | INFO     | Local IID: round 10/40 starting
+[2026-08-11 07:52:58]   Round  10/40 | Avg: 0.9085 | Min: 0.8628 | Max: 0.9398
+[2026-08-11 07:52:58] 2026-08-11 07:52:58 | INFO     | Local IID: round 11/40 starting
+[2026-08-11 08:03:17]   Round  11/40 | Avg: 0.9090 | Min: 0.8620 | Max: 0.9404
+[2026-08-11 08:03:17] 2026-08-11 08:03:17 | INFO     | Local IID: round 12/40 starting
+[2026-08-11 08:13:29]   Round  12/40 | Avg: 0.9088 | Min: 0.8589 | Max: 0.9410
+[2026-08-11 08:13:29] 2026-08-11 08:13:29 | INFO     | Local IID: round 13/40 starting
+[2026-08-11 08:23:30]   Round  13/40 | Avg: 0.9078 | Min: 0.8632 | Max: 0.9438
+[2026-08-11 08:23:30] 2026-08-11 08:23:30 | INFO     | Local IID: round 14/40 starting
+[2026-08-11 08:33:35]   Round  14/40 | Avg: 0.9071 | Min: 0.8621 | Max: 0.9433
+[2026-08-11 08:33:35] 2026-08-11 08:33:35 | INFO     | Local IID: round 15/40 starting
+[2026-08-11 08:43:55]   Round  15/40 | Avg: 0.9094 | Min: 0.8646 | Max: 0.9433
+[2026-08-11 08:43:55] 2026-08-11 08:43:55 | INFO     | Local IID: round 16/40 starting
+[2026-08-11 08:53:13]   Round  16/40 | Avg: 0.9090 | Min: 0.8596 | Max: 0.9432
+[2026-08-11 08:53:13] 2026-08-11 08:53:13 | INFO     | Local IID: round 17/40 starting
+[2026-08-11 09:03:41]   Round  17/40 | Avg: 0.9102 | Min: 0.8639 | Max: 0.9444
+[2026-08-11 09:03:41] 2026-08-11 09:03:41 | INFO     | Local IID: round 18/40 starting
+[2026-08-11 09:12:50]   Round  18/40 | Avg: 0.9071 | Min: 0.8603 | Max: 0.9442
+[2026-08-11 09:12:50] 2026-08-11 09:12:50 | INFO     | Local IID: round 19/40 starting
+[2026-08-11 09:22:28]   Round  19/40 | Avg: 0.9083 | Min: 0.8519 | Max: 0.9437
+[2026-08-11 09:22:28] 2026-08-11 09:22:28 | INFO     | Local IID: round 20/40 starting
+[2026-08-11 09:32:07]   Round  20/40 | Avg: 0.9096 | Min: 0.8595 | Max: 0.9444
+[2026-08-11 09:32:07] 2026-08-11 09:32:07 | INFO     | Local IID: round 21/40 starting
+[2026-08-11 09:41:56]   Round  21/40 | Avg: 0.9102 | Min: 0.8582 | Max: 0.9407
+[2026-08-11 09:41:56] 2026-08-11 09:41:56 | INFO     | Local IID: round 22/40 starting
+[2026-08-11 09:51:41]   Round  22/40 | Avg: 0.9025 | Min: 0.8306 | Max: 0.9431
+[2026-08-11 09:51:41] 2026-08-11 09:51:41 | INFO     | Local IID: round 23/40 starting
+[2026-08-11 10:01:00]   Round  23/40 | Avg: 0.9060 | Min: 0.8658 | Max: 0.9431
+[2026-08-11 10:01:00] 2026-08-11 10:01:00 | INFO     | Local IID: round 24/40 starting
+[2026-08-11 10:10:23]   Round  24/40 | Avg: 0.9108 | Min: 0.8599 | Max: 0.9446
+[2026-08-11 10:10:23] 2026-08-11 10:10:23 | INFO     | Local IID: round 25/40 starting
+[2026-08-11 10:21:42]   Round  25/40 | Avg: 0.9095 | Min: 0.8597 | Max: 0.9441
+[2026-08-11 10:21:42] 2026-08-11 10:21:42 | INFO     | Local IID: round 26/40 starting
+[2026-08-11 10:32:16]   Round  26/40 | Avg: 0.9085 | Min: 0.8613 | Max: 0.9450
+[2026-08-11 10:32:16] 2026-08-11 10:32:16 | INFO     | Local IID: round 27/40 starting
+[2026-08-11 10:42:11]   Round  27/40 | Avg: 0.9086 | Min: 0.8500 | Max: 0.9457
+[2026-08-11 10:42:11] 2026-08-11 10:42:11 | INFO     | Local IID: round 28/40 starting
+[2026-08-11 10:52:24]   Round  28/40 | Avg: 0.9120 | Min: 0.8641 | Max: 0.9450
+[2026-08-11 10:52:24] 2026-08-11 10:52:24 | INFO     | Local IID: round 29/40 starting
+[2026-08-11 11:02:51]   Round  29/40 | Avg: 0.9133 | Min: 0.8644 | Max: 0.9464
+[2026-08-11 11:02:51] 2026-08-11 11:02:51 | INFO     | Local IID: round 30/40 starting
+[2026-08-11 11:15:38]   Round  30/40 | Avg: 0.9131 | Min: 0.8669 | Max: 0.9464
+[2026-08-11 11:15:38] 2026-08-11 11:15:38 | INFO     | Local IID: round 31/40 starting
+[2026-08-11 11:32:23]   Round  31/40 | Avg: 0.9122 | Min: 0.8662 | Max: 0.9469
+[2026-08-11 11:32:23] 2026-08-11 11:32:23 | INFO     | Local IID: round 32/40 starting
+[2026-08-11 11:45:49]   Round  32/40 | Avg: 0.9131 | Min: 0.8665 | Max: 0.9467
+[2026-08-11 11:45:49] 2026-08-11 11:45:49 | INFO     | Local IID: round 33/40 starting
+[2026-08-11 12:01:20]   Round  33/40 | Avg: 0.9136 | Min: 0.8673 | Max: 0.9467
+[2026-08-11 12:01:20] 2026-08-11 12:01:20 | INFO     | Local IID: round 34/40 starting
+[2026-08-11 12:11:24]   Round  34/40 | Avg: 0.9107 | Min: 0.8635 | Max: 0.9471
+[2026-08-11 12:11:24] 2026-08-11 12:11:24 | INFO     | Local IID: round 35/40 starting
+[2026-08-11 12:21:35]   Round  35/40 | Avg: 0.9080 | Min: 0.8430 | Max: 0.9474
+[2026-08-11 12:21:35] 2026-08-11 12:21:35 | INFO     | Local IID: round 36/40 starting
+[2026-08-11 12:31:48]   Round  36/40 | Avg: 0.9088 | Min: 0.8389 | Max: 0.9470
+[2026-08-11 12:31:48] 2026-08-11 12:31:48 | INFO     | Local IID: round 37/40 starting
+[2026-08-11 12:41:05]   Round  37/40 | Avg: 0.9110 | Min: 0.8590 | Max: 0.9474
+[2026-08-11 12:41:05] 2026-08-11 12:41:05 | INFO     | Local IID: round 38/40 starting
+[2026-08-11 12:51:13]   Round  38/40 | Avg: 0.9112 | Min: 0.8290 | Max: 0.9465
+[2026-08-11 12:51:13] 2026-08-11 12:51:13 | INFO     | Local IID: round 39/40 starting
+[2026-08-11 13:00:12]   Round  39/40 | Avg: 0.9138 | Min: 0.8429 | Max: 0.9467
+[2026-08-11 13:00:12] 2026-08-11 13:00:12 | INFO     | Local IID: round 40/40 starting
+[2026-08-11 13:09:48]   Round  40/40 | Avg: 0.9141 | Min: 0.8452 | Max: 0.9455
+[2026-08-11 13:09:48]   Local done.
+[2026-08-11 13:09:48]   Metadata saved to C:/Users/ggad/Desktop/HomeSenseKD/results/phase1\mnist\local\uniform\iid\metadata.json
+[2026-08-11 13:09:48] 2026-08-11 13:09:48 | INFO     | run_one_algo: algorithm=local  setting=noniid
+[2026-08-11 13:09:53] 2026-08-11 13:09:53 | INFO     | Starting Local NONIID (40 rounds, 20 nodes)
+[2026-08-11 13:09:53] 
+[2026-08-11 13:09:53] =================================================================
+[2026-08-11 13:09:53]   Local — NONIID
+[2026-08-11 13:09:53] =================================================================
+[2026-08-11 13:09:53] 2026-08-11 13:09:53 | INFO     | Local NONIID: round 1/40 starting
+[2026-08-11 13:27:21]   Round   1/40 | Avg: 0.7888 | Min: 0.6601 | Max: 0.9484
+[2026-08-11 13:27:21] 2026-08-11 13:27:21 | INFO     | Local NONIID: round 2/40 starting
+[2026-08-11 13:41:59]   Round   2/40 | Avg: 0.8203 | Min: 0.6932 | Max: 0.9621
+[2026-08-11 13:41:59] 2026-08-11 13:41:59 | INFO     | Local NONIID: round 3/40 starting
+[2026-08-11 13:55:54]   Round   3/40 | Avg: 0.8324 | Min: 0.7242 | Max: 0.9623
+[2026-08-11 13:55:54] 2026-08-11 13:55:54 | INFO     | Local NONIID: round 4/40 starting
+[2026-08-11 14:10:34]   Round   4/40 | Avg: 0.8306 | Min: 0.6823 | Max: 0.9532
+[2026-08-11 14:10:34] 2026-08-11 14:10:34 | INFO     | Local NONIID: round 5/40 starting
+[2026-08-11 14:23:46]   Round   5/40 | Avg: 0.8423 | Min: 0.7377 | Max: 0.9662
+[2026-08-11 14:23:46] 2026-08-11 14:23:46 | INFO     | Local NONIID: round 6/40 starting
+[2026-08-11 14:44:22]   Round   6/40 | Avg: 0.8384 | Min: 0.7089 | Max: 0.9675
+[2026-08-11 14:44:22] 2026-08-11 14:44:22 | INFO     | Local NONIID: round 7/40 starting
+[2026-08-11 15:01:46]   Round   7/40 | Avg: 0.8418 | Min: 0.7353 | Max: 0.9663
+[2026-08-11 15:01:46] 2026-08-11 15:01:46 | INFO     | Local NONIID: round 8/40 starting
+[2026-08-11 15:17:21]   Round   8/40 | Avg: 0.8432 | Min: 0.7442 | Max: 0.9615
+[2026-08-11 15:17:21] 2026-08-11 15:17:21 | INFO     | Local NONIID: round 9/40 starting
+[2026-08-11 15:31:42]   Round   9/40 | Avg: 0.8470 | Min: 0.7399 | Max: 0.9685
+[2026-08-11 15:31:42] 2026-08-11 15:31:42 | INFO     | Local NONIID: round 10/40 starting
+[2026-08-11 15:49:49]   Round  10/40 | Avg: 0.8444 | Min: 0.7389 | Max: 0.9596
+[2026-08-11 15:49:49] 2026-08-11 15:49:49 | INFO     | Local NONIID: round 11/40 starting
+[2026-08-11 16:07:51]   Round  11/40 | Avg: 0.8418 | Min: 0.6982 | Max: 0.9704
+[2026-08-11 16:07:51] 2026-08-11 16:07:51 | INFO     | Local NONIID: round 12/40 starting
+[2026-08-11 16:26:00]   Round  12/40 | Avg: 0.8457 | Min: 0.7365 | Max: 0.9699
+[2026-08-11 16:26:00] 2026-08-11 16:26:00 | INFO     | Local NONIID: round 13/40 starting
+[2026-08-11 16:43:59]   Round  13/40 | Avg: 0.8510 | Min: 0.7450 | Max: 0.9751
+[2026-08-11 16:43:59] 2026-08-11 16:43:59 | INFO     | Local NONIID: round 14/40 starting
+[2026-08-11 17:02:40]   Round  14/40 | Avg: 0.8463 | Min: 0.7363 | Max: 0.9738
+[2026-08-11 17:02:40] 2026-08-11 17:02:40 | INFO     | Local NONIID: round 15/40 starting
+[2026-08-11 17:21:56]   Round  15/40 | Avg: 0.8489 | Min: 0.7326 | Max: 0.9756
+[2026-08-11 17:21:56] 2026-08-11 17:21:56 | INFO     | Local NONIID: round 16/40 starting
+[2026-08-11 17:40:27]   Round  16/40 | Avg: 0.8506 | Min: 0.7451 | Max: 0.9753
+[2026-08-11 17:40:27] 2026-08-11 17:40:27 | INFO     | Local NONIID: round 17/40 starting
+[2026-08-11 18:00:39]   Round  17/40 | Avg: 0.8493 | Min: 0.7368 | Max: 0.9693
+[2026-08-11 18:00:39] 2026-08-11 18:00:39 | INFO     | Local NONIID: round 18/40 starting
+[2026-08-11 18:19:48]   Round  18/40 | Avg: 0.8557 | Min: 0.7535 | Max: 0.9683
+[2026-08-11 18:19:48] 2026-08-11 18:19:48 | INFO     | Local NONIID: round 19/40 starting
+[2026-08-11 18:41:33]   Round  19/40 | Avg: 0.8526 | Min: 0.7385 | Max: 0.9693
+[2026-08-11 18:41:33] 2026-08-11 18:41:33 | INFO     | Local NONIID: round 20/40 starting
+[2026-08-11 19:02:55]   Round  20/40 | Avg: 0.8520 | Min: 0.7408 | Max: 0.9733
+[2026-08-11 19:02:55] 2026-08-11 19:02:55 | INFO     | Local NONIID: round 21/40 starting
+[2026-08-11 19:31:36]   Round  21/40 | Avg: 0.8493 | Min: 0.7416 | Max: 0.9625
+[2026-08-11 19:31:36] 2026-08-11 19:31:36 | INFO     | Local NONIID: round 22/40 starting
+[2026-08-11 19:54:39]   Round  22/40 | Avg: 0.8518 | Min: 0.7381 | Max: 0.9673
+[2026-08-11 19:54:39] 2026-08-11 19:54:39 | INFO     | Local NONIID: round 23/40 starting
+[2026-08-11 20:19:18]   Round  23/40 | Avg: 0.8479 | Min: 0.7223 | Max: 0.9692
+[2026-08-11 20:19:18] 2026-08-11 20:19:18 | INFO     | Local NONIID: round 24/40 starting
+[2026-08-11 20:42:44]   Round  24/40 | Avg: 0.8536 | Min: 0.7395 | Max: 0.9748
+[2026-08-11 20:42:44] 2026-08-11 20:42:44 | INFO     | Local NONIID: round 25/40 starting
+[2026-08-11 21:06:19]   Round  25/40 | Avg: 0.8506 | Min: 0.7406 | Max: 0.9721
+[2026-08-11 21:06:19] 2026-08-11 21:06:19 | INFO     | Local NONIID: round 26/40 starting
+[2026-08-11 21:29:46]   Round  26/40 | Avg: 0.8495 | Min: 0.7410 | Max: 0.9708
+[2026-08-11 21:29:46] 2026-08-11 21:29:46 | INFO     | Local NONIID: round 27/40 starting
+[2026-08-11 21:51:26]   Round  27/40 | Avg: 0.8464 | Min: 0.6530 | Max: 0.9720
+[2026-08-11 21:51:26] 2026-08-11 21:51:26 | INFO     | Local NONIID: round 28/40 starting
+[2026-08-11 22:12:14]   Round  28/40 | Avg: 0.8454 | Min: 0.7134 | Max: 0.9709
+[2026-08-11 22:12:14] 2026-08-11 22:12:14 | INFO     | Local NONIID: round 29/40 starting
+[2026-08-11 22:33:55]   Round  29/40 | Avg: 0.8520 | Min: 0.7455 | Max: 0.9724
+[2026-08-11 22:33:55] 2026-08-11 22:33:55 | INFO     | Local NONIID: round 30/40 starting
+[2026-08-11 22:55:52]   Round  30/40 | Avg: 0.8505 | Min: 0.7450 | Max: 0.9696
+[2026-08-11 22:55:52] 2026-08-11 22:55:52 | INFO     | Local NONIID: round 31/40 starting
+[2026-08-11 23:15:44]   Round  31/40 | Avg: 0.8473 | Min: 0.7390 | Max: 0.9670
+[2026-08-11 23:15:44] 2026-08-11 23:15:44 | INFO     | Local NONIID: round 32/40 starting
+[2026-08-11 23:36:16]   Round  32/40 | Avg: 0.8464 | Min: 0.7097 | Max: 0.9728
+[2026-08-11 23:36:16] 2026-08-11 23:36:16 | INFO     | Local NONIID: round 33/40 starting
+[2026-08-11 23:54:15]   Round  33/40 | Avg: 0.8506 | Min: 0.7218 | Max: 0.9675
+[2026-08-11 23:54:15] 2026-08-11 23:54:15 | INFO     | Local NONIID: round 34/40 starting
+[2026-08-12 00:10:56]   Round  34/40 | Avg: 0.8480 | Min: 0.7282 | Max: 0.9696
+[2026-08-12 00:10:56] 2026-08-12 00:10:56 | INFO     | Local NONIID: round 35/40 starting
+[2026-08-12 00:28:09]   Round  35/40 | Avg: 0.8495 | Min: 0.7168 | Max: 0.9710
+[2026-08-12 00:28:09] 2026-08-12 00:28:09 | INFO     | Local NONIID: round 36/40 starting
+[2026-08-12 00:46:17]   Round  36/40 | Avg: 0.8517 | Min: 0.7240 | Max: 0.9642
+[2026-08-12 00:46:17] 2026-08-12 00:46:17 | INFO     | Local NONIID: round 37/40 starting
+[2026-08-12 01:03:27]   Round  37/40 | Avg: 0.8481 | Min: 0.7255 | Max: 0.9752
+[2026-08-12 01:03:27] 2026-08-12 01:03:27 | INFO     | Local NONIID: round 38/40 starting
+[2026-08-12 01:24:33]   Round  38/40 | Avg: 0.8467 | Min: 0.7255 | Max: 0.9772
+[2026-08-12 01:24:33] 2026-08-12 01:24:33 | INFO     | Local NONIID: round 39/40 starting
+[2026-08-12 01:43:44]   Round  39/40 | Avg: 0.8503 | Min: 0.7244 | Max: 0.9762
+[2026-08-12 01:43:44] 2026-08-12 01:43:44 | INFO     | Local NONIID: round 40/40 starting
+[2026-08-12 02:04:36]   Round  40/40 | Avg: 0.8519 | Min: 0.7259 | Max: 0.9777
+[2026-08-12 02:04:36]   Local done.
+[2026-08-12 02:04:36]   Metadata saved to C:/Users/ggad/Desktop/HomeSenseKD/results/phase1\mnist\local\uniform\noniid\metadata.json
+[2026-08-12 02:04:36] 2026-08-12 02:04:36 | INFO     | run_multiseed: seed=123  algo=local  dataset=mnist  hetero=uniform
+[2026-08-12 02:04:36] 
+[2026-08-12 02:04:36] [seed=123]  LOCAL  dataset=mnist  hetero=uniform
+[2026-08-12 02:04:36] 2026-08-12 02:04:36 | INFO     | Loading target dataset: 'mnist'  public dataset: 'cifar10'
+[2026-08-12 02:04:36] 2026-08-12 02:04:36 | INFO     | Input shape: (28, 28, 1)  is_image: True
+[2026-08-12 02:05:06] Loading MNIST...
+[2026-08-12 02:05:06]   -> 60000 train, 10000 test
+[2026-08-12 02:05:06] Loading CIFAR-10...
+[2026-08-12 02:05:06]   -> 50000 train, 10000 test
+[2026-08-12 02:05:06] 2026-08-12 02:05:06 | INFO     | Dataset loaded: x_train=(60000, 28, 28, 1)  y_train=(60000,)  x_test=(10000, 28, 28, 1)  x_public=(50000, 28, 28, 1)
+[2026-08-12 02:05:06] 2026-08-12 02:05:06 | INFO     | Partitioning data: n_classes=10 n_parties=20 iid_spc=30 alpha=0.500
+[2026-08-12 02:05:07] 2026-08-12 02:05:07 | INFO     | run_one_algo: algorithm=local  settings=['iid', 'noniid']
+[2026-08-12 02:05:07] 2026-08-12 02:05:07 | INFO     | run_one_algo: algorithm=local  setting=iid
+[2026-08-12 02:05:13] 2026-08-12 02:05:13 | INFO     | Starting Local IID (40 rounds, 20 nodes)
+[2026-08-12 02:05:13] 
+[2026-08-12 02:05:13] =================================================================
+[2026-08-12 02:05:13]   Local — IID
+[2026-08-12 02:05:13] =================================================================
+[2026-08-12 02:05:13] 2026-08-12 02:05:13 | INFO     | Local IID: round 1/40 starting
+[2026-08-12 02:24:42]   Round   1/40 | Avg: 0.8176 | Min: 0.7845 | Max: 0.8487
+[2026-08-12 02:24:42] 2026-08-12 02:24:42 | INFO     | Local IID: round 2/40 starting
+[2026-08-12 02:38:38]   Round   2/40 | Avg: 0.8838 | Min: 0.8255 | Max: 0.9291
+[2026-08-12 02:38:38] 2026-08-12 02:38:38 | INFO     | Local IID: round 3/40 starting
+[2026-08-12 02:53:07]   Round   3/40 | Avg: 0.8938 | Min: 0.8497 | Max: 0.9388
+[2026-08-12 02:53:07] 2026-08-12 02:53:07 | INFO     | Local IID: round 4/40 starting
+[2026-08-12 03:08:22]   Round   4/40 | Avg: 0.8962 | Min: 0.8598 | Max: 0.9289
+[2026-08-12 03:08:22] 2026-08-12 03:08:22 | INFO     | Local IID: round 5/40 starting
+[2026-08-12 03:23:18]   Round   5/40 | Avg: 0.9007 | Min: 0.8631 | Max: 0.9389
+[2026-08-12 03:23:18] 2026-08-12 03:23:18 | INFO     | Local IID: round 6/40 starting
+[2026-08-12 03:37:04]   Round   6/40 | Avg: 0.9026 | Min: 0.8618 | Max: 0.9420
+[2026-08-12 03:37:04] 2026-08-12 03:37:04 | INFO     | Local IID: round 7/40 starting
+[2026-08-12 03:51:37]   Round   7/40 | Avg: 0.9066 | Min: 0.8642 | Max: 0.9414
+[2026-08-12 03:51:37] 2026-08-12 03:51:37 | INFO     | Local IID: round 8/40 starting
+[2026-08-12 04:06:07]   Round   8/40 | Avg: 0.9057 | Min: 0.8627 | Max: 0.9449
+[2026-08-12 04:06:07] 2026-08-12 04:06:07 | INFO     | Local IID: round 9/40 starting
+[2026-08-12 04:20:35]   Round   9/40 | Avg: 0.9052 | Min: 0.8583 | Max: 0.9433
+[2026-08-12 04:20:35] 2026-08-12 04:20:35 | INFO     | Local IID: round 10/40 starting
+[2026-08-12 04:37:33]   Round  10/40 | Avg: 0.9053 | Min: 0.8581 | Max: 0.9386
+[2026-08-12 04:37:33] 2026-08-12 04:37:33 | INFO     | Local IID: round 11/40 starting
+[2026-08-12 04:50:57]   Round  11/40 | Avg: 0.9065 | Min: 0.8634 | Max: 0.9413
+[2026-08-12 04:50:57] 2026-08-12 04:50:57 | INFO     | Local IID: round 12/40 starting
+[2026-08-12 05:06:21]   Round  12/40 | Avg: 0.9037 | Min: 0.8608 | Max: 0.9406
+[2026-08-12 05:06:21] 2026-08-12 05:06:21 | INFO     | Local IID: round 13/40 starting
+[2026-08-12 05:20:04]   Round  13/40 | Avg: 0.9099 | Min: 0.8676 | Max: 0.9433
+[2026-08-12 05:20:04] 2026-08-12 05:20:04 | INFO     | Local IID: round 14/40 starting
+[2026-08-12 05:34:56]   Round  14/40 | Avg: 0.9075 | Min: 0.8642 | Max: 0.9427
+[2026-08-12 05:34:56] 2026-08-12 05:34:56 | INFO     | Local IID: round 15/40 starting
+[2026-08-12 05:48:36]   Round  15/40 | Avg: 0.9079 | Min: 0.8589 | Max: 0.9438
+[2026-08-12 05:48:36] 2026-08-12 05:48:36 | INFO     | Local IID: round 16/40 starting
+[2026-08-12 06:03:13]   Round  16/40 | Avg: 0.9086 | Min: 0.8653 | Max: 0.9440
+[2026-08-12 06:03:13] 2026-08-12 06:03:13 | INFO     | Local IID: round 17/40 starting
+[2026-08-12 06:18:00]   Round  17/40 | Avg: 0.9095 | Min: 0.8592 | Max: 0.9449
+[2026-08-12 06:18:00] 2026-08-12 06:18:00 | INFO     | Local IID: round 18/40 starting
+[2026-08-12 06:33:17]   Round  18/40 | Avg: 0.9082 | Min: 0.8639 | Max: 0.9453
+[2026-08-12 06:33:17] 2026-08-12 06:33:17 | INFO     | Local IID: round 19/40 starting
+[2026-08-12 06:48:16]   Round  19/40 | Avg: 0.9078 | Min: 0.8633 | Max: 0.9466
+[2026-08-12 06:48:16] 2026-08-12 06:48:16 | INFO     | Local IID: round 20/40 starting
+[2026-08-12 07:03:02]   Round  20/40 | Avg: 0.9088 | Min: 0.8659 | Max: 0.9467
+[2026-08-12 07:03:02] 2026-08-12 07:03:02 | INFO     | Local IID: round 21/40 starting
+[2026-08-12 07:17:55]   Round  21/40 | Avg: 0.9080 | Min: 0.8571 | Max: 0.9453
+[2026-08-12 07:17:55] 2026-08-12 07:17:55 | INFO     | Local IID: round 22/40 starting
+[2026-08-12 07:32:52]   Round  22/40 | Avg: 0.9101 | Min: 0.8659 | Max: 0.9467
+[2026-08-12 07:32:52] 2026-08-12 07:32:52 | INFO     | Local IID: round 23/40 starting
+[2026-08-12 07:48:04]   Round  23/40 | Avg: 0.9110 | Min: 0.8665 | Max: 0.9466
+[2026-08-12 07:48:04] 2026-08-12 07:48:04 | INFO     | Local IID: round 24/40 starting
+[2026-08-12 08:01:08]   Round  24/40 | Avg: 0.9120 | Min: 0.8659 | Max: 0.9466
+[2026-08-12 08:01:08] 2026-08-12 08:01:08 | INFO     | Local IID: round 25/40 starting
+[2026-08-12 08:14:44]   Round  25/40 | Avg: 0.9087 | Min: 0.8575 | Max: 0.9460
+[2026-08-12 08:14:44] 2026-08-12 08:14:44 | INFO     | Local IID: round 26/40 starting
+[2026-08-12 08:29:14]   Round  26/40 | Avg: 0.9132 | Min: 0.8656 | Max: 0.9451
+[2026-08-12 08:29:14] 2026-08-12 08:29:14 | INFO     | Local IID: round 27/40 starting
+[2026-08-12 08:43:22]   Round  27/40 | Avg: 0.9117 | Min: 0.8630 | Max: 0.9479
+[2026-08-12 08:43:22] 2026-08-12 08:43:22 | INFO     | Local IID: round 28/40 starting
+[2026-08-12 08:56:48]   Round  28/40 | Avg: 0.9129 | Min: 0.8670 | Max: 0.9488
+[2026-08-12 08:56:48] 2026-08-12 08:56:48 | INFO     | Local IID: round 29/40 starting
+[2026-08-12 09:14:16]   Round  29/40 | Avg: 0.9130 | Min: 0.8684 | Max: 0.9490
+[2026-08-12 09:14:16] 2026-08-12 09:14:16 | INFO     | Local IID: round 30/40 starting
+[2026-08-12 09:34:51]   Round  30/40 | Avg: 0.9137 | Min: 0.8666 | Max: 0.9487
+[2026-08-12 09:34:51] 2026-08-12 09:34:51 | INFO     | Local IID: round 31/40 starting
+[2026-08-12 09:53:06]   Round  31/40 | Avg: 0.9143 | Min: 0.8681 | Max: 0.9487
+[2026-08-12 09:53:06] 2026-08-12 09:53:06 | INFO     | Local IID: round 32/40 starting
+[2026-08-12 10:09:09]   Round  32/40 | Avg: 0.9159 | Min: 0.8695 | Max: 0.9483
+[2026-08-12 10:09:09] 2026-08-12 10:09:09 | INFO     | Local IID: round 33/40 starting
+[2026-08-12 10:27:06]   Round  33/40 | Avg: 0.9140 | Min: 0.8513 | Max: 0.9481
+[2026-08-12 10:27:06] 2026-08-12 10:27:06 | INFO     | Local IID: round 34/40 starting
+[2026-08-12 10:43:28]   Round  34/40 | Avg: 0.9135 | Min: 0.8580 | Max: 0.9481
+[2026-08-12 10:43:28] 2026-08-12 10:43:28 | INFO     | Local IID: round 35/40 starting
+[2026-08-12 10:59:00]   Round  35/40 | Avg: 0.9148 | Min: 0.8641 | Max: 0.9465
+[2026-08-12 10:59:00] 2026-08-12 10:59:00 | INFO     | Local IID: round 36/40 starting
+[2026-08-12 11:11:59]   Round  36/40 | Avg: 0.9138 | Min: 0.8664 | Max: 0.9482
+[2026-08-12 11:11:59] 2026-08-12 11:11:59 | INFO     | Local IID: round 37/40 starting
+[2026-08-12 11:25:45]   Round  37/40 | Avg: 0.9132 | Min: 0.8675 | Max: 0.9483
+[2026-08-12 11:25:45] 2026-08-12 11:25:45 | INFO     | Local IID: round 38/40 starting
+[2026-08-12 11:40:20]   Round  38/40 | Avg: 0.9110 | Min: 0.8615 | Max: 0.9488
+[2026-08-12 11:40:20] 2026-08-12 11:40:20 | INFO     | Local IID: round 39/40 starting
+[2026-08-12 11:55:35]   Round  39/40 | Avg: 0.9115 | Min: 0.8659 | Max: 0.9490
+[2026-08-12 11:55:35] 2026-08-12 11:55:35 | INFO     | Local IID: round 40/40 starting
+[2026-08-12 12:09:45]   Round  40/40 | Avg: 0.9143 | Min: 0.8610 | Max: 0.9485
+[2026-08-12 12:09:45]   Local done.
+[2026-08-12 12:09:45]   Metadata saved to C:/Users/ggad/Desktop/HomeSenseKD/results/phase1\mnist\local\uniform\iid\metadata.json
+[2026-08-12 12:09:45] 2026-08-12 12:09:45 | INFO     | run_one_algo: algorithm=local  setting=noniid
+[2026-08-12 12:09:52] 2026-08-12 12:09:52 | INFO     | Starting Local NONIID (40 rounds, 20 nodes)
+[2026-08-12 12:09:52] 
+[2026-08-12 12:09:52] =================================================================
+[2026-08-12 12:09:52]   Local — NONIID
+[2026-08-12 12:09:52] =================================================================
+[2026-08-12 12:09:52] 2026-08-12 12:09:52 | INFO     | Local NONIID: round 1/40 starting
+[2026-08-12 12:32:18]   Round   1/40 | Avg: 0.7917 | Min: 0.6062 | Max: 0.9440
+[2026-08-12 12:32:18] 2026-08-12 12:32:18 | INFO     | Local NONIID: round 2/40 starting
+[2026-08-12 12:52:01]   Round   2/40 | Avg: 0.8385 | Min: 0.6655 | Max: 0.9553
+[2026-08-12 12:52:01] 2026-08-12 12:52:01 | INFO     | Local NONIID: round 3/40 starting
+[2026-08-12 13:12:26]   Round   3/40 | Avg: 0.8555 | Min: 0.6937 | Max: 0.9539
+[2026-08-12 13:12:26] 2026-08-12 13:12:26 | INFO     | Local NONIID: round 4/40 starting
+[2026-08-12 13:31:24]   Round   4/40 | Avg: 0.8587 | Min: 0.6714 | Max: 0.9595
+[2026-08-12 13:31:24] 2026-08-12 13:31:24 | INFO     | Local NONIID: round 5/40 starting
+[2026-08-12 13:50:33]   Round   5/40 | Avg: 0.8515 | Min: 0.6949 | Max: 0.9560
+[2026-08-12 13:50:33] 2026-08-12 13:50:33 | INFO     | Local NONIID: round 6/40 starting
+[2026-08-12 14:10:48]   Round   6/40 | Avg: 0.8590 | Min: 0.6607 | Max: 0.9581
+[2026-08-12 14:10:48] 2026-08-12 14:10:48 | INFO     | Local NONIID: round 7/40 starting
+[2026-08-12 14:28:49]   Round   7/40 | Avg: 0.8596 | Min: 0.6651 | Max: 0.9607
+[2026-08-12 14:28:49] 2026-08-12 14:28:49 | INFO     | Local NONIID: round 8/40 starting
+[2026-08-12 14:46:23]   Round   8/40 | Avg: 0.8598 | Min: 0.6868 | Max: 0.9596
+[2026-08-12 14:46:23] 2026-08-12 14:46:23 | INFO     | Local NONIID: round 9/40 starting
+[2026-08-12 15:05:09]   Round   9/40 | Avg: 0.8652 | Min: 0.6830 | Max: 0.9641
+[2026-08-12 15:05:09] 2026-08-12 15:05:09 | INFO     | Local NONIID: round 10/40 starting
+[2026-08-12 15:23:00]   Round  10/40 | Avg: 0.8625 | Min: 0.6515 | Max: 0.9591
+[2026-08-12 15:23:00] 2026-08-12 15:23:00 | INFO     | Local NONIID: round 11/40 starting
+[2026-08-12 15:40:44]   Round  11/40 | Avg: 0.8661 | Min: 0.6723 | Max: 0.9613
+[2026-08-12 15:40:44] 2026-08-12 15:40:44 | INFO     | Local NONIID: round 12/40 starting
+[2026-08-12 15:59:08]   Round  12/40 | Avg: 0.8627 | Min: 0.6496 | Max: 0.9662
+[2026-08-12 15:59:08] 2026-08-12 15:59:08 | INFO     | Local NONIID: round 13/40 starting
+[2026-08-12 16:15:01]   Round  13/40 | Avg: 0.8540 | Min: 0.6709 | Max: 0.9579
+[2026-08-12 16:15:01] 2026-08-12 16:15:01 | INFO     | Local NONIID: round 14/40 starting
+[2026-08-12 16:31:12]   Round  14/40 | Avg: 0.8543 | Min: 0.6516 | Max: 0.9514
+[2026-08-12 16:31:12] 2026-08-12 16:31:12 | INFO     | Local NONIID: round 15/40 starting
+[2026-08-12 16:48:37]   Round  15/40 | Avg: 0.8588 | Min: 0.6592 | Max: 0.9605
+[2026-08-12 16:48:37] 2026-08-12 16:48:37 | INFO     | Local NONIID: round 16/40 starting
+[2026-08-12 17:06:03]   Round  16/40 | Avg: 0.8645 | Min: 0.6736 | Max: 0.9669
+[2026-08-12 17:06:03] 2026-08-12 17:06:03 | INFO     | Local NONIID: round 17/40 starting
+[2026-08-12 17:24:02]   Round  17/40 | Avg: 0.8635 | Min: 0.6807 | Max: 0.9582
+[2026-08-12 17:24:02] 2026-08-12 17:24:01 | INFO     | Local NONIID: round 18/40 starting
+[2026-08-12 17:40:55]   Round  18/40 | Avg: 0.8638 | Min: 0.6819 | Max: 0.9531
+[2026-08-12 17:40:55] 2026-08-12 17:40:55 | INFO     | Local NONIID: round 19/40 starting
+[2026-08-12 17:59:00]   Round  19/40 | Avg: 0.8684 | Min: 0.6797 | Max: 0.9629
+[2026-08-12 17:59:00] 2026-08-12 17:59:00 | INFO     | Local NONIID: round 20/40 starting
+[2026-08-12 18:15:42]   Round  20/40 | Avg: 0.8642 | Min: 0.6812 | Max: 0.9632
+[2026-08-12 18:15:42] 2026-08-12 18:15:42 | INFO     | Local NONIID: round 21/40 starting
+[2026-08-12 18:33:46]   Round  21/40 | Avg: 0.8689 | Min: 0.6914 | Max: 0.9671
+[2026-08-12 18:33:46] 2026-08-12 18:33:46 | INFO     | Local NONIID: round 22/40 starting
+[2026-08-12 18:51:54]   Round  22/40 | Avg: 0.8708 | Min: 0.6771 | Max: 0.9692
+[2026-08-12 18:51:54] 2026-08-12 18:51:54 | INFO     | Local NONIID: round 23/40 starting
+[2026-08-12 19:09:53]   Round  23/40 | Avg: 0.8694 | Min: 0.6762 | Max: 0.9669
+[2026-08-12 19:09:53] 2026-08-12 19:09:53 | INFO     | Local NONIID: round 24/40 starting
+[2026-08-12 19:26:54]   Round  24/40 | Avg: 0.8644 | Min: 0.6679 | Max: 0.9630
+[2026-08-12 19:26:54] 2026-08-12 19:26:54 | INFO     | Local NONIID: round 25/40 starting
+[2026-08-12 19:45:16]   Round  25/40 | Avg: 0.8663 | Min: 0.6986 | Max: 0.9573
+[2026-08-12 19:45:16] 2026-08-12 19:45:16 | INFO     | Local NONIID: round 26/40 starting
+[2026-08-12 20:01:30]   Round  26/40 | Avg: 0.8714 | Min: 0.6765 | Max: 0.9624
+[2026-08-12 20:01:30] 2026-08-12 20:01:30 | INFO     | Local NONIID: round 27/40 starting
+[2026-08-12 20:18:14]   Round  27/40 | Avg: 0.8643 | Min: 0.6662 | Max: 0.9642
+[2026-08-12 20:18:14] 2026-08-12 20:18:14 | INFO     | Local NONIID: round 28/40 starting
+[2026-08-12 20:35:37]   Round  28/40 | Avg: 0.8669 | Min: 0.6820 | Max: 0.9690
+[2026-08-12 20:35:37] 2026-08-12 20:35:37 | INFO     | Local NONIID: round 29/40 starting
+[2026-08-12 20:54:24]   Round  29/40 | Avg: 0.8627 | Min: 0.6893 | Max: 0.9667
+[2026-08-12 20:54:24] 2026-08-12 20:54:24 | INFO     | Local NONIID: round 30/40 starting
+[2026-08-12 21:11:51]   Round  30/40 | Avg: 0.8673 | Min: 0.6887 | Max: 0.9590
+[2026-08-12 21:11:51] 2026-08-12 21:11:51 | INFO     | Local NONIID: round 31/40 starting
+[2026-08-12 21:30:34]   Round  31/40 | Avg: 0.8692 | Min: 0.7009 | Max: 0.9656
+[2026-08-12 21:30:34] 2026-08-12 21:30:34 | INFO     | Local NONIID: round 32/40 starting
+[2026-08-12 21:48:56]   Round  32/40 | Avg: 0.8706 | Min: 0.6960 | Max: 0.9640
+[2026-08-12 21:48:56] 2026-08-12 21:48:56 | INFO     | Local NONIID: round 33/40 starting
+[2026-08-12 22:07:30]   Round  33/40 | Avg: 0.8665 | Min: 0.6893 | Max: 0.9709
+[2026-08-12 22:07:30] 2026-08-12 22:07:30 | INFO     | Local NONIID: round 34/40 starting
+[2026-08-12 22:25:15]   Round  34/40 | Avg: 0.8678 | Min: 0.6832 | Max: 0.9656
+[2026-08-12 22:25:15] 2026-08-12 22:25:15 | INFO     | Local NONIID: round 35/40 starting
+[2026-08-12 22:43:02]   Round  35/40 | Avg: 0.8685 | Min: 0.6796 | Max: 0.9655
+[2026-08-12 22:43:02] 2026-08-12 22:43:02 | INFO     | Local NONIID: round 36/40 starting
+[2026-08-12 23:02:00]   Round  36/40 | Avg: 0.8701 | Min: 0.6850 | Max: 0.9672
+[2026-08-12 23:02:00] 2026-08-12 23:02:00 | INFO     | Local NONIID: round 37/40 starting
+[2026-08-12 23:19:54]   Round  37/40 | Avg: 0.8709 | Min: 0.6801 | Max: 0.9712
+[2026-08-12 23:19:54] 2026-08-12 23:19:54 | INFO     | Local NONIID: round 38/40 starting
+[2026-08-12 23:38:28]   Round  38/40 | Avg: 0.8708 | Min: 0.6885 | Max: 0.9676
+[2026-08-12 23:38:28] 2026-08-12 23:38:28 | INFO     | Local NONIID: round 39/40 starting
+[2026-08-12 23:55:58]   Round  39/40 | Avg: 0.8691 | Min: 0.6833 | Max: 0.9660
+[2026-08-12 23:55:58] 2026-08-12 23:55:58 | INFO     | Local NONIID: round 40/40 starting
+[2026-08-13 00:14:55]   Round  40/40 | Avg: 0.8675 | Min: 0.6878 | Max: 0.9689
+[2026-08-13 00:14:55]   Local done.
+[2026-08-13 00:14:55]   Metadata saved to C:/Users/ggad/Desktop/HomeSenseKD/results/phase1\mnist\local\uniform\noniid\metadata.json
+[2026-08-13 00:14:55] 2026-08-13 00:14:55 | INFO     | run_multiseed: seed=456  algo=local  dataset=mnist  hetero=uniform
+[2026-08-13 00:14:55] 
+[2026-08-13 00:14:55] [seed=456]  LOCAL  dataset=mnist  hetero=uniform
+[2026-08-13 00:14:55] 2026-08-13 00:14:55 | INFO     | Loading target dataset: 'mnist'  public dataset: 'cifar10'
+[2026-08-13 00:14:55] 2026-08-13 00:14:55 | INFO     | Input shape: (28, 28, 1)  is_image: True
+[2026-08-13 00:15:28] Loading MNIST...
+[2026-08-13 00:15:28]   -> 60000 train, 10000 test
+[2026-08-13 00:15:28] Loading CIFAR-10...
+[2026-08-13 00:15:28]   -> 50000 train, 10000 test
+[2026-08-13 00:15:28] 2026-08-13 00:15:28 | INFO     | Dataset loaded: x_train=(60000, 28, 28, 1)  y_train=(60000,)  x_test=(10000, 28, 28, 1)  x_public=(50000, 28, 28, 1)
+[2026-08-13 00:15:28] 2026-08-13 00:15:28 | INFO     | Partitioning data: n_classes=10 n_parties=20 iid_spc=30 alpha=0.500
+[2026-08-13 00:15:29] 2026-08-13 00:15:29 | INFO     | run_one_algo: algorithm=local  settings=['iid', 'noniid']
+[2026-08-13 00:15:29] 2026-08-13 00:15:29 | INFO     | run_one_algo: algorithm=local  setting=iid
+[2026-08-13 00:15:46] 2026-08-13 00:15:46 | INFO     | Starting Local IID (40 rounds, 20 nodes)
+[2026-08-13 00:15:46] 
+[2026-08-13 00:15:46] =================================================================
+[2026-08-13 00:15:46]   Local — IID
+[2026-08-13 00:15:46] =================================================================
+[2026-08-13 00:15:46] 2026-08-13 00:15:46 | INFO     | Local IID: round 1/40 starting
+[2026-08-13 00:32:21]   Round   1/40 | Avg: 0.8109 | Min: 0.7443 | Max: 0.8561
+[2026-08-13 00:32:21] 2026-08-13 00:32:21 | INFO     | Local IID: round 2/40 starting
+[2026-08-13 00:45:49]   Round   2/40 | Avg: 0.8871 | Min: 0.8399 | Max: 0.9224
+[2026-08-13 00:45:49] 2026-08-13 00:45:49 | INFO     | Local IID: round 3/40 starting
+[2026-08-13 00:58:37]   Round   3/40 | Avg: 0.8953 | Min: 0.8489 | Max: 0.9319
+[2026-08-13 00:58:37] 2026-08-13 00:58:37 | INFO     | Local IID: round 4/40 starting
+[2026-08-13 01:11:52]   Round   4/40 | Avg: 0.9000 | Min: 0.8499 | Max: 0.9390
+[2026-08-13 01:11:52] 2026-08-13 01:11:52 | INFO     | Local IID: round 5/40 starting
+[2026-08-13 01:24:10]   Round   5/40 | Avg: 0.9015 | Min: 0.8555 | Max: 0.9410
+[2026-08-13 01:24:10] 2026-08-13 01:24:10 | INFO     | Local IID: round 6/40 starting
+[2026-08-13 01:37:55]   Round   6/40 | Avg: 0.9047 | Min: 0.8570 | Max: 0.9393
+[2026-08-13 01:37:55] 2026-08-13 01:37:55 | INFO     | Local IID: round 7/40 starting
+[2026-08-13 01:50:41]   Round   7/40 | Avg: 0.9052 | Min: 0.8614 | Max: 0.9416
+[2026-08-13 01:50:41] 2026-08-13 01:50:41 | INFO     | Local IID: round 8/40 starting
+[2026-08-13 02:03:20]   Round   8/40 | Avg: 0.9064 | Min: 0.8541 | Max: 0.9413
+[2026-08-13 02:03:20] 2026-08-13 02:03:20 | INFO     | Local IID: round 9/40 starting
+[2026-08-13 02:15:48]   Round   9/40 | Avg: 0.9086 | Min: 0.8566 | Max: 0.9414
+[2026-08-13 02:15:48] 2026-08-13 02:15:48 | INFO     | Local IID: round 10/40 starting
+[2026-08-13 02:28:37]   Round  10/40 | Avg: 0.9067 | Min: 0.8524 | Max: 0.9403
+[2026-08-13 02:28:37] 2026-08-13 02:28:37 | INFO     | Local IID: round 11/40 starting
+[2026-08-13 02:42:47]   Round  11/40 | Avg: 0.9069 | Min: 0.8618 | Max: 0.9440
+[2026-08-13 02:42:47] 2026-08-13 02:42:47 | INFO     | Local IID: round 12/40 starting
+[2026-08-13 02:56:01]   Round  12/40 | Avg: 0.9047 | Min: 0.8592 | Max: 0.9441
+[2026-08-13 02:56:01] 2026-08-13 02:56:01 | INFO     | Local IID: round 13/40 starting
+[2026-08-13 03:09:19]   Round  13/40 | Avg: 0.9079 | Min: 0.8588 | Max: 0.9440
+[2026-08-13 03:09:19] 2026-08-13 03:09:19 | INFO     | Local IID: round 14/40 starting
+[2026-08-13 03:21:40]   Round  14/40 | Avg: 0.9111 | Min: 0.8484 | Max: 0.9444
+[2026-08-13 03:21:40] 2026-08-13 03:21:40 | INFO     | Local IID: round 15/40 starting
+[2026-08-13 03:34:47]   Round  15/40 | Avg: 0.9110 | Min: 0.8625 | Max: 0.9445
+[2026-08-13 03:34:47] 2026-08-13 03:34:47 | INFO     | Local IID: round 16/40 starting
+[2026-08-13 03:49:17]   Round  16/40 | Avg: 0.9122 | Min: 0.8663 | Max: 0.9456
+[2026-08-13 03:49:17] 2026-08-13 03:49:17 | INFO     | Local IID: round 17/40 starting

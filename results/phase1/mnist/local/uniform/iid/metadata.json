@@ -1,0 +1,31 @@
+{
+  "algorithm": "local",
+  "dataset": {
+    "private": "mnist",
+    "public": "cifar10",
+    "n_classes": 10,
+    "n_parties": 20
+  },
+  "setting": "iid",
+  "heterogeneity": "uniform",
+  "model_sharing": false,
+  "knowledge_distillation": false,
+  "training": {
+    "n_rounds": 40,
+    "local_epochs": 3,
+    "kd_epochs": 2,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 30,
+    "dirichlet_alpha": 0.5,
+    "window_size": 100,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "last_round_avg_accuracy": 0.9143399924039841,
+    "last_round_min_accuracy": 0.8610000014305115,
+    "last_round_max_accuracy": 0.9484999775886536,
+    "final_avg_accuracy": 0.9127749973535538
+  }
+}

@@ -491,7 +491,7 @@ def plot_training_curves(all_stats, save_path):
     fig, axes = plt.subplots(1, 2, figsize=(16, 5), sharey=True)
     for ax, setting, st in zip(axes, ["iid", "noniid"], ["IID", "non-IID"]):
         for k, (algo, stats) in enumerate(all_stats.items()):
-            if setting not in stats: continue
+            if setting not in stats or not stats[setting].get("avg"): continue
             d = stats[setting]
             rounds = np.arange(1, len(d["avg"])+1)
             col = COLORS[k % len(COLORS)]
@@ -509,8 +509,8 @@ def plot_training_curves(all_stats, save_path):
 def plot_final_comparison(final_accs, save_path):
     """final_accs: {algo: {iid: float, noniid: float}}"""
     algos = list(final_accs.keys())
-    iid_v = [final_accs[a]["iid"] for a in algos]
-    noniid_v = [final_accs[a]["noniid"] for a in algos]
+    iid_v = [final_accs[a].get("iid", 0.0) for a in algos]
+    noniid_v = [final_accs[a].get("noniid", 0.0) for a in algos]
     x = np.arange(len(algos)); w = 0.35
     fig, ax = plt.subplots(figsize=(12, 6))
     b1 = ax.bar(x - w/2, iid_v, w, label="IID",

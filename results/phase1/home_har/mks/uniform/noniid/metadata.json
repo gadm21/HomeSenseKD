@@ -23,9 +23,9 @@
     "n_stft_bins": 8
   },
   "results": {
-    "last_round_avg_accuracy": 0.2470909133553505,
+    "last_round_avg_accuracy": 0.15418182032881306,
     "last_round_min_accuracy": 0.0,
     "last_round_max_accuracy": 0.30909091234207153,
-    "final_avg_accuracy": 0.2470909111201763
+    "final_avg_accuracy": 0.1541090930206701
   }
 }

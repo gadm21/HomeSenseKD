@@ -2,7 +2,7 @@
 """
 run_fedkd.py — Modular federated-learning experiment runner.
 
-Algorithms : fedmd | fedakd | mks | fedavg | fedprox | local | central
+Algorithms : fedmd | fedakd | mks | feddf | fedavg | fedprox | local | central
 Datasets   : home_occupancy | home_har | mnist | cifar10
 
 Usage examples
@@ -24,6 +24,7 @@ import sys
 import argparse
 import json
 import logging
+import time
 from copy import deepcopy
 
 import numpy as np
@@ -383,6 +384,25 @@ def run_kd(clients, n_rounds, name):
     return stats
 
 
+def _weights_bytes(weights_list):
+    """Total byte size of a list of model-weight arrays."""
+    return int(sum(w.nbytes for w in weights_list))
+
+
+def _save_efficiency(exp_dir, setting, eff):
+    """Write per-round efficiency metrics to efficiency_<setting>.csv."""
+    os.makedirs(os.path.join(exp_dir, setting), exist_ok=True)
+    df = pd.DataFrame({
+        "round":      np.arange(1, len(eff["server_s"]) + 1),
+        "server_s":   eff["server_s"],
+        "client_s":   eff["client_s"],
+        "comm_bytes": eff["comm_bytes"],
+    })
+    path = os.path.join(exp_dir, setting, f"efficiency_{setting}.csv")
+    df.to_csv(path, index=False)
+    print(f"  Efficiency saved to {path}")
+
+
 def run_mks(clients, n_rounds, name, tier_map):
     """MKS: tier-based FedAvg within clusters + global KD across all.
 
@@ -391,12 +411,16 @@ def run_mks(clients, n_rounds, name, tier_map):
       1. Clients send soft labels + model weights.
       2. Server: global soft-label average + per-tier FedAvg.
       3. Server returns cluster model + global soft labels to each client.
+
+    Records per-round server/client compute time and communication bytes
+    (weights + feature-carrier matrix) in stats['eff'].
     """
     LOGGER.info("Starting %s (%d rounds, %d clients)", name, n_rounds, len(clients))
     print(f"\n{'='*65}\n  {name}\n{'='*65}")
     soft_labels    = None
     cluster_w      = {}           # tier -> averaged weights
     stats          = {"avg": [], "min": [], "max": []}
+    eff            = {"server_s": [], "client_s": [], "comm_bytes": []}
 
     for rnd in range(1, n_rounds + 1):
         LOGGER.info("%s: round %d/%d starting", name, rnd, n_rounds)
@@ -404,6 +428,8 @@ def run_mks(clients, n_rounds, name, tier_map):
         alpha = float(np.random.rand())
         all_scores, all_w, all_n, accs = [], [], [], []
         tier_results = {}
+        t_client = 0.0
+        comm     = 0
 
         for c in clients:
             tier = tier_map[c.cid]
@@ -420,7 +446,9 @@ def run_mks(clients, n_rounds, name, tier_map):
 
             cfg_r = {"round_num": rnd, "seed": seed, "alpha": alpha,
                      "use_cluster_weights": use_cw}
+            t0 = time.perf_counter()
             res, n, m = c.fit(params_in, cfg_r)
+            t_client += time.perf_counter() - t0
             all_scores.append(res[0])
             all_w.append(res[1:])
             all_n.append(n)
@@ -429,12 +457,92 @@ def run_mks(clients, n_rounds, name, tier_map):
             tier_results[tier]["w"].append(res[1:])
             tier_results[tier]["n"].append(n)
 
+            # comm: uplink = carrier + weights; downlink = global carrier + tier weights
+            comm += res[0].nbytes + _weights_bytes(res[1:])
+            if soft_labels is not None:
+                comm += soft_labels.nbytes
+            if use_cw:
+                comm += _weights_bytes(cw)
+
+        t0 = time.perf_counter()
         soft_labels = aggregate_soft_labels(all_scores, accs)
         cluster_w   = {t: fedavg_aggregate(d["w"], d["n"])
                        for t, d in tier_results.items()}
+        eff["server_s"].append(time.perf_counter() - t0)
+        eff["client_s"].append(t_client / len(clients))
+        eff["comm_bytes"].append(comm)
         LOGGER.info("%s: round %d/%d aggregated %d cluster weights", name, rnd, n_rounds, len(cluster_w))
         _log_round(rnd, n_rounds, accs, stats)
 
+    stats["eff"] = eff
+    print(f"  {name} done.")
+    return stats
+
+
+def run_feddf(clients, nodes, n_rounds, name, tier_map, pub_x,
+              input_shape, n_classes, kd_epochs):
+    """FedDF: server-side ensemble distillation into per-tier students.
+
+    Each round:
+      1. Clients train locally on private data and upload model weights.
+      2. Server runs every client model on the public set and averages the
+         soft outputs into an ensemble (weighted by client dataset size).
+      3. Server distils the ensemble into one student per tier (kd_epochs).
+      4. Server broadcasts each tier's fused student weights to its clients.
+
+    Unlike FedMKS there is no feature-carrier exchange: communication is
+    model weights only, but the server bears the full distillation cost.
+    Records per-round server/client compute time and communication bytes
+    in stats['eff'].
+    """
+    LOGGER.info("Starting %s (%d rounds, %d clients)", name, n_rounds, len(clients))
+    print(f"\n{'='*65}\n  {name}\n{'='*65}")
+    tiers_present = sorted(set(tier_map.values()))
+    students      = {t: build_tiered_model(t, input_shape, n_classes)[0]
+                     for t in tiers_present}
+    student_w     = {}          # tier -> fused student weights (downlink)
+    stats         = {"avg": [], "min": [], "max": []}
+    eff           = {"server_s": [], "client_s": [], "comm_bytes": []}
+    n_pub         = len(pub_x)
+
+    for rnd in range(1, n_rounds + 1):
+        LOGGER.info("%s: round %d/%d starting", name, rnd, n_rounds)
+        all_w, all_n, accs = [], [], []
+        t_client = 0.0
+        comm     = 0
+
+        # -- 1. client local training (client compute) -------------------
+        for c in clients:
+            tier      = tier_map[c.cid]
+            params_in = student_w.get(tier, []) if rnd > 1 else []
+            t0 = time.perf_counter()
+            res, n, m = c.fit(params_in, {"round_num": rnd})
+            t_client += time.perf_counter() - t0
+            all_w.append(res)
+            all_n.append(n)
+            accs.append(float(m["accuracy"]))
+            comm += _weights_bytes(res)                    # uplink weights
+            if rnd > 1 and tier in student_w:
+                comm += _weights_bytes(student_w[tier])    # downlink student
+
+        # -- 2+3. server ensemble + per-tier distillation (server compute)
+        t0  = time.perf_counter()
+        ens = np.zeros((n_pub, n_classes), dtype=np.float64)
+        tot = float(sum(all_n))
+        for node, n in zip(nodes, all_n):
+            ens += (n / tot) * node.model[0].predict(
+                pub_x, batch_size=32, verbose=0)
+        ens = ens.astype(np.float32)
+        for t in tiers_present:
+            students[t].fit(pub_x, ens, epochs=kd_epochs,
+                            batch_size=32, verbose=0)
+            student_w[t] = students[t].get_weights()
+        eff["server_s"].append(time.perf_counter() - t0)
+        eff["client_s"].append(t_client / len(clients))
+        eff["comm_bytes"].append(comm)
+        _log_round(rnd, n_rounds, accs, stats)
+
+    stats["eff"] = eff
     print(f"  {name} done.")
     return stats
 
@@ -521,7 +629,7 @@ def save_metadata(exp_dir, setting, cfg, algo, hetero, stats):
         "setting": setting,
         "heterogeneity": hetero,
         "model_sharing": algo in ("fedavg", "fedprox", "central"),
-        "knowledge_distillation": algo in ("fedmd", "fedakd", "mks"),
+        "knowledge_distillation": algo in ("fedmd", "fedakd", "mks", "feddf"),
         "training": {
             "n_rounds": cfg["federated"]["n_rounds"],
             "local_epochs": cfg["federated"]["local_epochs"],
@@ -541,6 +649,13 @@ def save_metadata(exp_dir, setting, cfg, algo, hetero, stats):
             "final_avg_accuracy": float(np.mean(stats["avg"][-5:])) if len(stats["avg"]) >= 5 else None,
         },
     }
+    if "eff" in stats:
+        metadata["efficiency"] = {
+            "mean_server_s_per_round":   float(np.mean(stats["eff"]["server_s"])),
+            "mean_client_s_per_round":   float(np.mean(stats["eff"]["client_s"])),
+            "mean_comm_bytes_per_round": float(np.mean(stats["eff"]["comm_bytes"])),
+            "total_comm_mb":             float(np.sum(stats["eff"]["comm_bytes"]) / 1e6),
+        }
     
     metadata_path = os.path.join(exp_dir, setting, "metadata.json")
     with open(metadata_path, "w") as f:
@@ -632,6 +747,21 @@ def run_one_algo(algo, cfg, tiers, tier_map,
             all_stats[setting] = run_mks(
                 clients, n_rnd, f"MKS — {setting.upper()}", tier_map)
             save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
+            _save_efficiency(exp_dir, setting, all_stats[setting]["eff"])
+
+        elif algo == "feddf":
+            models  = build_client_models(algo, tiers, input_shape, n_cls)
+            pub_cp  = (pub_data[0].copy(), pub_data[1].copy())
+            nodes   = [Node(models[i], (pri_x[i], pri_y[i]), pub_cp, val_data)
+                       for i in range(n_par)]
+            clients = [WeightClient(str(i), nodes[i], exp_dir, setting,
+                                    local_epochs=l_ep)
+                       for i in range(n_par)]
+            all_stats[setting] = run_feddf(
+                clients, nodes, n_rnd, f"FedDF — {setting.upper()}",
+                tier_map, pub_data[0], input_shape, n_cls, kd_ep)
+            save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
+            _save_efficiency(exp_dir, setting, all_stats[setting]["eff"])
 
         else:
             raise ValueError(f"Unknown algorithm: {algo!r}")

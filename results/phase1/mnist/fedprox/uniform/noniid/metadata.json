@@ -1,0 +1,31 @@
+{
+  "algorithm": "fedprox",
+  "dataset": {
+    "private": "mnist",
+    "public": "cifar10",
+    "n_classes": 10,
+    "n_parties": 20
+  },
+  "setting": "noniid",
+  "heterogeneity": "uniform",
+  "model_sharing": true,
+  "knowledge_distillation": false,
+  "training": {
+    "n_rounds": 40,
+    "local_epochs": 3,
+    "kd_epochs": 2,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 30,
+    "dirichlet_alpha": 0.5,
+    "window_size": 100,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "last_round_avg_accuracy": 0.9712850004434586,
+    "last_round_min_accuracy": 0.9503999948501587,
+    "last_round_max_accuracy": 0.9797999858856201,
+    "final_avg_accuracy": 0.9683430022001266
+  }
+}
