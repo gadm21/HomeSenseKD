@@ -1,0 +1,37 @@
+{
+  "algorithm": "feddf",
+  "dataset": {
+    "private": "home_occupancy",
+    "public": "home_har",
+    "n_classes": 3,
+    "n_parties": 10
+  },
+  "setting": "iid",
+  "heterogeneity": "uniform",
+  "model_sharing": false,
+  "knowledge_distillation": true,
+  "training": {
+    "n_rounds": 30,
+    "local_epochs": 4,
+    "kd_epochs": 2,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 30,
+    "dirichlet_alpha": 0.5,
+    "window_size": 1500,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "last_round_avg_accuracy": 0.8812612473964692,
+    "last_round_min_accuracy": 0.7891891598701477,
+    "last_round_max_accuracy": 0.929729700088501,
+    "final_avg_accuracy": 0.8902342319488525
+  },
+  "efficiency": {
+    "mean_server_s_per_round": 243.20968061333164,
+    "mean_client_s_per_round": 24.6396690306667,
+    "mean_comm_bytes_per_round": 31002202.933333334,
+    "total_comm_mb": 930.066088
+  }
+}

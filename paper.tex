@@ -94,18 +94,22 @@ Indoor human activity recognition (HAR) using Wi-Fi Channel State Information
 sensing.  Deploying such systems across multiple homes introduces three
 compounding challenges: statistical heterogeneity of activity distributions,
 architectural diversity of edge devices, and the prohibition on sharing raw
-sensor data.  We present \textbf{HomeSenseKD}, a benchmark framework for
-heterogeneous federated knowledge distillation applied to CSI-based indoor
-sensing.  Seven algorithms---FedMD, FedAKD, FedMKS, FedAvg, FedProx, Local,
-and Centralised---are evaluated across four datasets (HomeOccupancy, HomeHAR,
-MNIST, CIFAR-10) under both IID and non-IID partitions in two structured
-experimental phases.  A dual-head tiered model decouples local classification
-from soft-label distillation, enabling model-heterogeneous collaboration
-without exchanging raw data or full model weights.  On HomeOccupancy,
-FedMKS achieves 90.4\% validation accuracy under IID partitioning,
-within 2\% of the centralised ceiling.  HomeHAR reveals the failure
-mode of federated learning under severe data scarcity.  Code and datasets
-are publicly available.
+sensor data.  We present \textbf{FedMKS} (Federated Mixed Knowledge
+Sharing), a heterogeneous federated knowledge-distillation algorithm for
+CSI-based indoor sensing.  FedMKS organises clients into architecture tiers
+and couples intra-tier weight sharing with cross-tier feature-carrier
+distillation on a public set, enabling model-heterogeneous collaboration
+without exchanging raw data or full model weights.  We evaluate FedMKS
+against FedMD~\cite{li2019fedmd}, FedAKD~\cite{li2019fedmd,zhang2018mixup},
+FedAvg~\cite{mcmahan2017fedavg}, FedProx~\cite{li2020fedprox}, and
+FedDF~\cite{lin2020ensemble}, together with Local and Centralised baselines,
+on the HomeOccupancy CSI dataset
+and two widely used image benchmarks (MNIST, CIFAR-10) under IID and non-IID
+partitions.  On HomeOccupancy, FedMKS attains 90.4\% validation accuracy
+under IID partitioning---within 0.5\% of the centralised ceiling.  Under
+non-IID label skew, soft-label-only distillation underperforms even
+all-small weight sharing, motivating FedMKS's hybrid design.
+Code and datasets are publicly available.
 \end{abstract}
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -126,120 +130,29 @@ each client trains locally and contributes only model updates or soft
 predictions~\cite{mcmahan2017fedavg}.  Beyond privacy, FL brings a natural
 benefit for sensing: a client whose environment lacks certain classes (e.g.,
 no ``smoking'' behaviour observed) can still learn to recognise them through
-knowledge transferred from peers that have seen those classes, as illustrated
-in Fig.~\ref{fig:fedhar}.
-
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[font=\scriptsize,
-  >={Stealth[length=2.2pt,width=1.6pt]},
-  mdl/.style={rectangle,draw=black!50,fill=ltBlue,rounded corners=1.5pt,
-      minimum width=1.15cm,minimum height=0.40cm,font=\tiny,align=center},
-  srv/.style={rectangle,draw=black!50,fill=ltGray,rounded corners=2pt,
-      minimum width=2.5cm,minimum height=0.62cm,font=\tiny\bfseries,align=center},
-  chip/.style={rectangle,rounded corners=1pt,font=\scriptsize,inner sep=1.3pt,
-      minimum width=0.32cm,minimum height=0.30cm,align=center},
-  ok/.style={chip,fill=clGreen!30,draw=clGreen!55!black,text=black},
-  no/.style={chip,fill=black!6,draw=black!25,text=black!40},
-  tag/.style={font=\tiny,text=black!60,align=center},
-  uplink/.style={->,dashed,thick,clGreen},
-  dnlink/.style={->,dashed,thick,clPurple}]
-\tikzset{pics/home/.style args={#1}{code={
-  \node[font=\Large,text=black!55] at (0,0) {\faHome};
-  \node[font=\scriptsize,text=clBlue] at (-0.20,0.28) {\faWifi};
-  \node[font=\scriptsize,text=clOrange] at (0.20,0.26) {#1};}}}
-\newcommand{\chiprow}[7]{%
-  \node[#3] at (#1-0.88,#2) {\faWalking};
-  \node[#4] at (#1-0.44,#2) {\faChair};
-  \node[#5] at (#1+0.00,#2) {\faBed};
-  \node[#6] at (#1+0.44,#2) {\faUtensils};
-  \node[#7] at (#1+0.88,#2) {\faBriefcase};}
-
-\node[font=\scriptsize\bfseries,anchor=west] at (-4.45,3.05)
-   {(A) Non-cooperative: local training only};
-\coordinate (hA) at (-3.0,2.35); \pic at (hA) {home=\faWalking};
-\node[mdl] (mA) at (-3.0,1.50) {local\\model};
-\draw[->,black!55] (hA) -- (mA);
-\draw[->,black!55] (mA.south) -- (-3.0,1.02);
-\chiprow{-3.0}{0.66}{ok}{ok}{no}{no}{no}
-\node[tag] at (-3.0,0.28) {2/5 classes};
-\coordinate (hB) at (-0.4,2.35); \pic at (hB) {home=\faBed};
-\node[mdl] (mB) at (-0.4,1.50) {local\\model};
-\draw[->,black!55] (hB) -- (mB);
-\draw[->,black!55] (mB.south) -- (-0.4,1.02);
-\chiprow{-0.4}{0.66}{no}{no}{ok}{no}{no}
-\node[tag] at (-0.4,0.28) {1/5 classes};
-\coordinate (hC) at (2.2,2.35); \pic at (hC) {home=\faUtensils};
-\node[mdl] (mC) at (2.2,1.50) {local\\model};
-\draw[->,black!55] (hC) -- (mC);
-\draw[->,black!55] (mC.south) -- (2.2,1.02);
-\chiprow{2.2}{0.66}{no}{no}{no}{ok}{ok}
-\node[tag] at (2.2,0.28) {2/5 classes};
-\draw[dashed,black!45] (-1.7,0.15)--(-1.7,2.95);
-\draw[dashed,black!45] ( 0.9,0.15)--( 0.9,2.95);
-\node[tag,text=clRed,align=center] at (3.9,1.9) {\faBan\\[1pt]no data /\\model\\sharing};
-
-\node[font=\scriptsize\bfseries,anchor=west] at (-4.45,-0.35)
-   {(B) Federated: shared knowledge, private data};
-\node[srv] (srv) at (-0.4,0.55) {\faServer\ server\\aggregate};
-\coordinate (gA) at (-3.0,-1.15); \pic at (gA) {home=\faWalking};
-\coordinate (gB) at (-0.4,-1.15); \pic at (gB) {home=\faBed};
-\coordinate (gC) at ( 2.2,-1.15); \pic at (gC) {home=\faUtensils};
-\draw[uplink] ($(gA)+(0.02,0.30)$) -- ($(srv.200)$);
-\draw[uplink] ($(gB)+(-0.06,0.30)$) -- ($(srv.255)$);
-\draw[uplink] ($(gC)+(0.02,0.30)$) -- ($(srv.340)$);
-\draw[dnlink] ($(srv.160)$) -- ($(gA)+(-0.18,0.30)$);
-\draw[dnlink] ($(srv.285)$) -- ($(gB)+(0.06,0.30)$);
-\draw[dnlink] ($(srv.20)$)  -- ($(gC)+(-0.18,0.30)$);
-\chiprow{-3.0}{-2.05}{ok}{ok}{ok}{ok}{ok}
-\chiprow{-0.4}{-2.05}{ok}{ok}{ok}{ok}{ok}
-\chiprow{ 2.2}{-2.05}{ok}{ok}{ok}{ok}{ok}
-\node[tag] at (-3.0,-2.42) {5/5 classes};
-\node[tag] at (-0.4,-2.42) {5/5 classes};
-\node[tag] at ( 2.2,-2.42) {5/5 classes};
-\node[tag,anchor=west] at (3.55,0.80) {\textcolor{clGreen}{\faLongArrowAltUp}\,send};
-\node[tag,anchor=west] at (3.55,0.42) {\textcolor{clPurple}{\faLongArrowAltDown}\,receive};
-\node[ok]  at (3.62,-0.05){\faWalking};
-\node[tag,anchor=west] at (3.85,-0.05) {can recognise};
-\node[no]  at (3.62,-0.45){\faWalking};
-\node[tag,anchor=west] at (3.85,-0.45) {not seen};
-\end{tikzpicture}
-\caption{Federated learning for CSI-based HAR.  Each home senses activities
-  through Wi-Fi CSI (house $+$ access point $+$ person) but observes only a
-  subset of activity classes.  \textbf{(A)}~Non-cooperative clients train only
-  on their own data, so each recognises just its local classes (green chips).
-  \textbf{(B)}~Federated distillation lets every client recognise
-  \emph{activities it never observed locally} by absorbing peer knowledge
-  through the server, while raw data stays private.}
-\label{fig:fedhar}
-\end{figure}
+knowledge transferred from peers that have seen those classes.
 
 A persistent practical obstacle is \emph{model heterogeneity}: edge devices
 range from resource-constrained sensors to capable gateways, making a
 one-size-fits-all model architecture infeasible.  Standard weight-sharing
-algorithms (FedAvg, FedProx) require all clients to share the same
-architecture; knowledge-distillation approaches (FedMD, FedAKD) avoid weight
+algorithms (FedAvg~\cite{mcmahan2017fedavg}, FedProx~\cite{li2020fedprox})
+require all clients to share the same architecture; knowledge-distillation
+approaches (FedMD~\cite{li2019fedmd}, FedAKD~\cite{zhang2018mixup}) avoid weight
 exchange entirely but forego the benefits of model aggregation.
 FedMKS bridges this gap by organising clients into architecture tiers and
 simultaneously sharing weights within tiers and feature carriers across tiers,
 matching or exceeding both pure weight-sharing and pure KD baselines in
 semi-heterogeneous settings.
 
-\textbf{Contributions.}
-\begin{itemize}
-  \item \textbf{HomeSenseKD}: an open benchmark of 7 FL algorithms on 4
-    datasets (2 CSI, 2 image) under uniform and non-IID partitions.
-  \item \textbf{Dual-head tiered model}: a shared backbone with decoupled
-    classification and distillation heads that scales from small to large
-    devices.
-  \item \textbf{Phase 1}: comprehensive IID/non-IID comparison across all
-    algorithms, revealing the failure mode of all algorithms on HomeHAR.
-  \item \textbf{Phase 2}: heterogeneity-distribution ablation of FedMD on
-    HomeOccupancy (results to be added).
-  \item \textbf{Phase 3}: direct FedMKS vs.\ FedDF efficiency comparison
-    reporting accuracy, server/client compute load, and communication
-    overhead (results to be added).
-\end{itemize}
+\textbf{Contribution.}  We propose \textbf{FedMKS} (Federated Mixed
+Knowledge Sharing), a federated knowledge-distillation algorithm for
+model-heterogeneous CSI sensing.  FedMKS (i)~partitions clients into
+architecture tiers and shares classifier weights within each tier,
+(ii)~shares distilled feature carriers across all tiers on a public set,
+and (iii)~applies Mixup augmentation to the public set before distillation.
+A dual-head tiered model decouples private classification from public-set
+distillation, so clients of different capacity collaborate without
+exchanging raw data or full model weights.
 
 The remainder of this paper is structured as follows.
 Section~\ref{sec:related} surveys related work.
@@ -322,7 +235,7 @@ server collects client model outputs on a shared public dataset, constructs
 an ensemble prediction, and trains a fused student model via server-side
 knowledge distillation, improving accuracy and robustness compared to naive
 averaging.  Unlike FedDF, which concentrates all distillation on the server,
-FedMKS distributes distillation across clients (Table~\ref{tab:fedmks_feddf}),
+FedMKS distributes distillation across clients,
 substantially reducing server computation at the cost of higher client workload
 and communication overhead.
 
@@ -333,7 +246,7 @@ and communication overhead.
 \subsection{Notation}
 
 \begin{table}[t]
-\centering\small
+\centering\footnotesize
 \caption{Symbol table.}
 \label{tab:symbols}
 \setlength{\tabcolsep}{4pt}
@@ -499,8 +412,9 @@ Gradient flows are fully decoupled between heads; only the backbone is shared.
 
 \subsection{FedMKS: Mixed Knowledge Sharing}
 
-FedMKS (Fig.~\ref{fig:fedmksoverview}, Fig.~\ref{fig:fedmkstimeline}) is the
-proposed algorithm that addresses the limitations of both FedAvg and FedMD in
+FedMKS (Fig.~\ref{fig:fedmksoverview}) is the
+proposed algorithm that addresses the limitations of both
+FedAvg~\cite{mcmahan2017fedavg} and FedMD~\cite{li2019fedmd} in
 heterogeneous networks.  FedAvg requires all clients to share a single
 architecture, so it must use the smallest model in a heterogeneous
 network---sacrificing accuracy for capable clients.  FedMD shares only
@@ -509,7 +423,7 @@ accuracy gains of direct weight sharing.  FedMKS simultaneously:
 (i)~shares weights within clients of the same tier (intra-tier FedAvg);
 (ii)~distils knowledge across all tiers via aggregated feature carriers on
 the public set; and (iii)~applies Mixup augmentation to the public set before
-distillation (following FedAKD).
+distillation (following FedAKD~\cite{zhang2018mixup}).
 
 In round $r{=}1$ the server holds no global state, so each client trains only
 on its private data and then uploads its initial feature carrier and
@@ -633,20 +547,6 @@ $w_k^{(r)}$ to the server.
 \label{fig:fedmksoverview}
 \end{figure*}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{assets/FedMKS_timeline.png}
-  \caption{\textbf{FedMKS round timeline.}  From round $r{=}2$ onward, every
-    client receives the global carrier $\bar{s}$ and its tier's averaged
-    classifier weights $\mathbf{W}_{t_k}$ from the server; runs $E_{\text{kd}}$
-    KD epochs on the public set using $\bar{s}$ as targets; runs
-    $E_{\text{loc}}$ local epochs on private data; then returns its updated
-    carrier $s_k$ and classifier weights $w_k$ to the server.  Round $r{=}1$
-    bootstraps by local training only, producing the first carriers and
-    weights.}
-  \label{fig:fedmkstimeline}
-\end{figure}
-
 Algorithm~\ref{alg:fedmks} formalises one FedMKS round.
 
 \begin{algorithm}[t]
@@ -694,7 +594,7 @@ $\mathcal{F}$, $\mathcal{B}$ denote forward- and backward-pass costs.
 FedMKS inverts this design: the server performs only tensor aggregation
 $O(\sum_t |\mathbf{W}_t| + KPd)$ with no neural-network passes, shifting
 the distillation burden to clients---making it far more suitable when the
-coordinator is a lightweight edge gateway (Table~\ref{tab:fedmks_feddf}).
+coordinator is a lightweight edge gateway.
 
 Table~\ref{tab:algosummary} summarises all evaluated algorithms.
 
@@ -721,73 +621,6 @@ Central         & --         & --         & Centralised   \\
 \end{table}
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-\begin{table*}[t]
-\centering
-\caption{FedMKS vs.\ FedDF: algorithmic comparison using the notation of
-  Section~\ref{sec:sysmodel}.
-  $P\!\triangleq\!|\mathcal{D}^{\text{pub}}|$ (public samples);
-  $\mathcal{F}$, $\mathcal{B}$: forward- and backward-pass costs
-  (distinct from CSI window $T$ and STFT bins $B$).}
-\label{tab:fedmks_feddf}
-\small\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{%
-  >{\raggedright\arraybackslash}p{0.17\textwidth}
-  >{\raggedright\arraybackslash}X
-  >{\raggedright\arraybackslash}X}
-\toprule
-\textbf{Aspect} & \textbf{FedMKS (proposed)} & \textbf{FedDF~\cite{lin2020ensemble}} \\
-\midrule
-Objective &
-  Intra-tier weight sharing combined with cross-tier feature-carrier
-  distillation on $\mathcal{D}^{\text{pub}}$. &
-  Server-side ensemble distillation: a fused model is trained to match the
-  ensemble of client outputs on $\mathcal{D}^{\text{pub}}$. \\[2pt]
-Weight aggregation &
-  Per-tier FedAvg:
-  $\mathbf{W}_t^{(r)} =
-   \frac{\sum_{k:\,t_k=t} n_k\,\theta_k}{\sum_{k:\,t_k=t} n_k}$. &
-  Compatible client models may be averaged first; not the primary
-  fusion mechanism. \\[2pt]
-Knowledge aggregation &
-  Clients upload $s_k^{(r)}$; server computes
-  $\bar{s}^{(r)} = \tfrac{1}{K}\sum_{k=1}^{K} s_k^{(r)}$;
-  no server-side inference. &
-  Server runs all client models on $\mathcal{D}^{\text{pub}}$:
-  $\bar{s}^{(r)} = \sum_k \beta_k\,
-   f(\mathcal{D}^{\text{pub}};\theta_k)$. \\[2pt]
-Distillation &
-  Each client $k$ minimises
-  $\mathcal{L}_k = \mathcal{L}_{\text{CE}} +
-   \lambda\,\mathcal{L}_{\text{KD}}(\theta_k;\bar{s}^{(r-1)})$
-  locally for $E_{\text{kd}}$ epochs. &
-  Server trains a fused model:
-  $\theta^{*} = \arg\min_{\theta}
-   D_{\mathrm{KL}}\!\left(\bar{s}_\tau\,\|\,
-   f_\tau(\mathcal{D}^{\text{pub}};\theta)\right)$. \\[2pt]
-KD location    & Clients, in parallel.   & Central server only. \\[2pt]
-Server workload &
-  Tensor aggregation only:
-  $O\!\bigl(\sum_t|\mathbf{W}_t|+KPd\bigr)$;
-  no forward or backward passes. &
-  Client inference $+$ student optimisation:
-  $O\!\bigl(KP\mathcal{F}+
-             E_{\text{kd}}P(\mathcal{F}+\mathcal{B})\bigr)$. \\[2pt]
-Communication &
-  Per client: $|\theta_k|$ weights $+$ $P{\times}d$
-  feature-carrier matrix. &
-  Per client: $|\theta_k|$ weights; soft labels
-  remain on the server. \\[2pt]
-Main trade-off &
-  Lower server compute; higher client compute and
-  communication overhead. &
-  Lower client KD workload; higher server compute
-  and memory. \\[2pt]
-Suitable setting &
-  Resource-constrained IoT or edge coordinator. &
-  Computationally capable central server. \\
-\bottomrule
-\end{tabularx}
-\end{table*}
 
 \section{Experiments and Results}
 \label{sec:experiments}
@@ -796,10 +629,8 @@ Suitable setting &
 
 \textbf{Datasets.}
 \emph{HomeOccupancy}~\cite{homesensekd2024}: 3-class CSI (empty/sleep/work),
-sessions 1--2 as train, session 3 as test; public data is HomeHAR.
-\emph{HomeHAR}~\cite{homesensekd2024}: 7-class CSI (drink/eat/empty/sleep/
-smoke/watch/work), all sessions combined with 80/20 split; public data is
-HomeOccupancy.
+sessions 1--2 as train, session 3 as test; public data is the
+\emph{HomeHAR} CSI corpus~\cite{homesensekd2024}.
 \emph{MNIST}: 10-class digit images; public data is CIFAR-10.
 \emph{CIFAR-10}: 10-class object images; public data is MNIST.
 
@@ -808,6 +639,9 @@ $R{=}50$ rounds, $K{=}20$ clients, $n_c{=}30$ samples/class/client (IID),
 $\alpha{=}0.5$ (Dirichlet non-IID), $E_{\text{loc}}{=}4$, $E_{\text{kd}}{=}2$,
 $\mu{=}0.01$ (FedProx), $n_{\text{align}}{=}10{,}000$, $T{=}1500$, $B{=}8$.
 Tier distribution (Phase~1): 35\%~S, 35\%~M, 30\%~L.
+The image benchmarks (MNIST, CIFAR-10) use a larger per-client budget
+reflecting their greater data availability---$n_c{=}100$ samples/class,
+$E_{\text{loc}}{=}5$, $E_{\text{kd}}{=}3$; all other settings are shared.
 Results are mean validation accuracy across up to 3 independent seeds;
 runs still in progress are single-seed (marked \dag).
 
@@ -822,10 +656,10 @@ runs still in progress are single-seed (marked \dag).
 \midrule
 Rounds $R$ & 50 \\
 Clients $K$ & 20 \\
-IID samples / class / client & 30 \\
+IID samples / class / client & 30 (CSI) / 100 (image) \\
 Non-IID Dirichlet $\alpha$ & 0.5 \\
-Local epochs $E_{\text{loc}}$ & 4 \\
-KD epochs $E_{\text{kd}}$ & 2 \\
+Local epochs $E_{\text{loc}}$ & 4 (CSI) / 5 (image) \\
+KD epochs $E_{\text{kd}}$ & 2 (CSI) / 3 (image) \\
 Carrier dimension $d$ & 64 \\
 FedProx $\mu$ & 0.01 \\
 Alignment samples & 10\,000 (cap) \\
@@ -835,8 +669,11 @@ STFT bins $B$ & 8 \\
 \end{tabular}
 \end{table}
 
-\textbf{Phase 1} evaluates all 7 algorithms on 4 datasets under uniform tier
+\textbf{Phase 1} evaluates all 7 algorithms on 3 datasets under uniform tier
 heterogeneity (35\%~S/35\%~M/30\%~L) for both IID and non-IID data partitions.
+Because weight aggregation requires identical architectures, FedAvg and FedProx
+degrade every client to the smallest (\texttt{small}) model, whereas the KD
+methods and FedMKS retain their assigned heterogeneous tiers.
 \textbf{Phase 2} ablates tier-heterogeneity distribution on HomeOccupancy for
 FedMD across three configurations: \texttt{all\_small} (100\%~S),
 \texttt{uniform} (35/35/30), and \texttt{skewed} (60\%~S/30\%~M/10\%~L).
@@ -862,13 +699,13 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
   group style={
     xlabels at=edge bottom,
     ylabels at=edge left,
-    group size=2 by 2,
+    group size=3 by 1,
     horizontal sep=0.9cm,
-    vertical sep=0.55cm,
   },
   p1panel,
+  width=0.31\textwidth,
 ]
-\nextgroupplot[ymin=25, ymax=100, title={HomeOccupancy},
+\nextgroupplot[ymin=25, ymax=100,
   legend to name=legendPiid,
   legend style={legend columns=7, font=\tiny,
     /tikz/every even column/.append style={column sep=0.3em}}]
@@ -921,50 +758,7 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
   (31,81.05) (32,81.15) (33,81.79) (34,81.86) (35,82.17) (36,80.77) (37,81.12) (38,80.50) (39,82.09) (40,81.31)
   (41,80.79) (42,80.42) (43,81.20) (44,80.19) (45,81.01) (46,80.84) (47,80.85) (48,81.38) (49,82.08) (50,81.78)};
 \addlegendentry{Local}
-\nextgroupplot[ymin=18, ymax=33, title={HomeHAR}]
-\addplot[black,thick,dashed] coordinates {
-  (1,22.18) (2,30.67) (3,30.67) (4,29.58) (5,30.55) (6,30.55) (7,30.67) (8,30.67) (9,30.91) (10,30.91)
-  (11,30.91) (12,30.91) (13,28.85) (14,30.91) (15,30.79) (16,30.79) (17,30.91) (18,30.91) (19,30.91) (20,30.91)
-  (21,30.91) (22,30.91) (23,30.91) (24,30.91) (25,30.91) (26,30.91) (27,30.91) (28,30.91) (29,30.91) (30,30.91)
-  (31,30.91) (32,30.91) (33,30.91) (34,30.91) (35,30.91) (36,30.91) (37,30.91) (38,30.91) (39,30.91) (40,30.91)
-  (41,30.91) (42,30.91) (43,30.91) (44,30.91) (45,30.91) (46,30.91) (47,30.91) (48,30.91) (49,30.91) (50,30.91)};
-\addplot[clBlue] coordinates {
-  (1,24.73) (2,26.84) (3,28.91) (4,27.70) (5,27.27) (6,29.77) (7,29.22) (8,29.69) (9,30.29) (10,30.13)
-  (11,30.51) (12,30.38) (13,30.53) (14,30.45) (15,30.49) (16,30.74) (17,30.68) (18,30.77) (19,30.73) (20,30.64)
-  (21,30.60) (22,30.56) (23,30.72) (24,30.71) (25,30.53) (26,30.50) (27,30.65) (28,30.50) (29,30.77) (30,30.68)
-  (31,30.72) (32,30.70) (33,30.65) (34,30.60) (35,30.70) (36,30.55) (37,30.73) (38,30.62) (39,30.61) (40,30.73)
-  (41,30.58) (42,30.68) (43,30.70) (44,30.66) (45,30.78) (46,30.58) (47,30.75) (48,30.28) (49,30.70) (50,30.72)};
-\addplot[clTeal] coordinates {
-  (1,22.41) (2,26.79) (3,24.38) (4,27.56) (5,27.30) (6,28.70) (7,29.18) (8,27.79) (9,29.61) (10,29.52)
-  (11,29.42) (12,29.88) (13,30.39) (14,30.54) (15,30.65) (16,30.14) (17,30.05) (18,30.64) (19,30.56) (20,30.59)
-  (21,30.36) (22,30.70) (23,30.68) (24,30.75) (25,30.79) (26,30.72) (27,30.76) (28,30.66) (29,30.58) (30,30.77)
-  (31,30.71) (32,30.72) (33,30.76) (34,30.77) (35,30.82) (36,30.64) (37,30.56) (38,30.73) (39,30.75) (40,30.56)
-  (41,30.58) (42,30.72) (43,30.55) (44,30.70) (45,30.72) (46,30.77) (47,30.39) (48,30.55) (49,30.61) (50,30.81)};
-\addplot[clRed,thick] coordinates {
-  (1,26.88) (2,27.12) (3,27.91) (4,28.71) (5,26.84) (6,29.02) (7,29.32) (8,29.00) (9,29.63) (10,29.64)
-  (11,29.87) (12,29.97) (13,30.46) (14,30.53) (15,30.47) (16,30.45) (17,30.62) (18,30.52) (19,30.61) (20,30.70)
-  (21,30.73) (22,30.68) (23,30.64) (24,30.67) (25,30.60) (26,30.65) (27,30.60) (28,30.76) (29,30.76) (30,30.83)
-  (31,30.84) (32,30.58) (33,30.87) (34,30.67) (35,30.79) (36,30.55) (37,30.85) (38,30.76) (39,30.78) (40,30.81)
-  (41,30.78) (42,30.77) (43,30.81) (44,30.75) (45,30.81) (46,30.86) (47,30.84) (48,30.84) (49,30.79) (50,30.84)};
-\addplot[clPurple] coordinates {
-  (1,30.20) (2,30.91) (3,30.91) (4,30.39) (5,24.47) (6,29.04) (7,28.61) (8,28.99) (9,29.01) (10,29.92)
-  (11,30.30) (12,30.16) (13,30.13) (14,30.55) (15,30.66) (16,30.79) (17,30.75) (18,30.81) (19,30.56) (20,30.68)
-  (21,30.62) (22,30.78) (23,30.76) (24,30.76) (25,30.68) (26,30.63) (27,30.62) (28,30.73) (29,30.77) (30,30.66)
-  (31,30.70) (32,30.81) (33,30.65) (34,30.75) (35,30.65) (36,30.75) (37,30.85) (38,30.33) (39,30.24) (40,30.75)
-  (41,30.81) (42,30.85) (43,30.79) (44,30.83) (45,30.70) (46,30.75) (47,30.81) (48,30.80) (49,30.78) (50,30.28)};
-\addplot[clOlive] coordinates {
-  (1,29.83) (2,20.09) (3,27.23) (4,25.88) (5,21.81) (6,21.92) (7,26.70) (8,27.14) (9,28.67) (10,30.31)
-  (11,28.05) (12,29.41) (13,29.80) (14,28.92) (15,29.79) (16,30.48) (17,30.35) (18,30.47) (19,30.56) (20,29.58)
-  (21,30.01) (22,30.50) (23,30.67) (24,30.32) (25,30.63) (26,29.93) (27,30.68) (28,30.19) (29,30.45) (30,30.60)
-  (31,30.61) (32,30.01) (33,30.70) (34,30.77) (35,30.57) (36,30.55) (37,30.78) (38,30.50) (39,30.53) (40,30.24)
-  (41,30.52) (42,30.72) (43,30.76) (44,30.32) (45,30.55) (46,30.76) (47,30.66) (48,30.65) (49,30.45) (50,29.98)};
-\addplot[clGray,dotted] coordinates {
-  (1,26.05) (2,28.75) (3,26.81) (4,28.41) (5,29.70) (6,27.41) (7,27.52) (8,28.66) (9,28.92) (10,28.87)
-  (11,28.35) (12,29.40) (13,29.21) (14,29.18) (15,29.42) (16,28.75) (17,29.44) (18,29.13) (19,28.80) (20,29.19)
-  (21,28.99) (22,29.58) (23,28.65) (24,29.75) (25,29.36) (26,29.44) (27,29.24) (28,29.77) (29,29.48) (30,29.90)
-  (31,29.95) (32,29.70) (33,28.27) (34,29.23) (35,29.40) (36,29.08) (37,29.13) (38,29.20) (39,29.26) (40,29.33)
-  (41,29.27) (42,29.49) (43,29.08) (44,29.39) (45,28.98) (46,29.33) (47,29.26) (48,29.35) (49,29.44) (50,29.36)};
-\nextgroupplot[ymin=88, ymax=100, title={MNIST}]
+\nextgroupplot[ymin=88, ymax=100,]
 \addplot[black,thick,dashed] coordinates {
   (1,98.87) (2,99.01) (3,99.06) (4,98.08) (5,98.84) (6,98.95) (7,98.96) (8,99.0) (9,99.02) (10,98.75)
   (11,98.98) (12,99.06) (13,99.05) (14,99.08) (15,99.12) (16,98.74) (17,98.96) (18,98.95) (19,98.84) (20,98.92)
@@ -1008,7 +802,7 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
   (31,95.52) (32,95.72) (33,95.7) (34,95.62) (35,95.64) (36,95.6) (37,95.68) (38,95.79) (39,95.72) (40,95.64)
   (41,95.77) (42,95.82) (43,95.81) (44,95.63) (45,95.77) (46,95.64) (47,95.47) (48,95.66) (49,95.74) (50,95.74)};
 
-\nextgroupplot[ymin=25, ymax=75, title={CIFAR-10}]
+\nextgroupplot[ymin=25, ymax=75,]
 \addplot[black,thick,dashed] coordinates {
   (1,60.59) (2,67.14) (3,66.37) (4,65.37) (5,67.36) (6,68.15) (7,67.25) (8,67.85) (9,67.46) (10,67.79)
   (11,67.15) (12,67.48) (13,67.52) (14,67.33) (15,66.5) (16,67.12) (17,68.3) (18,67.89) (19,67.18) (20,68.19)
@@ -1056,14 +850,14 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
 \end{tikzpicture}
 \par\vspace{4pt}
 \ref{legendPiid}
-\caption{\textbf{Phase 1: Validation accuracy over 50 federated
-  rounds under IID partitioning} (mean across completed seeds).
+\caption{Validation accuracy over 50 federated rounds under IID
+  partitioning (mean across completed seeds).
+  Panels (left-to-right): HomeOccupancy, MNIST, CIFAR-10.
   All algorithms use uniform tier distribution
-  (35\%~S/35\%~M/30\%~L).  On HomeOccupancy, FedAvg and FedMKS
+  (35\%~S/35\%~M/30\%~L); FedAvg/FedProx are restricted to the
+  all-small architecture.  On HomeOccupancy, FedAvg and FedMKS
   match the centralised ceiling while soft-label-only methods lag
-  slightly.  HomeHAR collapses to the majority-class baseline
-  (${\approx}31\%$) for every method including Central---a
-  dataset-level limitation.  On MNIST all FL methods approach
+  slightly.  On MNIST all FL methods approach
   centralised accuracy; on CIFAR-10 the cross-domain public pool
   suppresses all federated methods ${>}10\%$ below Central.
   \dag~HomeOccupancy FedMD/FedAKD/FedMKS are single-seed; remaining
@@ -1078,66 +872,16 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
   group style={
     xlabels at=edge bottom,
     ylabels at=edge left,
-    group size=3 by 1,
+    group size=2 by 1,
     horizontal sep=0.55cm,
   },
   p1panel,
-  width=0.30\textwidth,
+  width=0.45\textwidth,
 ]
-\nextgroupplot[ymin=0, ymax=35, title={HomeHAR},
+\nextgroupplot[ymin=74, ymax=100,
   legend to name=legendPnoniid,
   legend style={legend columns=7, font=\tiny,
     /tikz/every even column/.append style={column sep=0.3em}}]
-\addplot[black,thick,dashed] coordinates {
-  (1,30.79) (2,30.91) (3,23.03) (4,30.91) (5,30.79) (6,30.91) (7,27.76) (8,30.67) (9,30.91) (10,30.79)
-  (11,30.79) (12,30.79) (13,30.91) (14,30.91) (15,30.79) (16,30.91) (17,30.79) (18,30.55) (19,30.79) (20,30.55)
-  (21,30.79) (22,30.91) (23,30.91) (24,30.79) (25,30.79) (26,30.79) (27,30.42) (28,30.91) (29,30.55) (30,30.91)
-  (31,30.79) (32,30.67) (33,30.55) (34,30.55) (35,30.91) (36,30.67) (37,30.91) (38,30.67) (39,30.42) (40,30.42)
-  (41,30.67) (42,30.91) (43,30.91) (44,30.79) (45,30.79) (46,30.91) (47,30.30) (48,30.67) (49,30.06) (50,30.67)};
-\addlegendentry{Central}
-\addplot[clBlue] coordinates {
-  (1,8.15) (2,5.48) (3,6.14) (4,7.25) (5,7.85) (6,8.22) (7,8.28) (8,9.25) (9,9.97) (10,10.29)
-  (11,11.07) (12,11.18) (13,11.73) (14,13.23) (15,13.19) (16,13.41) (17,13.55) (18,13.44) (19,14.17) (20,14.16)
-  (21,13.81) (22,14.02) (23,14.04) (24,14.75) (25,15.54) (26,15.48) (27,16.21) (28,16.20) (29,15.92) (30,16.20)
-  (31,16.59) (32,16.57) (33,17.04) (34,17.79) (35,17.48) (36,16.59) (37,17.44) (38,17.64) (39,17.79) (40,17.35)
-  (41,17.88) (42,17.79) (43,18.14) (44,17.53) (45,17.94) (46,18.03) (47,17.77) (48,18.16) (49,17.86) (50,18.16)};
-\addlegendentry{FedMD}
-\addplot[clTeal] coordinates {
-  (1,6.95) (2,6.67) (3,6.35) (4,7.92) (5,8.50) (6,8.50) (7,9.09) (8,10.35) (9,10.36) (10,11.25)
-  (11,12.50) (12,12.38) (13,12.15) (14,12.67) (15,12.45) (16,13.53) (17,13.18) (18,13.42) (19,14.40) (20,13.73)
-  (21,13.90) (22,14.11) (23,15.42) (24,14.64) (25,15.45) (26,16.51) (27,16.35) (28,17.26) (29,17.61) (30,18.77)
-  (31,19.21) (32,18.85) (33,18.34) (34,18.46) (35,19.27) (36,17.53) (37,18.68) (38,19.24) (39,19.49) (40,19.65)
-  (41,18.81) (42,19.27) (43,19.33) (44,19.84) (45,20.04) (46,19.36) (47,19.32) (48,19.41) (49,20.06) (50,19.63)};
-\addlegendentry{FedAKD}
-\addplot[clRed,thick] coordinates {
-  (1,7.72) (2,3.61) (3,4.61) (4,4.12) (5,4.37) (6,4.94) (7,6.24) (8,7.45) (9,8.18) (10,8.22)
-  (11,9.00) (12,9.78) (13,10.02) (14,11.21) (15,11.02) (16,11.45) (17,11.20) (18,11.36) (19,12.70) (20,12.71)
-  (21,12.77) (22,12.77) (23,13.59) (24,13.95) (25,14.22) (26,14.56) (27,14.36) (28,15.36) (29,15.44) (30,16.21)
-  (31,16.31) (32,16.69) (33,17.21) (34,17.41) (35,17.45) (36,17.72) (37,18.63) (38,17.62) (39,18.58) (40,18.20)
-  (41,18.89) (42,18.81) (43,18.91) (44,19.32) (45,19.61) (46,19.50) (47,19.02) (48,19.75) (49,19.35) (50,19.35)};
-\addlegendentry{FedMKS}
-\addplot[clPurple] coordinates {
-  (1,7.28) (2,4.44) (3,7.21) (4,6.18) (5,6.70) (6,6.18) (7,6.65) (8,6.93) (9,7.72) (10,7.73)
-  (11,8.75) (12,7.65) (13,8.99) (14,9.77) (15,10.36) (16,11.02) (17,12.16) (18,11.73) (19,12.76) (20,12.36)
-  (21,14.12) (22,14.56) (23,14.97) (24,14.61) (25,15.57) (26,16.18) (27,17.10) (28,17.21) (29,17.58) (30,17.82)
-  (31,17.61) (32,18.03) (33,18.79) (34,18.19) (35,18.58) (36,20.16) (37,19.22) (38,20.02) (39,19.87) (40,20.56)
-  (41,20.68) (42,21.36) (43,20.81) (44,20.73) (45,20.96) (46,21.25) (47,21.15) (48,21.04) (49,21.47) (50,21.08)};
-\addlegendentry{FedAvg}
-\addplot[clOlive] coordinates {
-  (1,8.25) (2,3.61) (3,4.64) (4,5.67) (5,7.21) (6,7.21) (7,6.70) (8,6.70) (9,6.80) (10,7.61)
-  (11,7.93) (12,8.76) (13,9.17) (14,9.27) (15,8.55) (16,9.27) (17,8.68) (18,8.76) (19,8.75) (20,10.27)
-  (21,11.84) (22,11.35) (23,12.61) (24,12.52) (25,12.65) (26,13.77) (27,15.73) (28,13.75) (29,15.14) (30,15.89)
-  (31,15.92) (32,16.13) (33,16.91) (34,16.48) (35,15.09) (36,16.44) (37,16.48) (38,18.28) (39,17.28) (40,18.91)
-  (41,16.21) (42,17.11) (43,17.26) (44,17.75) (45,19.08) (46,17.44) (47,19.28) (48,18.39) (49,18.95) (50,18.65)};
-\addlegendentry{FedProx}
-\addplot[clGray,dotted] coordinates {
-  (1,7.35) (2,9.67) (3,10.56) (4,10.77) (5,12.56) (6,13.54) (7,13.45) (8,15.10) (9,13.30) (10,13.33)
-  (11,15.61) (12,15.82) (13,15.13) (14,15.69) (15,14.12) (16,16.05) (17,15.70) (18,16.31) (19,15.81) (20,15.24)
-  (21,15.34) (22,14.74) (23,15.43) (24,15.67) (25,15.81) (26,15.08) (27,15.98) (28,15.59) (29,15.67) (30,15.80)
-  (31,16.56) (32,16.03) (33,15.47) (34,15.62) (35,15.95) (36,15.76) (37,15.39) (38,15.44) (39,15.47) (40,15.69)
-  (41,16.56) (42,16.12) (43,16.31) (44,16.58) (45,16.74) (46,16.18) (47,16.55) (48,15.45) (49,15.91) (50,15.82)};
-\addlegendentry{Local}
-\nextgroupplot[ymin=74, ymax=100, title={MNIST}]
 \addplot[black,thick,dashed] coordinates {
   (1,99.26) (2,99.15) (3,99.3) (4,99.27) (5,99.26) (6,99.31) (7,99.19) (8,99.18) (9,99.32) (10,98.88)
   (11,99.22) (12,99.32) (13,99.13) (14,99.33) (15,99.31) (16,99.26) (17,99.35) (18,99.31) (19,99.33) (20,99.31)
@@ -1181,7 +925,7 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
   (31,83.85) (32,83.4) (33,84.12) (34,84.1) (35,84.05) (36,84.29) (37,83.78) (38,84.16) (39,83.66) (40,83.6)
   (41,84.03) (42,83.82) (43,83.67) (44,84.06) (45,84.11) (46,84.05) (47,84.24) (48,84.21) (49,84.36) (50,84.28)};
 
-\nextgroupplot[ymin=22, ymax=82, title={CIFAR-10}]
+\nextgroupplot[ymin=22, ymax=82,]
 \addplot[black,thick,dashed] coordinates {
   (1,74.92) (2,72.86) (3,72.67) (4,73.94) (5,75.54) (6,75.04) (7,74.7) (8,75.46) (9,74.63) (10,75.29)
   (11,75.46) (12,75.75) (13,75.28) (14,75.75) (15,75.75) (16,75.18) (17,75.73) (18,75.79) (19,75.09) (20,75.12)
@@ -1229,14 +973,13 @@ HomeOccupancy non-IID condition is omitted while its runs complete.
 \end{tikzpicture}
 \par\vspace{4pt}
 \ref{legendPnoniid}
-\caption{\textbf{Phase 1: Validation accuracy over 50 federated
-  rounds under non-IID partitioning} (Dirichlet $\alpha{=}0.5$;
-  mean across completed seeds).  The HomeOccupancy non-IID condition
-  is omitted while its runs complete.  On HomeHAR every federated
-  method falls \emph{below} the ${\approx}31\%$ majority baseline
-  while Central remains at it.  On MNIST, FedMKS/FedAvg/FedProx stay
+\caption{Validation accuracy over 50 federated rounds under non-IID
+  partitioning (Dirichlet $\alpha{=}0.5$;
+  mean across completed seeds).  Panels (left-to-right):
+  MNIST, CIFAR-10.  The HomeOccupancy non-IID condition
+  is omitted while its runs complete.  On MNIST, FedMKS/FedAvg/FedProx stay
   near-centralised while soft-label-only methods plateau at
-  ${\approx}85\%$.  On CIFAR-10, FedAvg edges out FedProx and
+  ${\approx}84\%$.  On CIFAR-10, FedAvg edges out FedProx and
   FedMKS.}
 \label{fig:phase1noniid}
 \end{figure*}
@@ -1251,28 +994,15 @@ Fig.~\ref{fig:phase1noniid}; completed weight-sharing runs (FedAvg
 38.4\%, FedProx 33.7\%) already trail local-only training (60.1\%),
 consistent with the known difficulty of aggregation under Dirichlet skew.
 
-\textbf{HomeHAR (failure mode).}
-All algorithms converge to ${\approx}31\%$ accuracy on HomeHAR IID---
-essentially the majority-class fraction of the 7-class dataset.  This applies
-even to the centralised model, confirming that the failure is at the
-\emph{dataset level}, not algorithmic.  Under non-IID the failure
-deepens: every federated method falls \emph{below} the majority
-baseline (15.3--20.9\%) while the centralised model remains at
-${\approx}31\%$.  HomeHAR presents severe data scarcity:
-30 samples per class per client (IID) and fewer under non-IID yields
-$<$300 training windows in the most constrained case.  With 7 classes and
-short CSI recordings, the per-window feature extractor lacks sufficient
-diversity to learn discriminative patterns.  Training a centralised Transformer
-on the full HomeHAR corpus (via \texttt{dl.py --dataset home\_har}) is required
-to establish a meaningful upper bound.
-
 \textbf{MNIST.}
 MNIST is an easier benchmark that confirms algorithm ordering under ideal
 conditions.  IID: Central 99.0\%, FedMKS 97.7\%, FedAvg/FedProx
 97.0\%/97.2\%, FedMD/FedAKD/Local all ${\approx}95.8\%$.
 Non-IID: FedAvg 97.4\%, FedProx 97.2\%, FedMKS 96.6\% remain competitive,
-while FedMD/FedAKD/Local plateau at ${\approx}84\%$, confirming that
-soft-label-only methods fail under distribution shift.
+while FedMD/FedAKD/Local plateau at ${\approx}84\%$.  Notably, the
+soft-label-only methods---despite retaining heterogeneous (larger)
+architectures---fall ${\approx}13$ points \emph{below} FedAvg/FedProx, which
+are restricted to the smallest model.
 
 \textbf{CIFAR-10.}
 CIFAR-10 reveals the fundamental difficulty of cross-dataset public/private
@@ -1280,25 +1010,37 @@ knowledge transfer (public is MNIST, private is CIFAR-10).  All FL methods
 fall $10$--$30\%$ below centralised.  FedAvg (53.8\%) marginally leads
 FedProx (52.9\%) and FedMKS (52.6\%) under IID; under non-IID FedAvg
 (49.1\%) and FedProx (48.9\%) edge out FedMKS (48.3\%).  KD-only methods
-(FedMD~40.0\%, FedAKD~40.5\%) barely exceed local training (40.5\%),
+(FedMD~37.2\%, FedAKD~37.4\%) do not exceed local training (37.3\%),
 suggesting MNIST soft labels provide negligible signal for CIFAR-10 learning.
 
-\subsubsection{Phase 2 --- Heterogeneity Ablation}
+\paragraph{Key observation.}
+Two non-IID results motivate FedMKS.  First, weight sharing is a stronger
+signal than cross-architecture distillation alone: FedAvg/FedProx reach
+${\approx}97\%$ on MNIST non-IID while FedMD/FedAKD plateau at
+${\approx}84\%$.  Second---and surprisingly---this holds even though
+FedAvg/FedProx are forced onto the smallest architecture, so distillation
+by itself achieves \emph{lower} accuracy than simply degrading every client
+to the weakest model.  FedMKS is designed to recover model-sharing-level
+accuracy while preserving the heterogeneity that only distillation permits.
 
+\subsubsection{Ablation Studies}
+
+\paragraph{Tier heterogeneity (Phase~2).}
 Phase~2 investigates how tier-heterogeneity distribution affects FedMD on
 HomeOccupancy, comparing \texttt{all\_small}, \texttt{uniform}, and
 \texttt{skewed} configurations under both IID and non-IID settings
 (Fig.~\ref{fig:phase2}).
 
 Under IID, tier composition has negligible effect: \texttt{all\_small},
-\texttt{uniform}, and \texttt{skewed} converge to 86.7\%, 86.7\%, and
-85.8\% respectively, indicating that FedMD soft-label distillation is
-robust to model-capacity heterogeneity when per-client labels are
-balanced.  Under non-IID, \texttt{uniform} (61.5\%) modestly
-outperforms \texttt{all\_small} (59.0\%) and \texttt{skewed}
-(58.8\%), suggesting a balanced tier mix aids knowledge transfer under
-class skew, though the gap (${\approx}3\%$) is small relative to the
-IID/non-IID divide.
+\texttt{uniform}, and \texttt{skewed} all converge to ${\approx}86\%$,
+indicating that FedMD soft-label distillation is robust to model-capacity
+heterogeneity when per-client labels are balanced.  Under non-IID the
+picture changes: \texttt{uniform} (61.5\%) outperforms both
+\texttt{all\_small} (59.1\%) and \texttt{skewed} (58.6\%).  Because
+\texttt{all\_small} (100\%~S) and \texttt{skewed} (60\%~S) concentrate
+clients on the weakest architecture, they converge below the balanced
+\texttt{uniform} mix---i.e.\ small-dominated tier distributions
+underperform heterogeneous ones under label skew.
 
 \begin{figure*}[t]
 \centering
@@ -1313,7 +1055,7 @@ IID/non-IID divide.
   p1panel,
   width=0.42\textwidth,
 ]
-\nextgroupplot[ymin=30, ymax=95, title={IID},
+\nextgroupplot[ymin=30, ymax=95,
   legend to name=legendPtwo,
   legend style={legend columns=3, font=\tiny}]
 \addplot[clOrange] coordinates {
@@ -1337,7 +1079,7 @@ IID/non-IID divide.
   (31,84.67) (32,85.75) (33,85.90) (34,85.95) (35,85.97) (36,86.37) (37,85.88) (38,86.14) (39,85.70) (40,85.99)
   (41,85.84) (42,85.40) (43,85.67) (44,85.77) (45,85.94) (46,85.44) (47,86.09) (48,85.61) (49,85.31) (50,86.70)};
 \addlegendentry{Skewed}
-\nextgroupplot[ymin=30, ymax=70, title={Non-IID}]
+\nextgroupplot[ymin=30, ymax=70,]
 \addplot[clOrange] coordinates {
   (1,33.51) (2,33.74) (3,33.36) (4,33.27) (5,33.89) (6,34.64) (7,35.89) (8,36.61) (9,37.05) (10,37.14)
   (11,37.92) (12,39.31) (13,38.79) (14,38.91) (15,39.94) (16,40.94) (17,41.24) (18,42.18) (19,42.89) (20,43.09)
@@ -1360,83 +1102,117 @@ IID/non-IID divide.
 \end{tikzpicture}
 \par\vspace{4pt}
 \ref{legendPtwo}
-\caption{\textbf{Phase 2: FedMD tier-heterogeneity ablation on
-  HomeOccupancy.}  Validation accuracy over 50 rounds under three
+\caption{FedMD tier-heterogeneity ablation on HomeOccupancy.
+  Validation accuracy over 50 rounds under three
   tier distributions---\texttt{all\_small} (100\%~S),
   \texttt{uniform} (35/35/30), \texttt{skewed}
   (60/30/10)---for IID (left) and non-IID (right) partitions.
-  Tier composition has negligible effect under IID
-  (86.1--86.8\%); under non-IID, \texttt{uniform} modestly leads
-  (61.5\% vs.\ 59.1\%/58.6\%).}
+  Tier composition has negligible effect under IID;
+  under non-IID the small-dominated distributions
+  (\texttt{all\_small}, \texttt{skewed}) converge below the
+  balanced \texttt{uniform} mix.}
 \label{fig:phase2}
 \end{figure*}
 
-\subsubsection{Phase 3 --- FedMKS vs.\ FedDF}
-
-Phase~3 provides a direct empirical comparison of FedMKS and FedDF on
-HomeOccupancy under the IID setting
-(uniform tier distribution, single seed).
-Beyond validation accuracy, the evaluation records
-(ii)~per-round server computation time (aggregation only for FedMKS
-vs.\ client inference and student optimisation for FedDF),
-(iii)~per-round mean client computation time, and
-(iv)~total communication bytes per round, enabling the complexity
-analysis of Table~\ref{tab:fedmks_feddf} to be validated
-experimentally.
-\emph{Experiments are ongoing; results will be added upon completion.}
-Fig.~\ref{fig:phase3} is a placeholder.
+\paragraph{FedMKS vs.\ FedDF (Phase~3).}
+Phase~3 compares FedMKS and FedDF~\cite{lin2020ensemble} on
+HomeOccupancy under the IID setting (uniform tier distribution, single
+seed, 30 rounds, 10 clients), recording validation accuracy together with
+per-round server compute, client compute, and communication bytes
+(Fig.~\ref{fig:phase3}, Table~\ref{tab:efficiency}).  FedDF converges
+faster, plateauing near round~10, and holds a slightly higher converged
+accuracy (89.0\% vs.\ 87.1\% mean over the final five rounds), though
+FedMKS is still climbing and edges ahead at the final round (88.2\%
+vs.\ 88.1\%).
+The efficiency profiles differ sharply.  FedDF concentrates the
+distillation cost on the server---${\approx}243$~s per round of
+server-side ensemble training---whereas FedMKS performs essentially no
+server compute (${\approx}0.06$~s per round, aggregation only) and instead
+distributes the distillation across clients, which run in parallel
+(${\approx}93$~s vs.\ ${\approx}25$~s per client per round).  FedMKS thus
+removes the serial server bottleneck at the cost of higher per-client work
+and ${\approx}22\%$ more communication (37.9 vs.\ 31.0~MB per round),
+since it transmits both soft labels and per-tier weights.
 
 \begin{figure}[t]
 \centering
-\setlength{\fboxsep}{12pt}
-\fbox{%
-  \parbox{0.85\columnwidth}{\centering
-    \vspace{0.6cm}
-    {\large\textcolor{gray}{Phase 3 Results}}\\[4pt]
-    \textcolor{gray}{\small (FedMKS vs.\ FedDF: accuracy, server/client}\\[2pt]
-    \textcolor{gray}{\small compute, and communication overhead per round;}\\[2pt]
-    \textcolor{gray}{\small to be added after experiment completion)}
-    \vspace{0.6cm}
-  }%
-}
-\caption{\textbf{Phase 3 placeholder.}  Validation accuracy and
-  efficiency metrics (server compute, client compute, communication
-  bytes per round) for FedMKS vs.\ FedDF on HomeOccupancy under the IID
-  partition.  Results to be added.}
+\begin{tikzpicture}
+\begin{axis}[p1panel, width=0.92\columnwidth, height=4.4cm,
+  xmin=0, xmax=30, ymin=30, ymax=95, xtick={5,10,15,20,25,30},
+  legend pos=south east, legend style={font=\tiny}]
+\addplot[clRed,thick,mark=none] coordinates {
+  (1,36.4) (2,36.3) (3,33.1) (4,36.1) (5,55.5) (6,53.1) (7,59.4) (8,60.8)
+  (9,57.2) (10,60.6) (11,65.2) (12,69.0) (13,67.3) (14,63.3) (15,66.6)
+  (16,67.4) (17,69.7) (18,66.0) (19,75.4) (20,81.6) (21,83.4) (22,88.1)
+  (23,86.7) (24,87.9) (25,86.7) (26,88.1) (27,85.1) (28,86.4) (29,87.8)
+  (30,88.2)};
+\addlegendentry{FedMKS}
+\addplot[clBlue,mark=none] coordinates {
+  (1,35.2) (2,54.3) (3,58.3) (4,65.0) (5,66.7) (6,72.9) (7,76.6) (8,77.7)
+  (9,86.2) (10,87.1) (11,87.7) (12,89.3) (13,87.7) (14,89.5) (15,88.6)
+  (16,89.4) (17,86.7) (18,85.7) (19,88.7) (20,88.0) (21,89.2) (22,89.0)
+  (23,89.0) (24,88.5) (25,88.5) (26,89.3) (27,89.7) (28,89.0) (29,89.0)
+  (30,88.1)};
+\addlegendentry{FedDF}
+\end{axis}
+\end{tikzpicture}
+\caption{Phase~3: mean client validation accuracy of FedMKS and FedDF on
+  HomeOccupancy under IID (single seed, 30 rounds, 10 clients).  FedDF
+  plateaus earlier (round~${\approx}10$) near 89\%; FedMKS climbs more
+  gradually, reaching ${\approx}88\%$ by round~30.}
 \label{fig:phase3}
 \end{figure}
+
+\begin{table}[t]
+\centering\small
+\caption{Phase~3 efficiency comparison on HomeOccupancy (IID, 30 rounds,
+  10 clients).  Accuracy is the mean over the final five rounds, as in
+  Phase~1.  FedMKS removes the server-side distillation bottleneck by
+  distributing it across parallel clients, at higher per-client compute and
+  modestly more communication.}
+\label{tab:efficiency}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric (per round)} & \textbf{FedMKS} & \textbf{FedDF}\\
+\midrule
+Final val.\ accuracy (\%)        & 87.1   & 89.0  \\
+Server compute (s)               & 0.06   & 243.2 \\
+Mean client compute (s)          & 93.1   & 24.6  \\
+Communication (MB)               & 37.9   & 31.0  \\
+\midrule
+Total communication (MB, 30 r.)  & 1137.7 & 930.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Conclusion}
 \label{sec:conclusion}
 
-HomeSenseKD presents a systematic benchmark for heterogeneous federated
-knowledge distillation applied to CSI-based indoor activity sensing.  The
+We presented \textbf{FedMKS}, a heterogeneous federated
+knowledge-distillation algorithm for CSI-based indoor activity sensing.  The
 dual-head tiered model and the FedMKS algorithm demonstrate that combining
 intra-tier weight sharing with cross-tier feature-carrier distillation achieves
 near-centralised accuracy on HomeOccupancy ($\Delta{\approx}0.5\%$ under IID) while
-preserving full architectural heterogeneity.  Phase~1 results on four datasets
-expose a clear hierarchy: weight-sharing methods dominate under IID;
-soft-label methods are more robust under non-IID when distributions are
-highly skewed; and HomeHAR reveals that data scarcity, not algorithm design,
-is the binding constraint for challenging 7-class CSI recognition.
-Phase~3 will validate the theoretical efficiency advantage of FedMKS over
-FedDF by measuring server compute, client compute, and communication overhead
-directly, providing empirical grounding for the analysis in
-Table~\ref{tab:fedmks_feddf}.
-The public benchmark, code, and datasets provide a reproducible foundation
+preserving full architectural heterogeneity.  Phase~1 results on three
+datasets expose a clear hierarchy: weight-sharing methods dominate under IID;
+under non-IID, soft-label-only distillation underperforms even all-small
+weight sharing, while FedMKS's hybrid of intra-tier weight sharing and
+cross-tier distillation recovers near-centralised accuracy.  Phase~2 confirms
+that small-dominated tier distributions converge below a balanced
+heterogeneous mix under label skew.
+Phase~3 confirms that FedMKS attains comparable accuracy to FedDF
+(87.1\% vs.\ 89.0\%) while eliminating its ${\approx}243$~s/round
+server-side distillation bottleneck---FedMKS uses ${\approx}0.06$~s/round of server compute,
+distributing distillation across parallel clients at ${\approx}22\%$
+higher communication cost.
+The public code and datasets provide a reproducible foundation
 for future work on privacy-preserving sensing.
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Limitations and Future Work}
 \label{sec:limitations}
-
-\textbf{HomeHAR data scarcity.}
-The 7-class HomeHAR dataset yields insufficient windows for reliable
-multi-class federated learning under 30-sample-per-class constraints.  Future
-work should collect additional recording sessions and explore data augmentation
-(Mixup, time-warping) or self-supervised pre-training to improve sample
-efficiency.
 
 \textbf{Single tier distribution in Phase~1.}
 Phase~1 uses only uniform tier distribution (35/35/30).  Varying heterogeneity
@@ -1574,6 +1350,11 @@ T.~Shen, J.~Zhang, X.~Jia, F.~Zhang, G.~Huang, P.~Zhou, K.~Cheng, and
 F.~Wu,
 ``Federated mutual learning,''
 \emph{arXiv preprint arXiv:2006.16765}, 2020.
+
+\bibitem{zhang2018mixup}
+H.~Zhang, M.~Cisse, Y.~N.~Dauphin, and D.~Lopez-Paz,
+``mixup: Beyond empirical risk minimization,''
+in \emph{Proc. ICLR}, 2018.
 
 \bibitem{lin2020ensemble}
 T.~Lin, L.~Kong, S.~U.~Stich, and M.~Jaggi,
