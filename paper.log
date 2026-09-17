@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  16 SEP 2026 17:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  16 SEP 2026 21:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1084,7 +1084,7 @@ t:
  []
 
 [5]
-Underfull \hbox (badness 5592) in paragraph at lines 1193--1212
+Underfull \hbox (badness 5592) in paragraph at lines 1201--1220
 []\OT1/ptm/m/n/10 (+20) We pre-sented \OT1/ptm/b/n/10 (+20) FedMKS\OT1/ptm/m/n/
 10 (+20) , a het-ero-ge-neous fed-er-ated
  []
@@ -1101,9 +1101,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[7
-
-] (paper.aux)
+[7] (paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
@@ -1154,7 +1152,7 @@ a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a
 .pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.
 pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.
 pfb>
-Output written on paper.pdf (7 pages, 460572 bytes).
+Output written on paper.pdf (7 pages, 461349 bytes).
 PDF statistics:
  200 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

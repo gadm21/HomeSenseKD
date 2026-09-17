@@ -1131,8 +1131,13 @@ server compute (${\approx}0.06$~s per round, aggregation only) and instead
 distributes the distillation across clients, which run in parallel
 (${\approx}93$~s vs.\ ${\approx}25$~s per client per round).  FedMKS thus
 removes the serial server bottleneck at the cost of higher per-client work
-and ${\approx}22\%$ more communication (37.9 vs.\ 31.0~MB per round),
-since it transmits both soft labels and per-tier weights.
+and ${\approx}22\%$ more communication (37.9 vs.\ 31.0~MB per round).
+The model-weight term is identical for both (31.0~MB): each client sends
+and receives its own tier's weights, ${\approx}1.2$--$2.2$~MB depending on
+tier.  FedMKS's entire ${\approx}6.9$~MB overhead is the soft-label carrier
+exchange---each client uploads its carrier and downloads the global
+carrier ($|\mathcal{D}^{\text{pub}}|{\times}d$ each way), which FedDF
+avoids by distilling on the server.
 
 \begin{figure}[t]
 \centering
@@ -1179,7 +1184,10 @@ since it transmits both soft labels and per-tier weights.
 Final val.\ accuracy (\%)        & 87.1   & 89.0  \\
 Server compute (s)               & 0.06   & 243.2 \\
 Mean client compute (s)          & 93.1   & 24.6  \\
-Communication (MB)               & 37.9   & 31.0  \\
+\midrule
+Comm.: model weights (MB)        & 31.0   & 31.0  \\
+Comm.: soft-label carriers (MB)  & 6.9    & 0.0   \\
+Communication total (MB)         & 37.9   & 31.0  \\
 \midrule
 Total communication (MB, 30 r.)  & 1137.7 & 930.1 \\
 \bottomrule
