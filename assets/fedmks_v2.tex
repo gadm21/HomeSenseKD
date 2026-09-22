@@ -1,0 +1,130 @@
+% ============================================================
+%  FedMKS variant 2 --- ROUND PIPELINE (one round, left->right)
+%  Three tier rows flow through 5 numbered stages.
+%  Compile: pdflatex fedmks_v2.tex
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+\definecolor{ltBlue}  {RGB}{220,234,252}
+\definecolor{ltGray}  {RGB}{238,238,238}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  stage/.style={font=\tiny\bfseries,text=black!65,align=center},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  badge/.style={circle,draw=clRed,thick,inner sep=0.4pt,font=\tiny\bfseries,
+      text=clRed,fill=white},
+  srv/.style={rectangle,draw=black!50,fill=ltGray,rounded corners=2pt,
+      minimum width=2.6cm,minimum height=3.4cm,align=center},
+  flow/.style={->,thick,black!55},
+  uplink/.style={->,dashed,thick,clGreen},
+  dnlink/.style={->,dashed,thick,clPurple}]
+\tikzset{
+  pics/nnS/.style={code={
+    \foreach \y in {0,0.12} \fill[clBlue] (0,\y) circle (0.024);
+    \foreach \y in {0,0.12} \fill[clBlue] (0.16,\y) circle (0.024);
+    \foreach \a in {0,0.12} \foreach \b in {0,0.12} \draw[black!40,thin](0,\a)--(0.16,\b);}},
+  pics/nnM/.style={code={
+    \foreach \y in {0,0.12} \fill[clTeal] (0,\y) circle (0.022);
+    \foreach \y in {-0.03,0.06,0.15} \fill[clTeal] (0.15,\y) circle (0.022);
+    \foreach \y in {0,0.12} \fill[clTeal] (0.30,\y) circle (0.022);
+    \foreach \a in {0,0.12} \foreach \b in {-0.03,0.06,0.15} \draw[black!40,thin](0,\a)--(0.15,\b);
+    \foreach \a in {-0.03,0.06,0.15} \foreach \b in {0,0.12} \draw[black!40,thin](0.15,\a)--(0.30,\b);}},
+  pics/nnL/.style={code={
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.13,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.26,\y) circle (0.02);
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0.39,\y) circle (0.02);
+    \foreach \a in {0,0.09,0.18} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0,\a)--(0.13,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0.13,\a)--(0.26,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {0,0.09,0.18} \draw[black!40,thin](0.26,\a)--(0.39,\b);}},
+  pics/clientS/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnS};}},
+  pics/clientM/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnM};}},
+  pics/clientL/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnL};}},
+  pics/carrier/.style={code={
+    \node[font=\scriptsize,text=clBlue] at (0,0.05) {\faCommentDots};
+    \node[font=\tiny,text=clBlue] at (0.02,-0.16) {$s_k$};}},
+  pics/privdata/.style={code={
+    \node[font=\small,text=clRed!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clRed] at (0.20,-0.14) {\faLock};}},
+}
+% ===================== stage headers =====================
+\node[stage] at (0,3.15)    {\textcircled{1} local train\\[-1pt]{\tiny CE$+$KD}};
+\node[stage] at (2.7,3.15)  {\textcircled{2} soft labels\\[-1pt]{\tiny $s_k$ on $\mathcal{D}_0$}};
+\node[stage] at (5.0,3.15)  {\textcircled{3} upload\\[-1pt]{\tiny $s_k$, $w_k$}};
+\node[stage] at (7.9,3.15)  {\textcircled{4} aggregate\\[-1pt]{\tiny server}};
+\node[stage] at (10.9,3.15) {\textcircled{5} update\\[-1pt]{\tiny $W_t$, $\bar s$}};
+
+% zone banners: who does what
+\fill[clBlue!10] (-1.7,3.62) rectangle (6.2,4.28);
+\fill[ltGray]   ( 6.4,3.62) rectangle (9.4,4.28);
+\fill[clBlue!10] ( 9.6,3.62) rectangle (12.3,4.28);
+\node[tag,text=clBlue!70!black] at (2.25,3.95) {\textbf{client side}};
+\node[tag]                      at (7.9,3.95)  {\textbf{server side}};
+\node[tag,text=clBlue!70!black] at (10.95,3.95){\textbf{client side}};
+
+% stage separators
+\foreach \x in {1.5,3.9,6.4,9.9}
+  \draw[black!20,dashed] (\x,2.75) -- (\x,-1.55);
+
+% ===================== tier rows =====================
+% ---- row S (y=2.0) ----
+\pic at (-0.80,2.0) {clientS}; \pic at (-0.10,2.0) {clientS};
+\pic at (-0.80,1.45) {privdata}; \pic at (-0.10,1.45) {privdata};
+\pic at (2.50,2.10) {carrier}; \pic at (2.95,1.90) {carrier};
+\node[font=\scriptsize,text=clGreen] at (5.0,2.05) {\faUpload};
+\pic at (10.55,2.0) {clientS}; \pic at (11.30,2.0) {clientS};
+\node[tag] at (-1.40,2.55) {\textbf{S}};
+% ---- row M (y=0.6) ----
+\pic at (-0.80,0.6) {clientM}; \pic at (-0.10,0.6) {clientM};
+\pic at (-0.80,0.05) {privdata}; \pic at (-0.10,0.05) {privdata};
+\pic at (2.50,0.70) {carrier}; \pic at (2.95,0.50) {carrier};
+\node[font=\scriptsize,text=clGreen] at (5.0,0.65) {\faUpload};
+\pic at (10.55,0.6) {clientM}; \pic at (11.30,0.6) {clientM};
+\node[tag] at (-1.40,1.15) {\textbf{M}};
+% ---- row L (y=-0.8) ----
+\pic at (-0.80,-0.8) {clientL}; \pic at (-0.10,-0.8) {clientL};
+\pic at (-0.80,-1.35) {privdata}; \pic at (-0.10,-1.35) {privdata};
+\pic at (2.50,-0.70) {carrier}; \pic at (2.95,-0.90) {carrier};
+\node[font=\scriptsize,text=clGreen] at (5.0,-0.75) {\faUpload};
+\pic at (10.55,-0.8) {clientL}; \pic at (11.30,-0.8) {clientL};
+\node[tag] at (-1.40,-0.25) {\textbf{L}};
+
+% ===================== server (stage 4) =====================
+\node[srv] (srv) at (7.9,0.6)
+  {\faServer\ \ \textbf{Server}\\[3pt]
+   {\tiny tier weights}\\[-1pt]
+   {\tiny $W_t{=}\sum_{k\in t}\frac{n_k}{n_t}w_k$}\\[2pt]
+   {\tiny global carrier}\\[-1pt]
+   {\tiny $\bar s{=}\frac{1}{K}\sum_k s_k$}};
+
+% ===================== flows =====================
+\foreach \y in {2.0,0.6,-0.8}{
+  \draw[flow]   (1.15,\y) -- (1.95,\y);
+  \draw[flow]   (3.45,\y) -- (4.35,\y);
+  \draw[uplink] (5.65,\y) -- (6.55,\y);
+  \draw[dnlink] (9.25,\y) -- (10.15,\y);
+}
+\node[tag,text=clPurple] at (9.70,2.28) {$W_S,\bar s$};
+\node[tag,text=clPurple] at (9.70,0.88) {$W_M,\bar s$};
+\node[tag,text=clPurple] at (9.70,-0.52) {$W_L,\bar s$};
+% intra-tier FedAvg note, centred across the figure
+\node[tag,text=clBlue] at (5.3,-1.85)
+  {server outputs:\ \ tier weights $W_S,W_M,W_L$\ \ $+$\ \ global carrier $\bar s$};
+
+% ===================== next-round loop =====================
+\draw[->,thick,black!45] (11.9,-1.15) .. controls (12.5,-2.4) and (-1.6,-2.4) ..
+  (-1.15,-1.15) node[midway,below,tag]{next round $r{+}1$};
+\end{tikzpicture}
+\end{document}

@@ -2,7 +2,7 @@
 """
 run_fedkd.py — Modular federated-learning experiment runner.
 
-Algorithms : fedmd | fedakd | mks | feddf | fedavg | fedprox | local | central
+Algorithms : fedmd | fedakd | mks | mks_nomixup | feddf | fedavg | fedprox | local | central
 Datasets   : home_occupancy | home_har | mnist | cifar10
 
 Usage examples
@@ -629,7 +629,7 @@ def save_metadata(exp_dir, setting, cfg, algo, hetero, stats):
         "setting": setting,
         "heterogeneity": hetero,
         "model_sharing": algo in ("fedavg", "fedprox", "central"),
-        "knowledge_distillation": algo in ("fedmd", "fedakd", "mks", "feddf"),
+        "knowledge_distillation": algo in ("fedmd", "fedakd", "mks", "mks_nomixup", "feddf"),
         "training": {
             "n_rounds": cfg["federated"]["n_rounds"],
             "local_epochs": cfg["federated"]["local_epochs"],
@@ -734,18 +734,19 @@ def run_one_algo(algo, cfg, tiers, tier_map,
                 clients, n_rnd, f"{algo.upper()} — {setting.upper()}")
             save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
 
-        elif algo == "mks":
+        elif algo in ("mks", "mks_nomixup"):
+            use_mixup = (algo == "mks")
             models  = build_client_models(algo, tiers, input_shape, n_cls)
             pub_cp  = (pub_data[0].copy(), pub_data[1].copy())
             nodes   = [Node(models[i], (pri_x[i], pri_y[i]), pub_cp, val_data,
-                            use_mixup=True)
+                            use_mixup=use_mixup)
                        for i in range(n_par)]
             clients = [KDClient(str(i), nodes[i], exp_dir, setting,
                                 kd_epochs=kd_ep, local_epochs=l_ep,
                                 tier=tiers[i])
                        for i in range(n_par)]
             all_stats[setting] = run_mks(
-                clients, n_rnd, f"MKS — {setting.upper()}", tier_map)
+                clients, n_rnd, f"{algo.upper()} — {setting.upper()}", tier_map)
             save_metadata(exp_dir, setting, cfg, algo, hetero, all_stats[setting])
             _save_efficiency(exp_dir, setting, all_stats[setting]["eff"])
 

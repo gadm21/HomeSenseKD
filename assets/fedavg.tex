@@ -1,0 +1,72 @@
+% ============================================================
+%  HomeSenseKD --- FedAvg diagram (homogeneous weight sharing)
+%  Compile: pdflatex fedavg.tex
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta}
+
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clGray}  {RGB}{100,100,100}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  wshare/.style={<->,thick,clBlue}]
+\tikzset{
+  pics/nnS/.style={code={ % 2-2 (all clients forced to same arch)
+    \foreach \y in {0,0.16} \fill[clBlue] (0,\y) circle (0.035);
+    \foreach \y in {0,0.16} \fill[clBlue] (0.22,\y) circle (0.035);
+    \foreach \a in {0,0.16} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0,\a)--(0.22,\b);}},
+  pics/client/.style={code={
+    \node[font=\LARGE,text=clOrange] at (0.05,0.08) {\faHome};
+    \node[font=\footnotesize,text=clOrange!75!black] at (0.05,0.02) {\faUser};}},
+  pics/server/.style={code={
+    \node[font=\huge,text=black!70] at (0,0.05) {\faServer};}},
+  pics/privdata/.style={code={
+    \node[font=\Large,text=clRed!75!black] at (0,0.08) {\faDatabase};
+    \node[font=\scriptsize,text=clRed] at (0.30,-0.20) {\faLock};}},
+}
+% ==================== server ====================
+\pic at (-1.6,3.35) {server};
+\node[tag,anchor=west] at (-0.75,3.40)
+  {server:\ \ $W\gets\sum_k \frac{n_k}{n}\,w_k$\ \ (FedAvg)};
+
+% ==================== three clients, identical arch ====================
+% ---- client 1 ----
+\pic at (-4.75,0.55) {client};
+\pic at (-3.95,0.55) {nnS};
+\pic at (-4.40,-0.55) {privdata};
+\node[tag] at (-4.2,-1.35) {client 1\\[-1pt](same arch.)};
+\draw[wshare] (-4.2,1.15) -- (-1.95,2.90);
+% ---- client 2 ----
+\pic at (-0.55,0.55) {client};
+\pic at (0.30,0.55) {nnS};
+\pic at (-0.20,-0.55) {privdata};
+\node[tag] at (0,-1.35) {client 2\\[-1pt](same arch.)};
+\draw[wshare] (0,1.15) -- (-1.6,2.85);
+% ---- client 3 ----
+\pic at (3.65,0.55) {client};
+\pic at (4.50,0.55) {nnS};
+\pic at (4.00,-0.55) {privdata};
+\node[tag] at (4.2,-1.35) {client 3\\[-1pt](same arch.)};
+\draw[wshare] (4.2,1.15) -- (-1.25,2.90);
+
+% ==================== legend ====================
+\node[tag,anchor=west] at (-5.9,-2.15)
+  {\textcolor{clBlue}{$\leftrightarrow$}\ model weights
+   $w_k{\leftrightarrow}W$ --- one shared architecture};
+\node[tag,anchor=west] at (-5.9,-2.55)
+  {\textcolor{clRed}{\faLock}\ private data $\mathcal{D}_k$ never
+   leaves the client};
+\end{tikzpicture}
+\end{document}

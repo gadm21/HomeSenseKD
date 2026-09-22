@@ -1,0 +1,84 @@
+% ============================================================
+%  HomeSenseKD --- Non-cooperative (local-only) diagram
+%  Compile: pdflatex noncooperative.tex
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta}
+
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clGray}  {RGB}{100,100,100}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  tag/.style={font=\tiny,text=black!60,align=center}]
+\tikzset{
+  pics/nnS/.style={code={ % 2-2
+    \foreach \y in {0,0.16} \fill[clBlue] (0,\y) circle (0.035);
+    \foreach \y in {0,0.16} \fill[clBlue] (0.22,\y) circle (0.035);
+    \foreach \a in {0,0.16} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0,\a)--(0.22,\b);}},
+  pics/nnM/.style={code={ % 2-3-2
+    \foreach \y in {0,0.16} \fill[clTeal] (0,\y) circle (0.032);
+    \foreach \y in {-0.04,0.08,0.20} \fill[clTeal] (0.20,\y) circle (0.032);
+    \foreach \y in {0,0.16} \fill[clTeal] (0.40,\y) circle (0.032);
+    \foreach \a in {0,0.16} \foreach \b in {-0.04,0.08,0.20}
+      \draw[black!40,thin](0,\a)--(0.20,\b);
+    \foreach \a in {-0.04,0.08,0.20} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0.20,\a)--(0.40,\b);}},
+  pics/nnL/.style={code={ % 3-4-4-3
+    \foreach \y in {0,0.11,0.22} \fill[clPurple] (0,\y) circle (0.028);
+    \foreach \y in {-0.03,0.04,0.11,0.18} \fill[clPurple] (0.17,\y) circle (0.028);
+    \foreach \y in {-0.03,0.04,0.11,0.18} \fill[clPurple] (0.34,\y) circle (0.028);
+    \foreach \y in {0,0.11,0.22} \fill[clPurple] (0.51,\y) circle (0.028);
+    \foreach \a in {0,0.11,0.22} \foreach \b in {-0.03,0.04,0.11,0.18}
+      \draw[black!40,thin](0,\a)--(0.17,\b);
+    \foreach \a in {-0.03,0.04,0.11,0.18} \foreach \b in {-0.03,0.04,0.11,0.18}
+      \draw[black!40,thin](0.17,\a)--(0.34,\b);
+    \foreach \a in {-0.03,0.04,0.11,0.18} \foreach \b in {0,0.11,0.22}
+      \draw[black!40,thin](0.34,\a)--(0.51,\b);}},
+  pics/client/.style={code={
+    \node[font=\LARGE,text=clOrange] at (0.05,0.08) {\faHome};
+    \node[font=\footnotesize,text=clOrange!75!black] at (0.05,0.02) {\faUser};}},
+  pics/privdata/.style={code={
+    \node[font=\Large,text=clRed!75!black] at (0,0.08) {\faDatabase};
+    \node[font=\scriptsize,text=clRed] at (0.30,-0.20) {\faLock};}},
+}
+% ==================== crossed-out server ====================
+\node[font=\huge,text=black!45] at (0,3.15) {\faServer};
+\draw[clRed,very thick] (0,3.15) circle (0.80);
+\draw[clRed,very thick] (-0.60,3.75) -- (0.60,2.55);
+\node[tag] at (0,2.10) {no server, no aggregation,\\[-1pt]no knowledge sharing};
+
+% ==================== three isolated client silos ====================
+% ---- client 1 : tier S ----
+\draw[black!30,dashed,rounded corners=4pt] (-6.1,-1.55) rectangle (-2.7,1.55);
+\pic at (-4.95,0.85) {client};
+\pic at (-4.15,0.82) {nnS};
+\pic at (-4.60,-0.30) {privdata};
+\node[font=\scriptsize,text=clOrange] at (-3.55,-0.28) {\faRedo};
+\node[tag] at (-4.4,-1.15) {client 1 (tier S)\\[-1pt]local train (CE only)};
+% ---- client 2 : tier M ----
+\draw[black!30,dashed,rounded corners=4pt] (-1.7,-1.55) rectangle (1.7,1.55);
+\pic at (-0.55,0.85) {client};
+\pic at (0.30,0.79) {nnM};
+\pic at (-0.20,-0.30) {privdata};
+\node[font=\scriptsize,text=clOrange] at (0.85,-0.28) {\faRedo};
+\node[tag] at (0,-1.15) {client 2 (tier M)\\[-1pt]local train (CE only)};
+% ---- client 3 : tier L ----
+\draw[black!30,dashed,rounded corners=4pt] (2.7,-1.55) rectangle (6.1,1.55);
+\pic at (3.45,0.85) {client};
+\pic at (4.35,0.78) {nnL};
+\pic at (3.80,-0.30) {privdata};
+\node[font=\scriptsize,text=clOrange] at (4.85,-0.28) {\faRedo};
+\node[tag] at (4.4,-1.15) {client 3 (tier L)\\[-1pt]local train (CE only)};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,106 @@
+% ============================================================
+%  FedMKS variant 1 --- RADIAL / hub-and-spoke layout
+%  Server in the centre; three tier clusters at 120 deg.
+%  Compile: pdflatex fedmks_v1.tex
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+\definecolor{ltBlue}  {RGB}{220,234,252}
+\definecolor{ltGray}  {RGB}{238,238,238}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  srv/.style={circle,draw=black!50,fill=ltGray,
+      minimum size=3.1cm,font=\scriptsize\bfseries,align=center},
+  clust/.style={draw=black!40,dashed,rounded corners=6pt,inner sep=5pt},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  badge/.style={circle,draw=clRed,thick,inner sep=0.4pt,font=\tiny\bfseries,
+      text=clRed,fill=white},
+  wshare/.style={<->,thick,clBlue},
+  uplink/.style={->,dashed,thick,clGreen},
+  dnlink/.style={->,dashed,thick,clPurple}]
+\tikzset{
+  pics/nnS/.style={code={
+    \foreach \y in {0,0.12} \fill[clBlue] (0,\y) circle (0.024);
+    \foreach \y in {0,0.12} \fill[clBlue] (0.16,\y) circle (0.024);
+    \foreach \a in {0,0.12} \foreach \b in {0,0.12} \draw[black!40,thin](0,\a)--(0.16,\b);}},
+  pics/nnM/.style={code={
+    \foreach \y in {0,0.12} \fill[clTeal] (0,\y) circle (0.022);
+    \foreach \y in {-0.03,0.06,0.15} \fill[clTeal] (0.15,\y) circle (0.022);
+    \foreach \y in {0,0.12} \fill[clTeal] (0.30,\y) circle (0.022);
+    \foreach \a in {0,0.12} \foreach \b in {-0.03,0.06,0.15} \draw[black!40,thin](0,\a)--(0.15,\b);
+    \foreach \a in {-0.03,0.06,0.15} \foreach \b in {0,0.12} \draw[black!40,thin](0.15,\a)--(0.30,\b);}},
+  pics/nnL/.style={code={
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.13,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.26,\y) circle (0.02);
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0.39,\y) circle (0.02);
+    \foreach \a in {0,0.09,0.18} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0,\a)--(0.13,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0.13,\a)--(0.26,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {0,0.09,0.18} \draw[black!40,thin](0.26,\a)--(0.39,\b);}},
+  pics/clientS/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnS};}},
+  pics/clientM/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnM};}},
+  pics/clientL/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnL};}},
+}
+% ===================== central server =====================
+\node[srv] (srv) at (0,0) {\faServer\ \ Server\\[2pt]
+   {\tiny tier weights $W_t{=}\sum_{k\in t}\frac{n_k}{n_t}w_k$}\\[1pt]
+   {\tiny global carrier $\bar s{=}\frac{1}{K}\sum_k s_k$}};
+\node[badge] at (1.35,1.15) {5};
+
+% ===================== tier clusters at 120 deg (clients only) =====================
+% ---- Small tier : top ----
+\coordinate (s1) at (-0.60,3.30); \pic at (s1) {clientS};
+\coordinate (s2) at ( 0.60,3.30); \pic at (s2) {clientS};
+\node[clust,fit=(s1)(s2)] (cS) {};
+\node[tag] at (0,4.15) {\textbf{Small tier}};
+% ---- Medium tier : lower left ----
+\coordinate (m1) at (-4.05,-2.95); \pic at (m1) {clientM};
+\coordinate (m2) at (-2.85,-3.35); \pic at (m2) {clientM};
+\node[clust,fit=(m1)(m2)] (cM) {};
+\node[tag] at (-3.45,-4.20) {\textbf{Medium tier}};
+% ---- Large tier : lower right ----
+\coordinate (l1) at (2.85,-3.35); \pic at (l1) {clientL};
+\coordinate (l2) at (4.05,-2.95); \pic at (l2) {clientL};
+\node[clust,fit=(l1)(l2)] (cL) {};
+\node[tag] at (3.45,-4.20) {\textbf{Large tier}};
+
+% ===================== channels to the SAME server =====================
+% ---- Small tier ----
+\draw[wshare] (cS.south) -- (srv.90) node[midway,right,tag,text=clBlue]{$W_S$};
+\draw[uplink] (cS.230) .. controls (-1.15,1.9) .. (srv.125); % carrier up
+\draw[dnlink] (srv.55)  .. controls ( 1.15,1.9) .. (cS.310); % s-bar down
+% ---- Medium tier ----
+\draw[wshare] (cM.60) -- (srv.215) node[midway,above,tag,text=clBlue]{$W_M$};
+\draw[uplink] (cM.80)  .. controls (-2.5,-1.1) .. (srv.175); % carrier up
+\draw[dnlink] (srv.250) .. controls (-1.7,-2.0) .. (cM.20);  % s-bar down
+% ---- Large tier ----
+\draw[wshare] (cL.120) -- (srv.325) node[midway,above,tag,text=clBlue]{$W_L$};
+\draw[uplink] (cL.100) .. controls ( 2.5,-1.1) .. (srv.5);   % carrier up
+\draw[dnlink] (srv.290) .. controls ( 1.7,-2.0) .. (cL.160); % s-bar down
+\node[badge] at (-1.05,1.85) {4};
+
+% ===================== step badges =====================
+\node[badge] at (-1.15,3.45) {1};
+\node[badge] at (-0.30,2.45) {2};
+\node[badge] at ( 0.30,2.45) {3};
+
+% ===================== legend =====================
+\node[tag,anchor=west] at (-6.4,0.9)  {\textcolor{clOrange}{\faRedo}\,local train (CE$+$KD)};
+\node[tag,anchor=west] at (-6.4,0.5)  {\textcolor{clBlue}{\faCommentDots}\,carrier $s_k$};
+\node[tag,anchor=west] at (-6.4,0.1)  {\textcolor{clGreen}{\faLongArrowAltUp}\,$s_k$ up};
+\node[tag,anchor=west] at (-6.4,-0.3) {\textcolor{clPurple}{\faLongArrowAltDown}\,$\bar s$ down};
+\node[tag,anchor=west] at (-6.4,-0.7) {\textcolor{clBlue}{$\leftrightarrow$}\,weights $w_k{\leftrightarrow}W_t$};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,103 @@
+% ============================================================
+%  FedDF variant 1 --- hub layout
+%  Heterogeneous clients share ONLY soft labels on a public set.
+%  Compile: pdflatex feddf_v1.tex
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta}
+
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  uplink/.style={->,dashed,thick,clGreen},
+  dnlink/.style={->,dashed,thick,clPurple}]
+\tikzset{
+  pics/nnS/.style={code={
+    \foreach \y in {0,0.16} \fill[clBlue] (0,\y) circle (0.035);
+    \foreach \y in {0,0.16} \fill[clBlue] (0.22,\y) circle (0.035);
+    \foreach \a in {0,0.16} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0,\a)--(0.22,\b);}},
+  pics/nnM/.style={code={
+    \foreach \y in {0,0.16} \fill[clTeal] (0,\y) circle (0.032);
+    \foreach \y in {-0.04,0.08,0.20} \fill[clTeal] (0.20,\y) circle (0.032);
+    \foreach \y in {0,0.16} \fill[clTeal] (0.40,\y) circle (0.032);
+    \foreach \a in {0,0.16} \foreach \b in {-0.04,0.08,0.20}
+      \draw[black!40,thin](0,\a)--(0.20,\b);
+    \foreach \a in {-0.04,0.08,0.20} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0.20,\a)--(0.40,\b);}},
+  pics/nnL/.style={code={
+    \foreach \y in {0,0.11,0.22} \fill[clPurple] (0,\y) circle (0.028);
+    \foreach \y in {-0.03,0.04,0.11,0.18} \fill[clPurple] (0.17,\y) circle (0.028);
+    \foreach \y in {-0.03,0.04,0.11,0.18} \fill[clPurple] (0.34,\y) circle (0.028);
+    \foreach \y in {0,0.11,0.22} \fill[clPurple] (0.51,\y) circle (0.028);
+    \foreach \a in {0,0.11,0.22} \foreach \b in {-0.03,0.04,0.11,0.18}
+      \draw[black!40,thin](0,\a)--(0.17,\b);
+    \foreach \a in {-0.03,0.04,0.11,0.18} \foreach \b in {-0.03,0.04,0.11,0.18}
+      \draw[black!40,thin](0.17,\a)--(0.34,\b);
+    \foreach \a in {-0.03,0.04,0.11,0.18} \foreach \b in {0,0.11,0.22}
+      \draw[black!40,thin](0.34,\a)--(0.51,\b);}},
+  pics/client/.style={code={
+    \node[font=\LARGE,text=clOrange] at (0.05,0.08) {\faHome};
+    \node[font=\footnotesize,text=clOrange!75!black] at (0.05,0.02) {\faUser};}},
+  pics/server/.style={code={
+    \node[font=\huge,text=black!70] at (0,0.05) {\faServer};}},
+  pics/privdata/.style={code={
+    \node[font=\Large,text=clRed!75!black] at (0,0.08) {\faDatabase};
+    \node[font=\scriptsize,text=clRed] at (0.30,-0.20) {\faLock};}},
+  pics/pubdata/.style={code={
+    \node[font=\Large,text=clGreen!75!black] at (0,0.08) {\faDatabase};
+    \node[font=\scriptsize,text=clGreen] at (0.32,-0.20) {\faUnlock};}},
+}
+% ==================== server + public set ====================
+\pic at (-1.6,3.35) {server};
+\pic at (-3.3,3.35) {pubdata};
+\node[tag] at (-3.3,2.72) {public set $\mathcal{D}_0$};
+\node[tag,anchor=west] at (-0.75,3.40)
+  {server:\ \ $\bar s=\frac{1}{K}\sum_k s_k$\ \ (logit avg)};
+
+% ==================== three heterogeneous clients ====================
+% ---- client 1 : arch S ----
+\pic at (-4.75,0.55) {client};
+\pic at (-3.95,0.55) {nnS};
+\pic at (-4.40,-0.55) {privdata};
+\node[tag] at (-4.2,-1.35) {client 1 (arch S)};
+\draw[uplink] (-4.35,1.15) .. controls (-3.6,2.2) .. (-1.95,2.90);
+\draw[dnlink] (-1.55,2.95) .. controls (-3.0,2.3) .. (-3.95,1.15);
+% ---- client 2 : arch M ----
+\pic at (-0.55,0.55) {client};
+\pic at (0.30,0.52) {nnM};
+\pic at (-0.20,-0.55) {privdata};
+\node[tag] at (0,-1.35) {client 2 (arch M)};
+\draw[uplink] (-0.15,1.15) .. controls (-0.6,2.1) .. (-1.75,2.85);
+\draw[dnlink] (-1.35,2.90) .. controls (-0.5,2.2) .. (0.30,1.15);
+% ---- client 3 : arch L ----
+\pic at (3.65,0.55) {client};
+\pic at (4.50,0.50) {nnL};
+\pic at (4.00,-0.55) {privdata};
+\node[tag] at (4.2,-1.35) {client 3 (arch L)};
+\draw[uplink] (4.05,1.15) .. controls (3.2,2.2) .. (-1.25,2.90);
+\draw[dnlink] (-1.05,2.95) .. controls (2.6,2.3) .. (4.60,1.15);
+
+% ==================== legend ====================
+\node[tag,anchor=west] at (-5.9,-2.15)
+  {\textcolor{clGreen}{\faLongArrowAltUp}\ soft labels $s_k$
+   (logits on $\mathcal{D}_0$)};
+\node[tag,anchor=west] at (-5.9,-2.55)
+  {\textcolor{clPurple}{\faLongArrowAltDown}\ averaged soft labels $\bar s$
+   $\rightarrow$ KD target};
+\node[tag,anchor=west] at (-5.9,-2.95)
+  {\textcolor{clRed}{\faLock}\ weights \emph{never} shared ---
+   architectures may differ};
+\end{tikzpicture}
+\end{document}

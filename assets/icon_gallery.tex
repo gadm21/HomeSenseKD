@@ -1,0 +1,141 @@
+% ============================================================
+%  HomeSenseKD --- Icon gallery (standalone, for cropping)
+%  Compile: pdflatex icon_gallery.tex
+%  Output : icon_gallery.pdf (vector) / icon_gallery.png (raster)
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta}
+
+% ---- Palette (same as paper.tex) ----
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clGray}  {RGB}{100,100,100}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+\definecolor{clOlive} {RGB}{100,100,0}
+\definecolor{ltBlue}  {RGB}{220,234,252}
+\definecolor{ltGreen} {RGB}{215,244,220}
+\definecolor{ltOrange}{RGB}{255,237,212}
+\definecolor{ltYellow}{RGB}{255,251,212}
+\definecolor{ltPurple}{RGB}{238,225,255}
+\definecolor{ltGray}  {RGB}{238,238,238}
+\definecolor{ltRed}   {RGB}{255,220,220}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  icolab/.style={font=\tiny,text=black!60,align=center}]
+% ==================== reusable icon pics ====================
+\tikzset{
+  pics/cropcell/.style={code={
+    \draw[black!22,dashed,rounded corners=4pt]
+      (-1.62,-1.18) rectangle (1.62,1.18);}},
+  % ---- model architectures (per tier) ----
+  pics/nnS/.style={code={ % 2-2
+    \foreach \y in {0,0.16} \fill[clBlue] (0,\y) circle (0.035);
+    \foreach \y in {0,0.16} \fill[clBlue] (0.22,\y) circle (0.035);
+    \foreach \a in {0,0.16} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0,\a)--(0.22,\b);}},
+  pics/nnM/.style={code={ % 2-3-2
+    \foreach \y in {0,0.16} \fill[clTeal] (0,\y) circle (0.032);
+    \foreach \y in {-0.04,0.08,0.20} \fill[clTeal] (0.20,\y) circle (0.032);
+    \foreach \y in {0,0.16} \fill[clTeal] (0.40,\y) circle (0.032);
+    \foreach \a in {0,0.16} \foreach \b in {-0.04,0.08,0.20}
+      \draw[black!40,thin](0,\a)--(0.20,\b);
+    \foreach \a in {-0.04,0.08,0.20} \foreach \b in {0,0.16}
+      \draw[black!40,thin](0.20,\a)--(0.40,\b);}},
+  pics/nnL/.style={code={ % 3-4-4-3
+    \foreach \y in {0,0.11,0.22} \fill[clPurple] (0,\y) circle (0.028);
+    \foreach \y in {-0.03,0.04,0.11,0.18} \fill[clPurple] (0.17,\y) circle (0.028);
+    \foreach \y in {-0.03,0.04,0.11,0.18} \fill[clPurple] (0.34,\y) circle (0.028);
+    \foreach \y in {0,0.11,0.22} \fill[clPurple] (0.51,\y) circle (0.028);
+    \foreach \a in {0,0.11,0.22} \foreach \b in {-0.03,0.04,0.11,0.18}
+      \draw[black!40,thin](0,\a)--(0.17,\b);
+    \foreach \a in {-0.03,0.04,0.11,0.18} \foreach \b in {-0.03,0.04,0.11,0.18}
+      \draw[black!40,thin](0.17,\a)--(0.34,\b);
+    \foreach \a in {-0.03,0.04,0.11,0.18} \foreach \b in {0,0.11,0.22}
+      \draw[black!40,thin](0.34,\a)--(0.51,\b);}},
+  % ---- actors ----
+  pics/client/.style={code={
+    \node[font=\LARGE,text=clOrange] at (0.05,0.08) {\faHome};
+    \node[font=\footnotesize,text=clOrange!75!black] at (0.05,0.02) {\faUser};}},
+  pics/server/.style={code={
+    \node[font=\huge,text=black!70] at (0,0.05) {\faServer};}},
+  % ---- data ----
+  pics/privdata/.style={code={
+    \node[font=\Large,text=clRed!75!black] at (0,0.08) {\faDatabase};
+    \node[font=\scriptsize,text=clRed] at (0.30,-0.20) {\faLock};}},
+  pics/pubdata/.style={code={
+    \node[font=\Large,text=clGreen!70!black] at (0,0.08) {\faDatabase};
+    \node[font=\scriptsize,text=clGreen!80!black] at (0.30,-0.20) {\faGlobeAmericas};}},
+  % ---- knowledge vs weights ----
+  pics/softlabel/.style={code={
+    \draw[black!50,thin] (-0.06,0) -- (0.86,0);
+    \foreach \x/\h in {0.00/0.18,0.17/0.44,0.34/0.26,0.51/0.62,0.68/0.34}
+      \fill[clPurple!75] (\x,0) rectangle (\x+0.12,\h);}},
+  pics/weights/.style={code={
+    \foreach \i in {0,1,2} \foreach \j in {0,1,2}
+      \fill[clBlue!80] (\i*0.17,\j*0.17) rectangle (\i*0.17+0.12,\j*0.17+0.12);}},
+  pics/csiwave/.style={code={
+    \draw[clTeal,thick] plot[domain=0:0.95,samples=70]
+      (\x,{0.15*sin(700*\x)+0.07*sin(1900*\x)});
+    \node[font=\scriptsize,text=clTeal] at (0.48,0.40) {\faWifi};}},
+  % ---- operations ----
+  pics/aggregate/.style={code={
+    \foreach \y in {-0.16,0.06,0.28} \fill[clBlue] (-0.18,\y) circle (0.04);
+    \foreach \y in {-0.16,0.06,0.28}
+      \draw[-{Stealth[length=2pt]},clBlue,semithick] (-0.12,\y) -- (0.26,0.06);
+    \draw[-{Stealth[length=2.6pt]},clBlue,thick] (0.26,0.06) -- (0.58,0.06);
+    \fill[clBlue] (0.66,0.06) circle (0.055);}},
+  pics/uplink/.style={code={
+    \node[font=\huge,text=clGreen] at (0,0.02) {\faLongArrowAltUp};}},
+  pics/downlink/.style={code={
+    \node[font=\huge,text=clPurple] at (0,0.02) {\faLongArrowAltDown};}},
+  pics/mixup/.style={code={
+    \fill[clOrange,opacity=0.55] (0.00,0.08) circle (0.27);
+    \fill[clTeal,opacity=0.55]   (0.40,0.08) circle (0.27);
+    \node[font=\scriptsize\bfseries,text=black!75] at (0.20,0.08) {$\lambda$};}},
+  pics/activity/.style={code={
+    \node[font=\LARGE,text=clOrange] at (0,0.05) {\faRunning};}},
+}
+% ==================== gallery grid (5 x 3) ====================
+% ---- row 1 : architectures + actors ----
+\pic at (-6.8,0) {cropcell}; \pic at (-6.91,-0.03) {nnS};
+\node[icolab] at (-6.8,-0.86) {small model\\[-1pt](tier S)};
+\pic at (-3.4,0) {cropcell}; \pic at (-3.60,-0.03) {nnM};
+\node[icolab] at (-3.4,-0.86) {medium model\\[-1pt](tier M)};
+\pic at (0,0) {cropcell}; \pic at (-0.26,-0.05) {nnL};
+\node[icolab] at (0,-0.86) {large model\\[-1pt](tier L)};
+\pic at (3.4,0) {cropcell}; \pic at (3.35,0.05) {client};
+\node[icolab] at (3.4,-0.86) {client\\[-1pt](home / edge)};
+\pic at (6.8,0) {cropcell}; \pic at (6.8,0.05) {server};
+\node[icolab] at (6.8,-0.86) {server\\[-1pt](aggregator)};
+% ---- row 2 : data + knowledge ----
+\pic at (-6.8,-2.75) {cropcell}; \pic at (-6.9,-2.70) {privdata};
+\node[icolab] at (-6.8,-3.61) {private data\\[-1pt]$\mathcal{D}_k$ (stays local)};
+\pic at (-3.4,-2.75) {cropcell}; \pic at (-3.5,-2.70) {pubdata};
+\node[icolab] at (-3.4,-3.61) {public data\\[-1pt]$\mathcal{D}^{\mathrm{pub}}$ (shared)};
+\pic at (0,-2.75) {cropcell}; \pic at (-0.40,-2.95) {softlabel};
+\node[icolab] at (0,-3.61) {soft labels /\\[-1pt]carrier $s_k$};
+\pic at (3.4,-2.75) {cropcell}; \pic at (3.17,-2.90) {weights};
+\node[icolab] at (3.4,-3.61) {model weights\\[-1pt]$w_k,\ W_t$};
+\pic at (6.8,-2.75) {cropcell}; \pic at (6.32,-2.72) {csiwave};
+\node[icolab] at (6.8,-3.61) {CSI window\\[-1pt](input $x$)};
+% ---- row 3 : operations ----
+\pic at (-6.8,-5.5) {cropcell}; \pic at (-7.05,-5.48) {aggregate};
+\node[icolab] at (-6.8,-6.36) {aggregation\\[-1pt](FedAvg / mean)};
+\pic at (-3.4,-5.5) {cropcell}; \pic at (-3.4,-5.45) {uplink};
+\node[icolab] at (-3.4,-6.36) {uplink\\[-1pt]$s_k,\ w_k$};
+\pic at (0,-5.5) {cropcell}; \pic at (0,-5.45) {downlink};
+\node[icolab] at (0,-6.36) {downlink\\[-1pt]$\bar s,\ W_t$};
+\pic at (3.4,-5.5) {cropcell}; \pic at (3.2,-5.50) {mixup};
+\node[icolab] at (3.4,-6.36) {Mixup\\[-1pt]augmentation};
+\pic at (6.8,-5.5) {cropcell}; \pic at (6.8,-5.50) {activity};
+\node[icolab] at (6.8,-6.36) {activity\\[-1pt](HAR class)};
+\end{tikzpicture}
+\end{document}

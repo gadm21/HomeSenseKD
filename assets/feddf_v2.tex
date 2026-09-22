@@ -1,0 +1,130 @@
+% ============================================================
+%  FedDF variant 2 --- ROUND PIPELINE (one round, left->right)
+%  Soft labels are computed ON THE SERVER on the public set;
+%  clients only upload weights and distill the result.
+%  Compile: pdflatex feddf_v2.tex
+% ============================================================
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\definecolor{clBlue}  {RGB}{52,120,180}
+\definecolor{clGreen} {RGB}{45,155,75}
+\definecolor{clOrange}{RGB}{210,105,30}
+\definecolor{clPurple}{RGB}{120,55,175}
+\definecolor{clTeal}  {RGB}{0,130,115}
+\definecolor{clRed}   {RGB}{185,0,0}
+\definecolor{ltBlue}  {RGB}{220,234,252}
+\definecolor{ltGray}  {RGB}{238,238,238}
+
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  stage/.style={font=\tiny\bfseries,text=black!65,align=center},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  srv/.style={rectangle,draw=black!50,fill=ltGray,rounded corners=2pt,
+      minimum width=2.6cm,minimum height=3.4cm,align=center},
+  flow/.style={->,thick,black!55},
+  uplink/.style={->,dashed,thick,clBlue},
+  dnlink/.style={->,dashed,thick,clPurple}]
+\tikzset{
+  pics/nnS/.style={code={
+    \foreach \y in {0,0.12} \fill[clBlue] (0,\y) circle (0.024);
+    \foreach \y in {0,0.12} \fill[clBlue] (0.16,\y) circle (0.024);
+    \foreach \a in {0,0.12} \foreach \b in {0,0.12} \draw[black!40,thin](0,\a)--(0.16,\b);}},
+  pics/nnM/.style={code={
+    \foreach \y in {0,0.12} \fill[clTeal] (0,\y) circle (0.022);
+    \foreach \y in {-0.03,0.06,0.15} \fill[clTeal] (0.15,\y) circle (0.022);
+    \foreach \y in {0,0.12} \fill[clTeal] (0.30,\y) circle (0.022);
+    \foreach \a in {0,0.12} \foreach \b in {-0.03,0.06,0.15} \draw[black!40,thin](0,\a)--(0.15,\b);
+    \foreach \a in {-0.03,0.06,0.15} \foreach \b in {0,0.12} \draw[black!40,thin](0.15,\a)--(0.30,\b);}},
+  pics/nnL/.style={code={
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.13,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.26,\y) circle (0.02);
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0.39,\y) circle (0.02);
+    \foreach \a in {0,0.09,0.18} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0,\a)--(0.13,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0.13,\a)--(0.26,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {0,0.09,0.18} \draw[black!40,thin](0.26,\a)--(0.39,\b);}},
+  pics/clientS/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnS};}},
+  pics/clientM/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnM};}},
+  pics/clientL/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnL};}},
+  pics/wmodel/.style={code={
+    \node[font=\scriptsize,text=clBlue] at (0,0.05) {\faCube};
+    \node[font=\tiny,text=clBlue] at (0.02,-0.16) {$w_k$};}},
+  pics/privdata/.style={code={
+    \node[font=\small,text=clRed!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clRed] at (0.20,-0.14) {\faLock};}},
+  pics/pubdata/.style={code={
+    \node[font=\small,text=clGreen!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clGreen] at (0.22,-0.14) {\faUnlock};}},
+}
+% ===================== stage headers =====================
+\node[stage] at (0,3.15)    {\textcircled{1} local train\\[-1pt]{\tiny CE on $\mathcal{D}_k$}};
+\node[stage] at (4.5,3.15)  {\textcircled{2} upload\\[-1pt]{\tiny $w_k$}};
+\node[stage] at (7.5,3.15)  {\textcircled{3} soft labels\\[-1pt]{\tiny on $\mathcal{D}_0$}};
+\node[stage] at (10.6,3.15) {\textcircled{4} distill\\[-1pt]{\tiny KD on $\bar s$}};
+
+% zone banners: who does what
+\fill[clBlue!10] (-1.7,3.62) rectangle (5.8,4.28);
+\fill[ltGray]   ( 6.0,3.62) rectangle (9.0,4.28);
+\fill[clBlue!10] ( 9.2,3.62) rectangle (12.0,4.28);
+\node[tag,text=clBlue!70!black] at (2.05,3.95) {\textbf{client side}};
+\node[tag]                      at (7.5,3.95)  {\textbf{server side}};
+\node[tag,text=clBlue!70!black] at (10.6,3.95){\textbf{client side}};
+
+% stage separators
+\foreach \x in {2.5,6.0,9.6}
+  \draw[black!20,dashed] (\x,2.75) -- (\x,-1.55);
+
+% ===================== tier rows =====================
+% ---- row S (y=2.0) ----
+\pic at (-0.80,2.0) {clientS}; \pic at (-0.10,2.0) {clientS};
+\pic at (-0.80,1.45) {privdata}; \pic at (-0.10,1.45) {privdata};
+\node[font=\scriptsize,text=clBlue] at (4.5,2.05) {\faUpload};
+\pic at (10.20,2.0) {clientS}; \pic at (10.95,2.0) {clientS};
+\node[tag] at (-1.40,2.55) {\textbf{S}};
+% ---- row M (y=0.6) ----
+\pic at (-0.80,0.6) {clientM}; \pic at (-0.10,0.6) {clientM};
+\pic at (-0.80,0.05) {privdata}; \pic at (-0.10,0.05) {privdata};
+\node[font=\scriptsize,text=clBlue] at (4.5,0.65) {\faUpload};
+\pic at (10.20,0.6) {clientM}; \pic at (10.95,0.6) {clientM};
+\node[tag] at (-1.40,1.15) {\textbf{M}};
+% ---- row L (y=-0.8) ----
+\pic at (-0.80,-0.8) {clientL}; \pic at (-0.10,-0.8) {clientL};
+\pic at (-0.80,-1.35) {privdata}; \pic at (-0.10,-1.35) {privdata};
+\node[font=\scriptsize,text=clBlue] at (4.5,-0.75) {\faUpload};
+\pic at (10.20,-0.8) {clientL}; \pic at (10.95,-0.8) {clientL};
+\node[tag] at (-1.40,-0.25) {\textbf{L}};
+
+% ===================== server (stage 4) =====================
+\node[srv] (srv) at (7.5,0.6)
+  {\faServer\ \ \textbf{Server}\\[16pt]
+   {\tiny runs each $w_k$ on $\mathcal{D}_0$}\\[-1pt]
+   {\tiny $\rightarrow$ logits $s_k$}\\[3pt]
+   {\tiny $\bar s{=}\frac{1}{K}\sum_k s_k$}};
+\pic at (6.80,1.55) {pubdata};
+
+% ===================== flows =====================
+\foreach \y in {2.0,0.6,-0.8}{
+  \draw[flow]   (1.15,\y) -- (3.85,\y);
+  \draw[uplink] (5.15,\y) -- (6.15,\y);
+  \draw[dnlink] (8.85,\y) -- (9.75,\y);
+}
+\node[tag,text=clBlue]   at (5.65,2.28)  {$w_k$};
+\node[tag,text=clBlue]   at (5.65,0.88)  {$w_k$};
+\node[tag,text=clBlue]   at (5.65,-0.52) {$w_k$};
+\node[tag,text=clPurple] at (9.30,2.28)  {$\bar s$};
+\node[tag,text=clPurple] at (9.30,0.88)  {$\bar s$};
+\node[tag,text=clPurple] at (9.30,-0.52) {$\bar s$};
+% note, centred
+\node[tag,text=clBlue] at (5.15,-1.85)
+  {soft labels computed \emph{on the server} --- clients only distill};
+
+% ===================== next-round loop =====================
+\draw[->,thick,black!45] (11.55,-1.15) .. controls (12.15,-2.4) and (-1.6,-2.4) ..
+  (-1.15,-1.15) node[midway,below,tag]{next round $r{+}1$};
+\end{tikzpicture}
+\end{document}

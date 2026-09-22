@@ -1,0 +1,37 @@
+{
+  "algorithm": "mks_nomixup",
+  "dataset": {
+    "private": "home_occupancy",
+    "public": "home_har",
+    "n_classes": 3,
+    "n_parties": 10
+  },
+  "setting": "iid",
+  "heterogeneity": "uniform",
+  "model_sharing": false,
+  "knowledge_distillation": true,
+  "training": {
+    "n_rounds": 30,
+    "local_epochs": 4,
+    "kd_epochs": 2,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 30,
+    "dirichlet_alpha": 0.5,
+    "window_size": 1500,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "last_round_avg_accuracy": 0.872792798280716,
+    "last_round_min_accuracy": 0.8090090155601501,
+    "last_round_max_accuracy": 0.9225225448608398,
+    "final_avg_accuracy": 0.874270268678665
+  },
+  "efficiency": {
+    "mean_server_s_per_round": 0.05774205333194307,
+    "mean_client_s_per_round": 97.22566521499874,
+    "mean_comm_bytes_per_round": 37924869.6,
+    "total_comm_mb": 1137.746088
+  }
+}
