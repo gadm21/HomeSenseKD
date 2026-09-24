@@ -19,6 +19,8 @@ R, GS = 50, 4          # rounds per seed, local epochs per round (CSV rows/round
 # HomeOcc counts measured from load_homeoccupancy(window_size=1500) output.
 DS = {
     'home_occupancy': dict(counts=[375, 380, 293], n_cls=3,  spc=30),
+    'home_har':       dict(counts=[210, 198, 190, 199, 198, 105, 0],
+                           n_cls=7, spc=30),  # 80% train split of 1375
     'mnist':          dict(counts=[6000]*10,       n_cls=10, spc=30),
     'cifar10':        dict(counts=[5000]*10,       n_cls=10, spc=30),
 }
@@ -33,12 +35,16 @@ def replay_partitions(counts, n_cls, spc, seed):
     # iid_partition -> split_dataset: one choice() per class
     for c in range(n_cls):
         idx = np.where(y == c)[0]
+        if len(idx) == 0:
+            continue
         np.random.choice(idx, max(spc * N_PARTIES, len(idx)),
                          replace=True)[:spc * N_PARTIES]
     # dirichlet_partition
     cnt = np.zeros((N_PARTIES, n_cls), dtype=int)
     for c in range(n_cls):
         idxs = np.where(y == c)[0]
+        if len(idxs) == 0:
+            continue
         np.random.shuffle(idxs)
         props = np.random.dirichlet(np.repeat(ALPHA, N_PARTIES))
         splits = (np.cumsum(props[:-1]) * len(idxs)).astype(int)
@@ -68,9 +74,15 @@ for ds, p in DS.items():
         cnt = replay_partitions(p['counts'], p['n_cls'], p['spc'], seed)
         n = cnt.sum(1)
         dom = cnt.max(1) / np.maximum(n, 1)
+        # dominant-class mass: fraction of ALL client samples sitting in
+        # clients whose plurality class is c; the max over c predicts
+        # whether the first global average falls into one class's basin.
+        argmax = cnt.argmax(1)
+        mass = [n[argmax == c].sum() for c in range(p['n_cls'])]
         stats[ds].append({'seed': seed,
                           'n': n.tolist(),
                           'dom_share': dom.tolist(),
+                          'dom_mass': (max(mass) / max(n.sum(), 1)),
                           'counts': cnt.tolist()})
 
 os.makedirs('results', exist_ok=True)
@@ -100,6 +112,8 @@ for s, seed in enumerate(SEEDS):
         a = np.array(arr); m = ~np.isnan(a)
         if m.sum() > 2:
             print(f"corr(dom-share, {nm:6s}) = {np.corrcoef(np.array(doms)[m], a[m])[0,1]:+.3f}")
+    print(f"dominant-class mass fraction = {st['dom_mass']:.3f}  "
+          f"(FedAvg mean = {np.nanmean(fa[:, s]):.1f})")
 
 # ---- Phase-2 FedMD per-tier means (tiers assigned in client order) ----
 TIERFRAC = {'all_small': [1.0, 0.0, 0.0], 'uniform': [0.35, 0.35, 0.30],

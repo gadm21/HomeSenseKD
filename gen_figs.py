@@ -360,9 +360,11 @@ tex += ['\\end{groupplot}', '\\end{tikzpicture}',
 open('fig_clientseeds.tex', 'w').write('\n'.join(tex))
 
 # ---------- FIG partition ----------
-# Data distribution as the deciding factor.
+# Data distribution as the deciding factor.  Three panels:
 # (a) HomeOcc non-IID: dominant-class share vs per-client final accuracy.
-# (b) all datasets: samples per client (log) vs dominant-class share.
+# (b) per-seed mean accuracy: weight sharing collapses in 2/3 seeds while
+#     KD/local references stay flat.
+# (c) all four datasets in the (samples/client, dominant-share) plane.
 pstats = json.load(open('results/partition_stats.json'))
 ho = pstats['home_occupancy']
 
@@ -378,62 +380,102 @@ def share_acc_pts(folder):
         out += [(ho[s]['dom_share'][c] * 100, acc[c]) for c in range(C)]
     return out
 
+def seed_means(folder):
+    """Per-seed mean of per-client last-5-round accuracy (%)."""
+    a = load(folder)
+    if a is None:
+        return []
+    C, T = a.shape
+    return [float(a[:, s*R + R - 5:(s+1)*R].mean() * 100) for s in range(T // R)]
+
+HO = 'results/phase1/home_occupancy'
+MK = {'local': 'mark=*', 'fedavg': 'mark=square*', 'fedprox': 'mark=triangle*',
+      'fedmd': 'mark=*', 'fedakd': 'mark=diamond*', 'mks': 'mark=pentagon*'}
 tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
-       '  group style={', '    group size=2 by 1,', '    horizontal sep=1.5cm,', '  },',
-       '  width=0.44\\textwidth,', '  height=4.6cm,', ']']
+       '  group style={', '    group size=3 by 1,', '    horizontal sep=1.15cm,', '  },',
+       '  width=0.31\\textwidth,', '  height=4.4cm,', ']']
 # ---- (a) dominant share vs accuracy, HomeOccupancy non-IID ----
 tex += ['\\nextgroupplot[xlabel={Dominant-class share (\\%)},',
         '  ylabel={Val.\\ Acc.\\ (\\%)},',
         '  xmin=30, xmax=105, ymin=20, ymax=95, grid=major,',
         '  grid style={gray!18, line width=0.3pt},',
-        '  tick label style={font=\\tiny}, label style={font=\\tiny},',
-        '  legend style={font=\\tiny, at={(0.03,0.97)}, anchor=north west,',
-        '    draw=none, fill=none}]']
-PA = [('local', 'Local', 'results/phase1/home_occupancy/local/uniform/noniid'),
-      ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
-      ('fedavg', 'FedAvg', 'results/phase1/home_occupancy/fedavg/uniform/noniid')]
-for algo, nm, folder in PA:
+        '  tick label style={font=\\tiny}, label style={font=\\tiny}]']
+for algo, folder in [('local', f'{HO}/local/uniform/noniid'),
+                     ('fedmd', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
+                     ('fedavg', f'{HO}/fedavg/uniform/noniid')]:
     pts = share_acc_pts(folder)
     pc = '\n'.join('  ' + ' '.join(f'({x:.1f},{y:.2f})' for x, y in pts[k:k+12])
                    for k in range(0, len(pts), 12))
-    tex.append(f'\\addplot[only marks, mark=*, mark size=0.9pt, {FILL[algo]}, opacity=0.6] coordinates {{\n{pc}}};')
+    tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=1.0pt, {FILL[algo]}, opacity=0.65, forget plot] coordinates {{\n{pc}}};')
+tex.append('\\addplot[black!50, dashed, forget plot] coordinates {(30,33.3) (105,33.3)};')
+# ---- (b) per-seed mean accuracy ----
+tex += ['\\nextgroupplot[xlabel={Seed}, ylabel={Mean val.\\ acc.\\ (\\%)},',
+        '  xmin=0.6, xmax=3.4, ymin=25, ymax=95, xtick={1,2,3},',
+        '  xticklabels={42,123,456}, grid=major,',
+        '  grid style={gray!18, line width=0.3pt},',
+        '  tick label style={font=\\tiny}, label style={font=\\tiny},',
+        '  legend to name=legendPart,',
+        '  legend style={legend columns=6, font=\\tiny}]']
+for algo, nm, folder in [
+        ('fedavg', 'FedAvg', f'{HO}/fedavg/uniform/noniid'),
+        ('fedprox', 'FedProx', f'{HO}/fedprox/uniform/noniid'),
+        ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
+        ('fedakd', 'FedAKD', f'{HO}/fedakd/uniform/noniid'),
+        ('mks', 'FedMKS', f'{HO}/mks/uniform/noniid'),
+        ('local', 'Local', f'{HO}/local/uniform/noniid')]:
+    ms = seed_means(folder)
+    if not ms:
+        continue
+    xs = list(range(1, len(ms) + 1))
+    if len(ms) > 1:   # per-seed points connected by a line
+        pc = ' '.join(f'({x},{y:.2f})' for x, y in zip(xs, ms))
+        tex.append(f'\\addplot[{FILL[algo]}, thick, {MK[algo]}, mark size=1.4pt] coordinates {{{pc}}};')
+    else:             # single-seed reference: dashed horizontal line
+        tex.append(f'\\addplot[{FILL[algo]}, dashed, thick] coordinates {{(0.6,{ms[0]:.2f}) (3.4,{ms[0]:.2f})}};')
     tex.append(f'\\addlegendentry{{{nm}}}')
-tex.append('\\addplot[clGray, dashed, forget plot] coordinates {(30,33.3) (105,33.3)};')
-# ---- (b) samples per client vs dominant share, all datasets ----
+tex.append('\\addplot[black!50, dotted, forget plot] coordinates {(0.6,33.3) (3.4,33.3)};')
+# ---- (c) samples per client vs dominant share, all datasets ----
 tex += ['\\nextgroupplot[xmode=log,',
         '  xlabel={Samples per client}, ylabel={Dominant-class share (\\%)},',
         '  xmin=8, xmax=9000, ymin=15, ymax=105, grid=major,',
         '  grid style={gray!18, line width=0.3pt},',
         '  tick label style={font=\\tiny}, label style={font=\\tiny},',
-        '  legend style={font=\\tiny, at={(0.97,0.03)}, anchor=south east,',
-        '    draw=none, fill=none}]']
-DSCOL = {'home_occupancy': ('clRed', 'HomeOcc (3 cls)'),
-         'mnist': ('clBlue', 'MNIST (10 cls)'),
-         'cifar10': ('clOlive', 'CIFAR-10 (10 cls)')}
-for ds, (col, nm) in DSCOL.items():
+        '  legend to name=legendPartDS,',
+        '  legend style={legend columns=4, font=\\tiny}]']
+DSCOL = {'home_occupancy': ('clRed', 'mark=*', 'HomeOcc (3 cls)'),
+         'home_har': ('clOrange', 'mark=square*', 'HomeHAR (7 cls)'),
+         'mnist': ('clBlue', 'mark=triangle*', 'MNIST (10 cls)'),
+         'cifar10': ('clOlive', 'mark=diamond*', 'CIFAR-10 (10 cls)')}
+for ds, (col, mk, nm) in DSCOL.items():
     pts = [(n, sh * 100) for sd in pstats[ds]
            for n, sh in zip(sd['n'], sd['dom_share'])]
     pc = '\n'.join('  ' + ' '.join(f'({x},{y:.1f})' for x, y in pts[k:k+12])
                    for k in range(0, len(pts), 12))
-    tex.append(f'\\addplot[only marks, mark=*, mark size=0.9pt, {col}, opacity=0.55] coordinates {{\n{pc}}};')
+    tex.append(f'\\addplot[only marks, {mk}, mark size=1.0pt, {col}, opacity=0.55] coordinates {{\n{pc}}};')
     tex.append(f'\\addlegendentry{{{nm}}}')
     mn = float(np.exp(np.mean(np.log([p[0] for p in pts]))))
     ms = float(np.mean([p[1] for p in pts]))
-    tex.append(f'\\addplot[only marks, mark=*, mark size=2.2pt, {col}!45!black, forget plot] coordinates {{({mn:.0f},{ms:.1f})}};')
-tex += ['\\end{groupplot}', '\\end{tikzpicture}',
-        '\\caption{Data distribution decides per-client accuracy.',
-        "  (a)~HomeOccupancy non-IID: each client's final accuracy vs.\\ the",
-        '  dominant-class share of its Dirichlet partition.  Local and FedMD',
-        '  accuracies degrade as the partition approaches a single class',
+    tex.append(f'\\addplot[only marks, {mk}, mark size=2.4pt, {col}!45!black, forget plot] coordinates {{({mn:.0f},{ms:.1f})}};')
+tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
+        '\\ref{legendPart}\\\\[2pt]\\ref{legendPartDS}',
+        '\\caption{Data distribution decides whether weight averaging',
+        '  survives.  (a)~HomeOccupancy non-IID: per-client final accuracy',
+        "  vs.\\ each client's dominant-class share.  Local and FedMD",
+        '  degrade as the partition approaches a single class',
         '  ($r{=}{-}0.36$ for Local); FedAvg clients in the two collapsed',
-        '  seeds sit at chance at \\emph{every} share---collapse is a global',
+        '  seeds sit at chance at \\emph{every} share---collapse is a',
         "  property of the averaged model, not of any client's data.",
-        '  (b)~Per-client partitions of all benchmarks in the',
-        '  (samples, dominant-share) plane (all seeds pooled; large dots mark',
-        '  dataset means).  HomeOccupancy occupies the high-skew/low-data',
-        '  corner---the regime where weight averaging can collapse---while',
-        '  MNIST and CIFAR-10 clients hold ${\\approx}60{\\times}$ more',
-        '  samples at lower dominant shares.}',
+        '  (b)~Mean accuracy per seed: FedAvg and FedProx collapse in two',
+        '  of three seeds while the KD-based methods and Local (single',
+        '  seed, dashed references) hold ${\\approx}54$--$63\\%$; FedMKS',
+        '  never falls below 53\\%, so its worst case exceeds the',
+        '  weight-sharing worst case by ${\\approx}20$ points.',
+        '  (c)~Per-client partitions of all benchmarks in the',
+        '  (samples, dominant-share) plane (all seeds pooled; large marks',
+        '  are dataset means).  HomeOccupancy alone occupies the',
+        '  high-skew/low-data corner; HomeHAR has equally few samples but',
+        '  more classes, so no single class dominates---and averaging',
+        '  survives there.}',
         '\\label{fig:partition}', '\\end{figure*}']
 open('fig_partition.tex', 'w').write('\n'.join(tex))
 print('done')
