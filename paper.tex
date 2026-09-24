@@ -1920,6 +1920,104 @@ accuracy over 50 rounds under IID and non-IID partitions.
 \label{fig:partition}
 \end{figure*}
 
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    group size=2 by 1,
+    horizontal sep=1.5cm,
+  },
+  width=0.44\textwidth,
+  height=4.6cm,
+]
+\nextgroupplot[xlabel={Dominant-class share (\%)},
+  ylabel={Acc.\ drop vs.\ IID (pts)},
+  xmin=30, xmax=105, ymin=-12, ymax=68, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}
+  , legend to name=legendImb,
+  legend style={legend columns=6, font=\tiny}]
+\addplot[only marks, mark=*, mark size=1.0pt, clGray, opacity=0.6] coordinates {
+  (76.9,16.16) (75.0,29.31) (56.0,14.36) (94.1,16.16) (87.2,41.31) (54.4,3.08) (59.6,14.32) (74.0,18.72) (70.5,16.16) (52.4,14.65) (96.6,28.81) (64.3,23.73)
+  (47.9,22.21) (72.8,33.78) (59.1,21.42) (50.0,10.25) (66.7,53.56) (66.7,12.77) (94.1,20.48) (56.2,14.11)};
+\addlegendentry{Local}
+\addplot[only marks, mark=*, mark size=1.0pt, clBlue, opacity=0.6] coordinates {
+  (76.9,21.56) (75.0,34.72) (56.0,21.56) (94.1,21.56) (87.2,21.82) (54.4,34.57) (59.6,21.28) (74.0,13.42) (70.5,21.56) (52.4,16.52) (96.6,33.74) (64.3,14.18)
+  (47.9,8.48) (72.8,29.64) (59.1,35.19) (50.0,15.22) (66.7,45.35) (66.7,20.77) (94.1,21.56) (56.2,19.80)};
+\addlegendentry{FedMD}
+\addplot[only marks, mark=diamond*, mark size=1.0pt, clTeal, opacity=0.6] coordinates {
+  (76.9,21.74) (75.0,34.89) (56.0,21.74) (94.1,29.19) (87.2,39.32) (54.4,29.59) (59.6,21.41) (74.0,15.65) (70.5,21.74) (52.4,19.68) (96.6,33.88) (64.3,15.93)
+  (47.9,14.28) (72.8,30.10) (59.1,33.05) (50.0,16.69) (66.7,57.05) (66.7,20.15) (94.1,21.74) (56.2,20.73)};
+\addlegendentry{FedAKD}
+\addplot[only marks, mark=pentagon*, mark size=1.0pt, clRed, opacity=0.6] coordinates {
+  (76.9,43.68) (75.0,55.61) (56.0,42.46) (94.1,54.60) (87.2,51.65) (54.4,44.80) (59.6,55.61) (74.0,23.61) (70.5,25.16) (52.4,10.46) (96.6,38.49) (64.3,23.43)
+  (47.9,18.64) (72.8,42.28) (59.1,55.25) (50.0,16.12) (66.7,55.61) (66.7,25.16) (94.1,25.16) (56.2,23.68)};
+\addlegendentry{FedMKS}
+\addplot[only marks, mark=square*, mark size=1.0pt, clPurple, opacity=0.6] coordinates {
+  (76.9,57.66) (75.0,57.66) (56.0,57.66) (94.1,57.66) (87.2,57.66) (54.4,56.36) (59.6,55.50) (74.0,55.50) (70.5,57.66) (52.4,57.66) (96.6,57.66) (64.3,55.50)
+  (47.9,53.73) (72.8,57.66) (59.1,55.50) (50.0,57.66) (66.7,55.50) (66.7,57.66) (94.1,57.66) (56.2,57.66) (71.6,25.05) (51.5,25.05) (100.0,16.69) (42.3,-0.61)
+  (52.1,2.52) (50.0,51.24) (63.2,5.95) (58.3,1.30) (85.7,13.41) (96.6,55.50) (57.5,9.87) (95.8,22.27) (56.7,25.01) (90.3,23.93) (88.9,35.39) (68.4,22.96)
+  (53.8,24.94) (63.6,23.78) (84.8,2.45) (53.8,19.57) (78.0,57.66) (42.4,53.84) (77.3,57.55) (62.7,57.59) (66.7,55.50) (58.3,57.66) (64.3,55.42) (50.9,55.50)
+  (51.2,25.30) (74.1,45.62) (100.0,57.66) (77.8,57.66) (57.3,55.50) (78.1,57.66) (44.3,51.42) (42.9,51.14) (57.1,46.81) (59.5,51.21) (54.4,38.09) (44.0,49.48)};
+\addlegendentry{FedAvg}
+\addplot[only marks, mark=triangle*, mark size=1.0pt, clOlive, opacity=0.6] coordinates {
+  (76.9,56.23) (75.0,56.23) (56.0,56.23) (94.1,56.23) (87.2,56.23) (54.4,53.28) (59.6,54.07) (74.0,54.07) (70.5,56.23) (52.4,56.23) (96.6,56.23) (64.3,54.07)
+  (47.9,54.07) (72.8,56.23) (59.1,54.07) (50.0,56.23) (66.7,54.07) (66.7,56.23) (94.1,56.23) (56.2,56.23) (71.6,23.66) (51.5,23.62) (100.0,40.16) (42.3,8.74)
+  (52.1,9.03) (50.0,29.42) (63.2,29.64) (58.3,22.14) (85.7,23.69) (96.6,54.07) (57.5,21.53) (95.8,47.44) (56.7,23.19) (90.3,23.62) (88.9,30.25) (68.4,21.64)
+  (53.8,23.66) (63.6,21.68) (84.8,26.22) (53.8,22.50) (78.0,56.23) (42.4,51.58) (77.3,56.23) (62.7,56.23) (66.7,54.07) (58.3,56.23) (64.3,54.07) (50.9,54.07)
+  (51.2,56.23) (74.1,56.23) (100.0,56.23) (77.8,56.23) (57.3,54.07) (78.1,56.23) (44.3,49.57) (42.9,56.23) (57.1,56.23) (59.5,54.07) (54.4,56.23) (44.0,56.09)};
+\addlegendentry{FedProx}
+\addplot[black!50, dashed, forget plot] coordinates {(30,0) (105,0)};
+\nextgroupplot[xlabel={Samples per client},
+  ylabel={Acc.\ drop vs.\ IID (pts)},
+  xmode=log, xmin=8, xmax=300, ymin=-12, ymax=68, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[only marks, mark=*, mark size=1.0pt, clGray, opacity=0.6] coordinates {
+  (13.0,16.16) (12.0,29.31) (25.0,14.36) (17.0,16.16) (47.0,41.31) (103.0,3.08) (52.0,14.32) (73.0,18.72) (88.0,16.16) (21.0,14.65) (203.0,28.81) (28.0,23.73)
+  (71.0,22.21) (136.0,33.78) (22.0,21.42) (74.0,10.25) (21.0,53.56) (9.0,12.77) (17.0,20.48) (16.0,14.11)};
+\addplot[only marks, mark=*, mark size=1.0pt, clBlue, opacity=0.6] coordinates {
+  (13.0,21.56) (12.0,34.72) (25.0,21.56) (17.0,21.56) (47.0,21.82) (103.0,34.57) (52.0,21.28) (73.0,13.42) (88.0,21.56) (21.0,16.52) (203.0,33.74) (28.0,14.18)
+  (71.0,8.48) (136.0,29.64) (22.0,35.19) (74.0,15.22) (21.0,45.35) (9.0,20.77) (17.0,21.56) (16.0,19.80)};
+\addplot[only marks, mark=diamond*, mark size=1.0pt, clTeal, opacity=0.6] coordinates {
+  (13.0,21.74) (12.0,34.89) (25.0,21.74) (17.0,29.19) (47.0,39.32) (103.0,29.59) (52.0,21.41) (73.0,15.65) (88.0,21.74) (21.0,19.68) (203.0,33.88) (28.0,15.93)
+  (71.0,14.28) (136.0,30.10) (22.0,33.05) (74.0,16.69) (21.0,57.05) (9.0,20.15) (17.0,21.74) (16.0,20.73)};
+\addplot[only marks, mark=pentagon*, mark size=1.0pt, clRed, opacity=0.6] coordinates {
+  (13.0,43.68) (12.0,55.61) (25.0,42.46) (17.0,54.60) (47.0,51.65) (103.0,44.80) (52.0,55.61) (73.0,23.61) (88.0,25.16) (21.0,10.46) (203.0,38.49) (28.0,23.43)
+  (71.0,18.64) (136.0,42.28) (22.0,55.25) (74.0,16.12) (21.0,55.61) (9.0,25.16) (17.0,25.16) (16.0,23.68)};
+\addplot[only marks, mark=square*, mark size=1.0pt, clPurple, opacity=0.6] coordinates {
+  (13.0,57.66) (12.0,57.66) (25.0,57.66) (17.0,57.66) (47.0,57.66) (103.0,56.36) (52.0,55.50) (73.0,55.50) (88.0,57.66) (21.0,57.66) (203.0,57.66) (28.0,55.50)
+  (71.0,53.73) (136.0,57.66) (22.0,55.50) (74.0,57.66) (21.0,55.50) (9.0,57.66) (17.0,57.66) (16.0,57.66) (109.0,25.05) (68.0,25.05) (1.0,16.69) (52.0,-0.61)
+  (48.0,2.52) (36.0,51.24) (38.0,5.95) (84.0,1.30) (14.0,13.41) (29.0,55.50) (214.0,9.87) (24.0,22.27) (30.0,25.01) (93.0,23.93) (54.0,35.39) (38.0,22.96)
+  (13.0,24.94) (11.0,23.78) (79.0,2.45) (13.0,19.57) (91.0,57.66) (33.0,53.84) (44.0,57.55) (51.0,57.59) (6.0,55.50) (24.0,57.66) (14.0,55.42) (57.0,55.50)
+  (80.0,25.30) (139.0,45.62) (32.0,57.66) (18.0,57.66) (82.0,55.50) (64.0,57.66) (88.0,51.42) (7.0,51.14) (7.0,46.81) (79.0,51.21) (57.0,38.09) (75.0,49.48)};
+\addplot[only marks, mark=triangle*, mark size=1.0pt, clOlive, opacity=0.6] coordinates {
+  (13.0,56.23) (12.0,56.23) (25.0,56.23) (17.0,56.23) (47.0,56.23) (103.0,53.28) (52.0,54.07) (73.0,54.07) (88.0,56.23) (21.0,56.23) (203.0,56.23) (28.0,54.07)
+  (71.0,54.07) (136.0,56.23) (22.0,54.07) (74.0,56.23) (21.0,54.07) (9.0,56.23) (17.0,56.23) (16.0,56.23) (109.0,23.66) (68.0,23.62) (1.0,40.16) (52.0,8.74)
+  (48.0,9.03) (36.0,29.42) (38.0,29.64) (84.0,22.14) (14.0,23.69) (29.0,54.07) (214.0,21.53) (24.0,47.44) (30.0,23.19) (93.0,23.62) (54.0,30.25) (38.0,21.64)
+  (13.0,23.66) (11.0,21.68) (79.0,26.22) (13.0,22.50) (91.0,56.23) (33.0,51.58) (44.0,56.23) (51.0,56.23) (6.0,54.07) (24.0,56.23) (14.0,54.07) (57.0,54.07)
+  (80.0,56.23) (139.0,56.23) (32.0,56.23) (18.0,56.23) (82.0,54.07) (64.0,56.23) (88.0,49.57) (7.0,56.23) (7.0,56.23) (79.0,54.07) (57.0,56.23) (75.0,56.09)};
+\addplot[black!50, dashed, forget plot] coordinates {(8,0) (300,0)};
+\end{groupplot}
+\end{tikzpicture}
+\par\vspace{4pt}
+\ref{legendImb}
+\caption{Partition imbalance, not partition size, drives the
+  per-client accuracy decline under non-IID (HomeOccupancy).
+  Each dot is one client in one seed; the y-axis is the drop from
+  the method's own IID mean.  (a)~The decline grows with the
+  dominant-class share for every method that keeps per-client
+  models ($r{=}{+}0.36$ Local, $r{=}{+}0.73$ FedProx in its
+  surviving seed); the collapsed FedAvg/FedProx seeds form a flat
+  band at ${\approx}57$ points---their bias is total and
+  independent of the partition.  (b)~The same decline is
+  uncorrelated with the number of samples a client holds
+  ($r{\approx}0$): at this scale, balance matters and quantity
+  does not.}
+\label{fig:imbalance}
+\end{figure*}
+
 \begin{table*}[t]
 \centering\small
 \caption{Final validation accuracy (\%): mean of the last five rounds,
@@ -2042,7 +2140,14 @@ where a single class can dominate both the local optimum and the first
 global average.  HomeHAR isolates the two variables---its clients hold
 equally few samples but spread over seven classes, so no single class
 dominates and averaging survives---while MNIST/CIFAR-10 clients hold
-${\approx}60{\times}$ more samples at lower shares.  How much data, and
+${\approx}60{\times}$ more samples at lower shares.
+Fig.~\ref{fig:imbalance} makes the imbalance--bias link explicit: the
+per-client accuracy decline relative to IID grows with the
+dominant-class share for every method that keeps per-client models
+($r{=}{+}0.36$ for Local, $r{=}{+}0.73$ for FedProx in its surviving
+seed), yet is uncorrelated with the number of samples held
+($r{\approx}0$)---at this scale, balance matters and quantity does not.
+How much data, and
 how balanced, is \emph{enough} for a given task difficulty is the
 natural next question (Sec.~\ref{sec:limitations}).
 

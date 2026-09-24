@@ -42,6 +42,15 @@ else:
     src = (src[:e] + '\n\n' +
            open('fig_partition.tex', encoding='utf-8').read() + src[e:])
 
+# fig:imbalance — replace if present, else insert right after fig:partition
+if '\\label{fig:imbalance}' in src:
+    replace_figure('fig:imbalance', 'fig_imbalance.tex')
+else:
+    li = src.index('\\label{fig:partition}')
+    e = src.index('\\end{figure*}', li) + len('\\end{figure*}')
+    src = (src[:e] + '\n\n' +
+           open('fig_imbalance.tex', encoding='utf-8').read() + src[e:])
+
 src = src.replace('\\usepgfplotslibrary{groupplots}\n\\usepgfplotslibrary{fillbetween}',
                   '\\usepgfplotslibrary{groupplots}')
 out = src.replace('\n', '\r\n') if crlf else src

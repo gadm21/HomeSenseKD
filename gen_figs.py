@@ -478,4 +478,67 @@ tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
         '  survives there.}',
         '\\label{fig:partition}', '\\end{figure*}']
 open('fig_partition.tex', 'w').write('\n'.join(tex))
+
+# ---------- FIG imbalance ----------
+# Partition imbalance vs accuracy decline (bias), HomeOccupancy non-IID.
+# (a) accuracy drop vs IID mean vs dominant-class share.
+# (b) same drop vs samples per client -- flat: balance, not size, predicts.
+IMB = [('local', 'Local', f'{HO}/local/uniform/noniid'),
+       ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
+       ('fedakd', 'FedAKD', f'{HO}/fedakd/uniform/noniid'),
+       ('mks', 'FedMKS', f'{HO}/mks/uniform/noniid'),
+       ('fedavg', 'FedAvg', f'{HO}/fedavg/uniform/noniid'),
+       ('fedprox', 'FedProx', f'{HO}/fedprox/uniform/noniid')]
+tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
+       '  group style={', '    group size=2 by 1,', '    horizontal sep=1.5cm,', '  },',
+       '  width=0.44\\textwidth,', '  height=4.6cm,', ']']
+for pi, (xkey, xlab, xex) in enumerate([
+        ('dom', 'Dominant-class share (\\%)', 'xmin=30, xmax=105'),
+        ('n', 'Samples per client', 'xmode=log, xmin=8, xmax=300')]):
+    hdr = f'\\nextgroupplot[xlabel={{{xlab}}},'
+    tex.append(hdr)
+    tex.append('  ylabel={Acc.\\ drop vs.\\ IID (pts)},')
+    tex.append(f'  {xex}, ymin=-12, ymax=68, grid=major,')
+    tex.append('  grid style={gray!18, line width=0.3pt},')
+    tex.append('  tick label style={font=\\tiny}, label style={font=\\tiny}')
+    if pi == 0:
+        tex.append('  , legend to name=legendImb,')
+        tex.append('  legend style={legend columns=6, font=\\tiny}]')
+    else:
+        tex[-1] += ']'
+    for algo, nm, folder in IMB:
+        a = load(folder)
+        if a is None:
+            continue
+        iidm = np.mean(seed_means(folder.replace('noniid', 'iid')))
+        C, T = a.shape
+        pts = []
+        for s in range(T // R):
+            acc = a[:, s*R + R - 5:(s+1)*R].mean(axis=1) * 100
+            for c in range(C):
+                x = ho[s]['dom_share'][c] * 100 if xkey == 'dom' else ho[s]['n'][c]
+                pts.append((x, iidm - acc[c]))
+        pc = '\n'.join('  ' + ' '.join(f'({x:.1f},{y:.2f})' for x, y in pts[k:k+12])
+                       for k in range(0, len(pts), 12))
+        tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=1.0pt, {FILL[algo]}, opacity=0.6] coordinates {{\n{pc}}};')
+        if pi == 0:
+            tex.append(f'\\addlegendentry{{{nm}}}')
+    tex.append('\\addplot[black!50, dashed, forget plot] coordinates '
+               + ('{(30,0) (105,0)};' if xkey == 'dom' else '{(8,0) (300,0)};'))
+tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
+        '\\ref{legendImb}',
+        '\\caption{Partition imbalance, not partition size, drives the',
+        '  per-client accuracy decline under non-IID (HomeOccupancy).',
+        '  Each dot is one client in one seed; the y-axis is the drop from',
+        "  the method's own IID mean.  (a)~The decline grows with the",
+        '  dominant-class share for every method that keeps per-client',
+        '  models ($r{=}{+}0.36$ Local, $r{=}{+}0.73$ FedProx in its',
+        '  surviving seed); the collapsed FedAvg/FedProx seeds form a flat',
+        '  band at ${\\approx}57$ points---their bias is total and',
+        '  independent of the partition.  (b)~The same decline is',
+        '  uncorrelated with the number of samples a client holds',
+        '  ($r{\\approx}0$): at this scale, balance matters and quantity',
+        '  does not.}',
+        '\\label{fig:imbalance}', '\\end{figure*}']
+open('fig_imbalance.tex', 'w').write('\n'.join(tex))
 print('done')
