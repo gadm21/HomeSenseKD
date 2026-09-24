@@ -399,14 +399,17 @@ tex += ['\\nextgroupplot[xlabel={Dominant-class share (\\%)},',
         '  ylabel={Val.\\ Acc.\\ (\\%)},',
         '  xmin=30, xmax=105, ymin=20, ymax=95, grid=major,',
         '  grid style={gray!18, line width=0.3pt},',
-        '  tick label style={font=\\tiny}, label style={font=\\tiny}]']
-for algo, folder in [('local', f'{HO}/local/uniform/noniid'),
-                     ('fedmd', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
-                     ('fedavg', f'{HO}/fedavg/uniform/noniid')]:
+        '  tick label style={font=\\tiny}, label style={font=\\tiny},',
+        '  legend to name=legendPartA,',
+        '  legend style={legend columns=3, font=\\tiny}]']
+for algo, nm, folder in [('local', 'Local', f'{HO}/local/uniform/noniid'),
+                         ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
+                         ('fedavg', 'FedAvg', f'{HO}/fedavg/uniform/noniid')]:
     pts = share_acc_pts(folder)
     pc = '\n'.join('  ' + ' '.join(f'({x:.1f},{y:.2f})' for x, y in pts[k:k+12])
                    for k in range(0, len(pts), 12))
-    tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=1.0pt, {FILL[algo]}, opacity=0.65, forget plot] coordinates {{\n{pc}}};')
+    tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=1.0pt, {FILL[algo]}, opacity=0.65] coordinates {{\n{pc}}};')
+    tex.append(f'\\addlegendentry{{{nm}}}')
 tex.append('\\addplot[black!50, dashed, forget plot] coordinates {(30,33.3) (105,33.3)};')
 # ---- (b) per-seed mean accuracy ----
 tex += ['\\nextgroupplot[xlabel={Seed}, ylabel={Mean val.\\ acc.\\ (\\%)},',
@@ -457,7 +460,7 @@ for ds, (col, mk, nm) in DSCOL.items():
     ms = float(np.mean([p[1] for p in pts]))
     tex.append(f'\\addplot[only marks, {mk}, mark size=2.4pt, {col}!45!black, forget plot] coordinates {{({mn:.0f},{ms:.1f})}};')
 tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
-        '\\ref{legendPart}\\\\[2pt]\\ref{legendPartDS}',
+        '\\ref{legendPartA}\\hspace{1.2em}\\ref{legendPart}\\\\[2pt]\\ref{legendPartDS}',
         '\\caption{Data distribution decides whether weight averaging',
         '  survives.  (a)~HomeOccupancy non-IID: per-client final accuracy',
         "  vs.\\ each client's dominant-class share.  Local and FedMD",
@@ -483,20 +486,23 @@ open('fig_partition.tex', 'w').write('\n'.join(tex))
 # Partition imbalance vs accuracy decline (bias), HomeOccupancy non-IID.
 # (a) accuracy drop vs IID mean vs dominant-class share.
 # (b) same drop vs samples per client -- flat: balance, not size, predicts.
-IMB = [('local', 'Local', f'{HO}/local/uniform/noniid'),
-       ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid'),
-       ('fedakd', 'FedAKD', f'{HO}/fedakd/uniform/noniid'),
-       ('mks', 'FedMKS', f'{HO}/mks/uniform/noniid'),
-       ('fedavg', 'FedAvg', f'{HO}/fedavg/uniform/noniid'),
-       ('fedprox', 'FedProx', f'{HO}/fedprox/uniform/noniid')]
+# FedAvg/FedProx: only the surviving seed (123) is shown as a trend; the
+# two collapsed seeds form the dashed band at ~57 pts.
+IMB = [('local', 'Local', f'{HO}/local/uniform/noniid', None),
+       ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid', None),
+       ('fedakd', 'FedAKD', f'{HO}/fedakd/uniform/noniid', None),
+       ('mks', 'FedMKS', f'{HO}/mks/uniform/noniid', None),
+       ('fedavg', 'FedAvg', f'{HO}/fedavg/uniform/noniid', 1),
+       ('fedprox', 'FedProx', f'{HO}/fedprox/uniform/noniid', 1)]
+BINX = {'dom': ([30, 50, 65, 80, 106], lambda lo, hi: (lo + hi) / 2),
+        'n':   ([8, 20, 40, 80, 160, 320], lambda lo, hi: (lo * hi) ** 0.5)}
 tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
        '  group style={', '    group size=2 by 1,', '    horizontal sep=1.5cm,', '  },',
        '  width=0.44\\textwidth,', '  height=4.6cm,', ']']
 for pi, (xkey, xlab, xex) in enumerate([
         ('dom', 'Dominant-class share (\\%)', 'xmin=30, xmax=105'),
         ('n', 'Samples per client', 'xmode=log, xmin=8, xmax=300')]):
-    hdr = f'\\nextgroupplot[xlabel={{{xlab}}},'
-    tex.append(hdr)
+    tex.append(f'\\nextgroupplot[xlabel={{{xlab}}},')
     tex.append('  ylabel={Acc.\\ drop vs.\\ IID (pts)},')
     tex.append(f'  {xex}, ymin=-12, ymax=68, grid=major,')
     tex.append('  grid style={gray!18, line width=0.3pt},')
@@ -506,7 +512,8 @@ for pi, (xkey, xlab, xex) in enumerate([
         tex.append('  legend style={legend columns=6, font=\\tiny}]')
     else:
         tex[-1] += ']'
-    for algo, nm, folder in IMB:
+    edges, centre = BINX[xkey]
+    for algo, nm, folder, sonly in IMB:
         a = load(folder)
         if a is None:
             continue
@@ -514,31 +521,49 @@ for pi, (xkey, xlab, xex) in enumerate([
         C, T = a.shape
         pts = []
         for s in range(T // R):
+            if sonly is not None and s != sonly:
+                continue
             acc = a[:, s*R + R - 5:(s+1)*R].mean(axis=1) * 100
             for c in range(C):
                 x = ho[s]['dom_share'][c] * 100 if xkey == 'dom' else ho[s]['n'][c]
                 pts.append((x, iidm - acc[c]))
         pc = '\n'.join('  ' + ' '.join(f'({x:.1f},{y:.2f})' for x, y in pts[k:k+12])
                        for k in range(0, len(pts), 12))
-        tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=1.0pt, {FILL[algo]}, opacity=0.6] coordinates {{\n{pc}}};')
+        tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=0.8pt, {FILL[algo]}, opacity=0.3, forget plot] coordinates {{\n{pc}}};')
+        # binned-mean trend line
+        xs = np.array([p[0] for p in pts]); ys = np.array([p[1] for p in pts])
+        line = []
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            m = (xs >= lo) & (xs < hi)
+            if m.sum() >= 2:
+                line.append(f'({centre(lo, hi):.1f},{ys[m].mean():.2f})')
+        if len(line) > 1:
+            tex.append(f'\\addplot[{FILL[algo]}, very thick, mark=*, mark size=1.1pt] coordinates {{{" ".join(line)}}};')
+        else:
+            tex.append(f'\\addplot[{FILL[algo]}, very thick] coordinates {{{" ".join(line)}}};')
         if pi == 0:
             tex.append(f'\\addlegendentry{{{nm}}}')
     tex.append('\\addplot[black!50, dashed, forget plot] coordinates '
                + ('{(30,0) (105,0)};' if xkey == 'dom' else '{(8,0) (300,0)};'))
+    if xkey == 'dom':
+        tex.append('\\addplot[black!60, dotted, thick, forget plot] coordinates {(30,56) (105,56)};')
+        tex.append('\\node[font=\\tiny, black!60, anchor=south west] at (rel axis cs:0.02,0.86) {collapsed seeds};')
 tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
         '\\ref{legendImb}',
         '\\caption{Partition imbalance, not partition size, drives the',
         '  per-client accuracy decline under non-IID (HomeOccupancy).',
-        '  Each dot is one client in one seed; the y-axis is the drop from',
-        "  the method's own IID mean.  (a)~The decline grows with the",
-        '  dominant-class share for every method that keeps per-client',
-        '  models ($r{=}{+}0.36$ Local, $r{=}{+}0.73$ FedProx in its',
-        '  surviving seed); the collapsed FedAvg/FedProx seeds form a flat',
-        '  band at ${\\approx}57$ points---their bias is total and',
-        '  independent of the partition.  (b)~The same decline is',
-        '  uncorrelated with the number of samples a client holds',
-        '  ($r{\\approx}0$): at this scale, balance matters and quantity',
-        '  does not.}',
+        '  Dots are individual clients; thick lines are binned means.',
+        '  The y-axis is the drop from',
+        "  the method's own IID mean.  (a)~The decline grows steadily with",
+        '  the dominant-class share for every method that keeps per-client',
+        '  models---e.g.\\ FedAvg in its surviving seed falls from',
+        '  ${\\approx}0$ to ${\\approx}24$ points of drop across the share',
+        '  range ($r{=}{+}0.73$ for FedProx)---while the collapsed',
+        '  FedAvg/FedProx seeds form a flat band at ${\\approx}56$ points',
+        '  (dotted): their bias is total and independent of the partition.',
+        '  (b)~The same decline is uncorrelated with the number of samples',
+        '  a client holds ($r{\\approx}0$): at this scale, balance matters',
+        '  and quantity does not.}',
         '\\label{fig:imbalance}', '\\end{figure*}']
 open('fig_imbalance.tex', 'w').write('\n'.join(tex))
 print('done')

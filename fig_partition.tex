@@ -13,19 +13,24 @@
   ylabel={Val.\ Acc.\ (\%)},
   xmin=30, xmax=105, ymin=20, ymax=95, grid=major,
   grid style={gray!18, line width=0.3pt},
-  tick label style={font=\tiny}, label style={font=\tiny}]
-\addplot[only marks, mark=*, mark size=1.0pt, clGray, opacity=0.65, forget plot] coordinates {
+  tick label style={font=\tiny}, label style={font=\tiny},
+  legend to name=legendPartA,
+  legend style={legend columns=3, font=\tiny}]
+\addplot[only marks, mark=*, mark size=1.0pt, clGray, opacity=0.65] coordinates {
   (76.9,65.23) (75.0,52.07) (56.0,67.03) (94.1,65.23) (87.2,40.07) (54.4,78.31) (59.6,67.06) (74.0,62.67) (70.5,65.23) (52.4,66.74) (96.6,52.58) (64.3,57.66)
   (47.9,59.17) (72.8,47.60) (59.1,59.96) (50.0,71.14) (66.7,27.82) (66.7,68.61) (94.1,60.90) (56.2,67.28)};
-\addplot[only marks, mark=*, mark size=1.0pt, clBlue, opacity=0.65, forget plot] coordinates {
+\addlegendentry{Local}
+\addplot[only marks, mark=*, mark size=1.0pt, clBlue, opacity=0.65] coordinates {
   (76.9,65.23) (75.0,52.07) (56.0,65.23) (94.1,65.23) (87.2,64.97) (54.4,52.22) (59.6,65.51) (74.0,73.37) (70.5,65.23) (52.4,70.27) (96.6,53.05) (64.3,72.61)
   (47.9,78.31) (72.8,57.15) (59.1,51.60) (50.0,71.57) (66.7,41.44) (66.7,66.02) (94.1,65.23) (56.2,66.99)};
-\addplot[only marks, mark=square*, mark size=1.0pt, clPurple, opacity=0.65, forget plot] coordinates {
+\addlegendentry{FedMD}
+\addplot[only marks, mark=square*, mark size=1.0pt, clPurple, opacity=0.65] coordinates {
   (76.9,32.61) (75.0,32.61) (56.0,32.61) (94.1,32.61) (87.2,32.61) (54.4,33.91) (59.6,34.77) (74.0,34.77) (70.5,32.61) (52.4,32.61) (96.6,32.61) (64.3,34.77)
   (47.9,36.54) (72.8,32.61) (59.1,34.77) (50.0,32.61) (66.7,34.77) (66.7,32.61) (94.1,32.61) (56.2,32.61) (71.6,65.23) (51.5,65.23) (100.0,73.59) (42.3,90.88)
   (52.1,87.75) (50.0,39.03) (63.2,84.32) (58.3,88.97) (85.7,76.86) (96.6,34.77) (57.5,80.40) (95.8,68.00) (56.7,65.26) (90.3,66.34) (88.9,54.88) (68.4,67.32)
   (53.8,65.33) (63.6,66.49) (84.8,87.82) (53.8,70.70) (78.0,32.61) (42.4,36.43) (77.3,32.72) (62.7,32.68) (66.7,34.77) (58.3,32.61) (64.3,34.85) (50.9,34.77)
   (51.2,64.97) (74.1,44.65) (100.0,32.61) (77.8,32.61) (57.3,34.77) (78.1,32.61) (44.3,38.85) (42.9,39.14) (57.1,43.46) (59.5,39.06) (54.4,52.18) (44.0,40.79)};
+\addlegendentry{FedAvg}
 \addplot[black!50, dashed, forget plot] coordinates {(30,33.3) (105,33.3)};
 \nextgroupplot[xlabel={Seed}, ylabel={Mean val.\ acc.\ (\%)},
   xmin=0.6, xmax=3.4, ymin=25, ymax=95, xtick={1,2,3},
@@ -89,7 +94,7 @@
 \end{groupplot}
 \end{tikzpicture}
 \par\vspace{4pt}
-\ref{legendPart}\\[2pt]\ref{legendPartDS}
+\ref{legendPartA}\hspace{1.2em}\ref{legendPart}\\[2pt]\ref{legendPartDS}
 \caption{Data distribution decides whether weight averaging
   survives.  (a)~HomeOccupancy non-IID: per-client final accuracy
   vs.\ each client's dominant-class share.  Local and FedMD

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  24 SEP 2026 11:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  24 SEP 2026 12:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1058,9 +1058,9 @@ LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 8
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
-Package pgfplots info on input line 1865: Using 'lua backend=false' for axis: x
+Package pgfplots info on input line 1870: Using 'lua backend=false' for axis: x
 mode=log unsupported (yet).
-Package pgfplots info on input line 1976: Using 'lua backend=false' for axis: x
+Package pgfplots info on input line 1983: Using 'lua backend=false' for axis: x
 mode=log unsupported (yet).
 
 [4]
@@ -1070,7 +1070,7 @@ Underfull \vbox (badness 2418) has occurred while \output is active []
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [5]
-Underfull \hbox (badness 4391) in paragraph at lines 2100--2106
+Underfull \hbox (badness 4391) in paragraph at lines 2109--2115
 []\OT1/ptm/b/n/10 (+20) MNIST. \OT1/ptm/m/n/10 (+20) IID: Cen-tral 99.0%, FedMK
 S 97.5%, Fe-
  []
@@ -1083,10 +1083,10 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [6]
 [7]
-Package pgfplots info on input line 2485: Using 'lua backend=false' for axis: y
+Package pgfplots info on input line 2494: Using 'lua backend=false' for axis: y
 mode=log unsupported (yet).
 
-Underfull \hbox (badness 5592) in paragraph at lines 2530--2546
+Underfull \hbox (badness 5592) in paragraph at lines 2539--2555
 []\OT1/ptm/m/n/10 (+20) We pre-sented \OT1/ptm/b/n/10 (+20) FedMKS\OT1/ptm/m/n/
 10 (+20) , a het-ero-ge-neous fed-er-ated
  []
@@ -1114,10 +1114,10 @@ L3 programming layer <2025-12-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 34668 strings out of 467871
- 857924 string characters out of 5418861
- 2138578 words of memory out of 5000000
- 62523 multiletter control sequences out of 15000+600000
+ 34678 strings out of 467871
+ 858122 string characters out of 5418861
+ 2148717 words of memory out of 5000000
+ 62533 multiletter control sequences out of 15000+600000
  707803 words of font info for 456 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,19n,104p,11118b,2403s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1160,7 +1160,7 @@ ts/type1/urw/times/utmb8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
 s/type1/urw/times/utmbi8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
 s/type1/urw/times/utmr8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts
 /type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (9 pages, 667251 bytes).
+Output written on paper.pdf (9 pages, 669132 bytes).
 PDF statistics:
  220 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
