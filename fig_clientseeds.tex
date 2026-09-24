@@ -1,0 +1,84 @@
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    xlabels at=edge bottom,
+    ylabels at=edge left,
+    group size=4 by 1,
+    horizontal sep=0.9cm,
+  },
+  width=0.23\textwidth,
+  height=4.2cm,
+]
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize Local}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (0.968,65.23) (0.763,52.07) (1.025,67.03) (0.968,65.23) (0.960,40.07) (0.915,78.31) (0.852,67.06) (1.060,62.67) (0.900,65.23) (0.883,66.74)
+  (1.061,52.58) (1.015,57.66) (0.817,59.17) (1.007,47.60) (0.842,59.96) (1.143,71.14) (1.177,27.82) (0.997,68.61) (1.173,60.90) (0.790,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize FedAvg seed 1}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (1.003,65.23) (0.783,52.07) (0.964,67.03) (0.798,65.23) (0.814,40.07) (1.048,78.31) (0.863,67.06) (0.803,62.67) (0.860,65.23) (0.925,66.74)
+  (0.984,52.58) (0.851,57.66) (1.070,59.17) (0.992,47.60) (1.003,59.96) (0.943,71.14) (1.147,27.82) (1.040,68.61) (0.831,60.90) (1.100,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {
+  (2.232,32.61) (2.000,32.61) (2.195,32.61) (1.921,32.61) (2.034,32.61) (1.964,33.91) (1.968,34.77) (2.138,34.77) (2.018,32.61) (2.227,32.61)
+  (2.022,32.61) (1.791,34.77) (1.933,36.54) (2.175,32.61) (1.953,34.77) (1.764,32.61) (1.874,34.77) (1.784,32.61) (2.247,32.61) (2.235,32.61)};
+\addplot[black, thick, forget plot] coordinates {(1.7,33.41) (2.3,33.41)};
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize FedAvg seed 2}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (1.150,65.23) (1.051,52.07) (1.132,67.03) (0.835,65.23) (0.897,40.07) (1.012,78.31) (0.928,67.06) (0.773,62.67) (1.242,65.23) (0.971,66.74)
+  (1.002,52.58) (0.912,57.66) (0.880,59.17) (0.943,47.60) (1.166,59.96) (1.118,71.14) (0.940,27.82) (0.757,68.61) (1.149,60.90) (0.885,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {
+  (2.041,65.23) (1.763,65.23) (2.081,73.59) (1.944,90.88) (1.999,87.75) (1.957,39.03) (1.925,84.32) (2.025,88.97) (2.236,76.86) (1.806,34.77)
+  (1.907,80.40) (1.771,68.00) (2.119,65.26) (2.079,66.34) (1.857,54.88) (1.958,67.32) (2.072,65.33) (2.081,66.49) (1.835,87.82) (2.191,70.70)};
+\addplot[black, thick, forget plot] coordinates {(1.7,69.96) (2.3,69.96)};
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize FedAvg seed 3}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (1.139,65.23) (0.817,52.07) (1.184,67.03) (1.124,65.23) (1.149,40.07) (1.022,78.31) (0.860,67.06) (1.209,62.67) (1.046,65.23) (0.923,66.74)
+  (0.882,52.58) (1.207,57.66) (0.960,59.17) (1.020,47.60) (1.054,59.96) (1.163,71.14) (1.062,27.82) (0.838,68.61) (1.046,60.90) (0.995,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {
+  (2.024,32.61) (2.100,36.43) (1.873,32.72) (1.843,32.68) (1.805,34.77) (1.887,32.61) (1.755,34.85) (2.065,34.77) (1.898,64.97) (1.844,44.65)
+  (1.798,32.61) (1.892,32.61) (1.857,34.77) (1.893,32.61) (1.986,38.85) (2.025,39.14) (2.173,43.46) (2.244,39.06) (1.774,52.18) (1.866,40.79)};
+\addplot[black, thick, forget plot] coordinates {(1.7,38.36) (2.3,38.36)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{HomeOccupancy non-IID, per-client final accuracy by seed
+  (each client's model evaluated after its local update).
+  Grey dots (identical in every panel) are the Local-only clients;
+  purple dots are FedAvg clients in seeds 1--3.  In seeds 1 and 3
+  \emph{every} FedAvg client sits at chance (33.3\%)---the shared
+  model collapses collectively---while seed 2 retains a healthy
+  spread comparable to Local.}
+\label{fig:clientseeds}
+\end{figure*}

@@ -1,0 +1,37 @@
+{
+  "algorithm": "mks",
+  "dataset": {
+    "private": "home_occupancy",
+    "public": "home_har",
+    "n_classes": 3,
+    "n_parties": 20
+  },
+  "setting": "noniid",
+  "heterogeneity": "uniform",
+  "model_sharing": false,
+  "knowledge_distillation": true,
+  "training": {
+    "n_rounds": 50,
+    "local_epochs": 4,
+    "kd_epochs": 2,
+    "fedprox_mu": 0.01
+  },
+  "data_config": {
+    "n_samples_per_class": 30,
+    "dirichlet_alpha": 0.5,
+    "window_size": 1500,
+    "n_stft_bins": 8
+  },
+  "results": {
+    "last_round_avg_accuracy": 0.5473873868584633,
+    "last_round_min_accuracy": 0.3477477431297302,
+    "last_round_max_accuracy": 0.8036035895347595,
+    "final_avg_accuracy": 0.5381261250376701
+  },
+  "efficiency": {
+    "mean_server_s_per_round": 0.3415414480009349,
+    "mean_client_s_per_round": 106.79086176860059,
+    "mean_comm_bytes_per_round": 76951448.64,
+    "total_comm_mb": 3847.572432
+  }
+}

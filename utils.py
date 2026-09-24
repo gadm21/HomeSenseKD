@@ -624,6 +624,17 @@ def load_cifar10():
     return x_tr, y_tr, x_te, y_te
 
 
+def load_cifar100():
+    print("Loading CIFAR-100...")
+    from tensorflow.keras.datasets import cifar100 as _cifar100
+    (x_tr, y_tr), (x_te, y_te) = _cifar100.load_data()
+    x_tr = x_tr.astype(np.float32) / 255.0
+    x_te = x_te.astype(np.float32) / 255.0
+    y_tr, y_te = y_tr.ravel(), y_te.ravel()
+    print(f"  -> {len(x_tr)} train, {len(x_te)} test")
+    return x_tr, y_tr, x_te, y_te
+
+
 def resize_images(x, target_shape):
     """Resize/convert image array to target_shape (H, W, C).
 

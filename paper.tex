@@ -1,4 +1,4 @@
-﻿% ============================================================
+% ============================================================
 %  FedMKS --- IEEE Conference Paper
 %  Compile: pdflatex paper.tex
 %  Requires: IEEEtran, tikz, pgfplots, pgfplotsgroup, graphicx,
@@ -74,8 +74,7 @@
 }
 
 % ============================================================
-\title{FedMKS: A Hybrid Model and Knowledge Sharing Approach\\
-  for Robust Federated Learning in Heterogeneous Networks}
+\title{FedMKS: A Hybrid Model and Knowledge Sharing Approach for Robust Federated Learning in Heterogeneous Networks}
 
 \author{%
   \IEEEauthorblockN{Gad Gad\IEEEauthorrefmark{1},
@@ -103,9 +102,10 @@ so no single model architecture fits all clients.
 Knowledge-distillation-based FL sidesteps this constraint by exchanging
 soft labels on a shared public set instead of weights, allowing each
 client to keep its own architecture.  Yet under \emph{statistical
-heterogeneity} (non-IID label skew), soft-label-only distillation
-degrades sharply and can underperform simple weight averaging on a
-common small model.  We present \textbf{FedMKS} (Federated Learning
+heterogeneity} (non-IID label skew), neither channel is uniformly
+reliable: weight averaging can collapse under client drift, while
+soft-label-only distillation degrades when the public set is poorly
+aligned with the private task.  We present \textbf{FedMKS} (Federated Learning
 with Model and Knowledge Sharing), a hybrid algorithm that organises
 clients into architecture tiers and couples intra-tier weight averaging
 with cross-tier soft-label distillation, recovering the accuracy of
@@ -115,7 +115,8 @@ detection---a privacy-critical setting where raw data cannot leave the
 home---and evaluate it on the HomeOccupancy CSI dataset and
 MNIST/CIFAR-10 under IID and non-IID partitions against FedMD, FedAKD,
 FedAvg, FedProx, FedDF, and Local/Centralised baselines.  FedMKS attains
-90.4\% on HomeOccupancy IID---within 0.5\% of the centralised ceiling.
+90.4\% on HomeOccupancy IID---within 1.3 percentage points of the centralised
+ceiling.
 Code and datasets are publicly available.
 \end{abstract}
 
@@ -134,16 +135,17 @@ A persistent obstacle is \emph{system heterogeneity}: edge devices range
 from constrained sensors to capable gateways, so no single architecture
 fits all.  Weight-sharing methods (FedAvg, FedProx) require identical
 architectures and therefore force every client onto the smallest common
-model.  Knowledge-distillation methods (FedMD, FedAKD, FedDF) remove this
+model.  Knowledge-distillation methods (FedMD, FedAKD~\cite{gad2023fedakd}, FedDF) remove this
 constraint by exchanging soft labels on a shared public set rather than
 weights, letting each client keep an architecture matched to its
 hardware.
 
-Distillation alone, however, suffers under \emph{statistical
-heterogeneity}: when client label distributions are non-IID, soft-label
-averaging provides a weaker training signal than weight averaging, and
-our experiments show KD-only methods trailing even all-small weight
-sharing by double-digit margins.  This motivates a \emph{hybrid}
+Neither channel alone, however, is robust under \emph{statistical
+heterogeneity}: when client label distributions are non-IID, weight
+averaging suffers client drift---on our low-data CSI benchmark it
+collapses to chance level on two of three seeds---while soft-label
+distillation provides a weaker per-round signal whose quality depends
+on how well the public set matches the private task.  This motivates a \emph{hybrid}
 architecture that combines both channels---averaging weights where
 architectures match and distilling soft labels where they do not.
 
@@ -157,7 +159,7 @@ heterogeneous FL.
 
 \textbf{Contribution.}  We propose \textbf{FedMKS} (Federated Learning
 with Model and Knowledge Sharing), which (i)~partitions clients into
-architecture tiers and shares classifier weights within each tier,
+architecture tiers and shares model weights within each tier,
 (ii)~shares distilled soft labels across tiers on a public set, and
 (iii)~applies Mixup augmentation before distillation.  A dual-head tiered
 model decouples private classification from public-set distillation, so
@@ -167,13 +169,231 @@ clients of different capacity collaborate without exchanging raw data.
 \centering
 \begin{minipage}[t]{0.495\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{assets/feddf_v2.pdf}\\[1pt]
+  \resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  stage/.style={font=\tiny\bfseries,text=black!65,align=center},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  srv/.style={rectangle,draw=black!50,fill=ltGray,rounded corners=2pt,
+      minimum width=2.6cm,minimum height=3.4cm,align=center},
+  flow/.style={->,thick,black!55},
+  uplink/.style={->,dashed,thick,clBlue},
+  dnlink/.style={->,dashed,thick,clPurple}]
+\tikzset{
+  pics/nnS/.style={code={
+    \foreach \y in {0,0.12} \fill[clBlue] (0,\y) circle (0.024);
+    \foreach \y in {0,0.12} \fill[clBlue] (0.16,\y) circle (0.024);
+    \foreach \a in {0,0.12} \foreach \b in {0,0.12} \draw[black!40,thin](0,\a)--(0.16,\b);}},
+  pics/nnM/.style={code={
+    \foreach \y in {0,0.12} \fill[clTeal] (0,\y) circle (0.022);
+    \foreach \y in {-0.03,0.06,0.15} \fill[clTeal] (0.15,\y) circle (0.022);
+    \foreach \y in {0,0.12} \fill[clTeal] (0.30,\y) circle (0.022);
+    \foreach \a in {0,0.12} \foreach \b in {-0.03,0.06,0.15} \draw[black!40,thin](0,\a)--(0.15,\b);
+    \foreach \a in {-0.03,0.06,0.15} \foreach \b in {0,0.12} \draw[black!40,thin](0.15,\a)--(0.30,\b);}},
+  pics/nnL/.style={code={
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.13,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.26,\y) circle (0.02);
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0.39,\y) circle (0.02);
+    \foreach \a in {0,0.09,0.18} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0,\a)--(0.13,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0.13,\a)--(0.26,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {0,0.09,0.18} \draw[black!40,thin](0.26,\a)--(0.39,\b);}},
+  pics/clientS/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnS};}},
+  pics/clientM/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnM};}},
+  pics/clientL/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnL};}},
+  pics/wmodel/.style={code={
+    \node[font=\scriptsize,text=clBlue] at (0,0.05) {\faCube};
+    \node[font=\tiny,text=clBlue] at (0.02,-0.16) {$w_k$};}},
+  pics/privdata/.style={code={
+    \node[font=\small,text=clRed!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clRed] at (0.20,-0.14) {\faLock};}},
+  pics/pubdata/.style={code={
+    \node[font=\small,text=clGreen!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clGreen] at (0.22,-0.14) {\faUnlock};}},
+}
+% ===================== stage headers =====================
+\node[stage] at (0,3.15)    {\textcircled{1} local train\\[-1pt]{\tiny CE on $\mathcal{D}_k$}};
+\node[stage] at (4.5,3.15)  {\textcircled{2} upload\\[-1pt]{\tiny $w_k$}};
+\node[stage] at (7.5,3.15)  {\textcircled{3} soft labels\\[-1pt]{\tiny on $\mathcal{D}_0$}};
+\node[stage] at (10.6,3.15) {\textcircled{4} distill\\[-1pt]{\tiny KD on $\bar s$}};
+
+% zone banners: who does what
+\fill[clBlue!10] (-1.7,3.62) rectangle (5.8,4.28);
+\fill[ltGray]   ( 6.0,3.62) rectangle (9.0,4.28);
+\fill[clBlue!10] ( 9.2,3.62) rectangle (12.0,4.28);
+\node[tag,text=clBlue!70!black] at (2.05,3.95) {\textbf{client side}};
+\node[tag]                      at (7.5,3.95)  {\textbf{server side}};
+\node[tag,text=clBlue!70!black] at (10.6,3.95){\textbf{client side}};
+
+% stage separators
+\foreach \x in {2.5,6.0,9.6}
+  \draw[black!20,dashed] (\x,2.75) -- (\x,-1.85);
+
+% ===================== tier rows =====================
+% subtle boxes grouping clients of the same tier
+\foreach \y in {2.0,0.6,-0.8}
+  \draw[black!22, rounded corners=3pt] (-1.58,\y-0.82) rectangle (0.55,\y+0.40);
+% ---- row S (y=2.0) ----
+\pic at (-0.80,2.0) {clientS}; \pic at (-0.10,2.0) {clientS};
+\pic at (-0.80,1.45) {privdata}; \pic at (-0.10,1.45) {privdata};
+\node[font=\scriptsize,text=clBlue] at (4.5,2.05) {\faUpload};
+\pic at (10.20,2.0) {clientS}; \pic at (10.95,2.0) {clientS};
+\node[tag] at (-1.38,2.18) {\textbf{S}};
+% ---- row M (y=0.6) ----
+\pic at (-0.80,0.6) {clientM}; \pic at (-0.10,0.6) {clientM};
+\pic at (-0.80,0.05) {privdata}; \pic at (-0.10,0.05) {privdata};
+\node[font=\scriptsize,text=clBlue] at (4.5,0.65) {\faUpload};
+\pic at (10.20,0.6) {clientM}; \pic at (10.95,0.6) {clientM};
+\node[tag] at (-1.38,0.78) {\textbf{M}};
+% ---- row L (y=-0.8) ----
+\pic at (-0.80,-0.8) {clientL}; \pic at (-0.10,-0.8) {clientL};
+\pic at (-0.80,-1.35) {privdata}; \pic at (-0.10,-1.35) {privdata};
+\node[font=\scriptsize,text=clBlue] at (4.5,-0.75) {\faUpload};
+\pic at (10.20,-0.8) {clientL}; \pic at (10.95,-0.8) {clientL};
+\node[tag] at (-1.38,-0.62) {\textbf{L}};
+
+% ===================== server (stage 4) =====================
+\node[srv] (srv) at (7.5,0.6)
+  {\faServer\ \ \textbf{Server}\\[16pt]
+   {\tiny runs each $w_k$ on $\mathcal{D}_0$}\\[-1pt]
+   {\tiny $\rightarrow$ logits $s_k$}\\[3pt]
+   {\tiny $\bar s{=}\frac{1}{K}\sum_k s_k$}};
+\pic at (7.5,2.58) {pubdata};
+
+% ===================== flows =====================
+\foreach \y in {2.0,0.6,-0.8}{
+  \draw[flow]   (1.15,\y) -- (3.85,\y);
+  \draw[uplink] (5.15,\y) -- (6.15,\y);
+  \draw[dnlink] (8.85,\y) -- (9.75,\y);
+}
+\node[tag,text=clBlue]   at (5.65,2.28)  {$w_k$};
+\node[tag,text=clBlue]   at (5.65,0.88)  {$w_k$};
+\node[tag,text=clBlue]   at (5.65,-0.52) {$w_k$};
+\node[tag,text=clPurple] at (9.30,2.28)  {$\bar s$};
+\node[tag,text=clPurple] at (9.30,0.88)  {$\bar s$};
+\node[tag,text=clPurple] at (9.30,-0.52) {$\bar s$};
+% note, centred
+\node[tag,text=clBlue] at (5.15,-2.05)
+  {soft labels computed \emph{on the server} --- clients only distill};
+\end{tikzpicture}%
+  }\\[1pt]
   {\footnotesize (a)~FedDF~\cite{lin2020ensemble}: soft labels computed
    \emph{on the server}.}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.495\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{assets/fedmks_v2.pdf}\\[1pt]
+  \resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\scriptsize,
+  >={Stealth[length=2.2pt,width=1.6pt]},
+  stage/.style={font=\tiny\bfseries,text=black!65,align=center},
+  tag/.style={font=\tiny,text=black!60,align=center},
+  badge/.style={circle,draw=clRed,thick,inner sep=0.4pt,font=\tiny\bfseries,
+      text=clRed,fill=white},
+  srv/.style={rectangle,draw=black!50,fill=ltGray,rounded corners=2pt,
+      minimum width=2.6cm,minimum height=3.4cm,align=center},
+  flow/.style={->,thick,black!55},
+  uplink/.style={->,dashed,thick,clGreen},
+  dnlink/.style={->,dashed,thick,clPurple}]
+\tikzset{
+  pics/nnS/.style={code={
+    \foreach \y in {0,0.12} \fill[clBlue] (0,\y) circle (0.024);
+    \foreach \y in {0,0.12} \fill[clBlue] (0.16,\y) circle (0.024);
+    \foreach \a in {0,0.12} \foreach \b in {0,0.12} \draw[black!40,thin](0,\a)--(0.16,\b);}},
+  pics/nnM/.style={code={
+    \foreach \y in {0,0.12} \fill[clTeal] (0,\y) circle (0.022);
+    \foreach \y in {-0.03,0.06,0.15} \fill[clTeal] (0.15,\y) circle (0.022);
+    \foreach \y in {0,0.12} \fill[clTeal] (0.30,\y) circle (0.022);
+    \foreach \a in {0,0.12} \foreach \b in {-0.03,0.06,0.15} \draw[black!40,thin](0,\a)--(0.15,\b);
+    \foreach \a in {-0.03,0.06,0.15} \foreach \b in {0,0.12} \draw[black!40,thin](0.15,\a)--(0.30,\b);}},
+  pics/nnL/.style={code={
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.13,\y) circle (0.02);
+    \foreach \y in {-0.03,0.03,0.09,0.15} \fill[clPurple] (0.26,\y) circle (0.02);
+    \foreach \y in {0,0.09,0.18} \fill[clPurple] (0.39,\y) circle (0.02);
+    \foreach \a in {0,0.09,0.18} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0,\a)--(0.13,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {-0.03,0.03,0.09,0.15} \draw[black!40,thin](0.13,\a)--(0.26,\b);
+    \foreach \a in {-0.03,0.03,0.09,0.15} \foreach \b in {0,0.09,0.18} \draw[black!40,thin](0.26,\a)--(0.39,\b);}},
+  pics/clientS/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnS};}},
+  pics/clientM/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnM};}},
+  pics/clientL/.style={code={\node[font=\scriptsize,text=clOrange] at(-0.04,0.02){\faUser};\pic at(0.16,0){nnL};}},
+  pics/carrier/.style={code={
+    \node[font=\scriptsize,text=clBlue] at (0,0.05) {\faCommentDots};
+    \node[font=\tiny,text=clBlue] at (0.02,-0.16) {$s_k$};}},
+  pics/privdata/.style={code={
+    \node[font=\small,text=clRed!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clRed] at (0.20,-0.14) {\faLock};}},
+  pics/pubdata/.style={code={
+    \node[font=\small,text=clGreen!75!black] at (0,0.05) {\faDatabase};
+    \node[font=\tiny,text=clGreen] at (0.22,-0.14) {\faUnlock};}},
+}
+% ===================== stage headers =====================
+\node[stage] at (0,3.15)    {\textcircled{1} local train\\[-1pt]{\tiny CE$+$KD}};
+\node[stage] at (2.7,3.15)  {\textcircled{2} soft labels\\[-1pt]{\tiny $s_k$ on $\mathcal{D}_0$}};
+\node[stage] at (5.0,3.15)  {\textcircled{3} upload\\[-1pt]{\tiny $s_k$, $w_k$}};
+\node[stage] at (7.9,3.15)  {\textcircled{4} aggregate\\[-1pt]{\tiny server}};
+\node[stage] at (10.9,3.15) {\textcircled{5} update\\[-1pt]{\tiny $W_t$, $\bar s$}};
+
+% zone banners: who does what
+\fill[clBlue!10] (-1.7,3.62) rectangle (6.2,4.28);
+\fill[ltGray]   ( 6.4,3.62) rectangle (9.4,4.28);
+\fill[clBlue!10] ( 9.6,3.62) rectangle (12.3,4.28);
+\node[tag,text=clBlue!70!black] at (2.25,3.95) {\textbf{client side}};
+\node[tag]                      at (7.9,3.95)  {\textbf{server side}};
+\node[tag,text=clBlue!70!black] at (10.95,3.95){\textbf{client side}};
+
+% stage separators
+\foreach \x in {1.5,3.9,6.4,9.9}
+  \draw[black!20,dashed] (\x,2.75) -- (\x,-1.85);
+
+% ===================== tier rows =====================
+% subtle boxes grouping clients of the same tier
+\foreach \y in {2.0,0.6,-0.8}
+  \draw[black!22, rounded corners=3pt] (-1.58,\y-0.82) rectangle (0.85,\y+0.40);
+% ---- row S (y=2.0) ----
+\pic at (-0.80,2.0) {clientS}; \pic at (-0.10,2.0) {clientS};
+\pic at (-0.98,1.45) {privdata}; \pic at (-0.55,1.45) {pubdata};
+\pic at (-0.28,1.45) {privdata}; \pic at (0.15,1.45) {pubdata};
+\pic at (2.50,2.10) {carrier}; \pic at (2.95,1.90) {carrier};
+\node[font=\scriptsize,text=clGreen] at (5.0,2.05) {\faUpload};
+\pic at (10.55,2.0) {clientS}; \pic at (11.30,2.0) {clientS};
+\node[tag] at (-1.38,2.18) {\textbf{S}};
+% ---- row M (y=0.6) ----
+\pic at (-0.80,0.6) {clientM}; \pic at (-0.10,0.6) {clientM};
+\pic at (-0.98,0.05) {privdata}; \pic at (-0.55,0.05) {pubdata};
+\pic at (-0.28,0.05) {privdata}; \pic at (0.15,0.05) {pubdata};
+\pic at (2.50,0.70) {carrier}; \pic at (2.95,0.50) {carrier};
+\node[font=\scriptsize,text=clGreen] at (5.0,0.65) {\faUpload};
+\pic at (10.55,0.6) {clientM}; \pic at (11.30,0.6) {clientM};
+\node[tag] at (-1.38,0.78) {\textbf{M}};
+% ---- row L (y=-0.8) ----
+\pic at (-0.80,-0.8) {clientL}; \pic at (-0.10,-0.8) {clientL};
+\pic at (-0.98,-1.35) {privdata}; \pic at (-0.55,-1.35) {pubdata};
+\pic at (-0.28,-1.35) {privdata}; \pic at (0.15,-1.35) {pubdata};
+\pic at (2.50,-0.70) {carrier}; \pic at (2.95,-0.90) {carrier};
+\node[font=\scriptsize,text=clGreen] at (5.0,-0.75) {\faUpload};
+\pic at (10.55,-0.8) {clientL}; \pic at (11.30,-0.8) {clientL};
+\node[tag] at (-1.38,-0.62) {\textbf{L}};
+
+% ===================== server (stage 4) =====================
+\node[srv] (srv) at (7.9,0.6)
+  {\faServer\ \ \textbf{Server}\\[3pt]
+   {\tiny tier weights}\\[-1pt]
+   {\tiny $W_t{=}\sum_{k\in t}\frac{n_k}{n_t}w_k$}\\[2pt]
+   {\tiny global carrier}\\[-1pt]
+   {\tiny $\bar s{=}\frac{1}{K}\sum_k s_k$}};
+
+% ===================== flows =====================
+\foreach \y in {2.0,0.6,-0.8}{
+  \draw[flow]   (1.15,\y) -- (1.95,\y);
+  \draw[flow]   (3.45,\y) -- (4.35,\y);
+  \draw[uplink] (5.65,\y) -- (6.55,\y);
+  \draw[dnlink] (9.25,\y) -- (10.15,\y);
+}
+\node[tag,text=clPurple] at (9.70,2.28) {$W_S,\bar s$};
+\node[tag,text=clPurple] at (9.70,0.88) {$W_M,\bar s$};
+\node[tag,text=clPurple] at (9.70,-0.52) {$W_L,\bar s$};
+\end{tikzpicture}%
+  }\\[1pt]
   {\footnotesize (b)~FedMKS (ours): soft labels computed \emph{on each
    client}; server also averages intra-tier weights.}
 \end{minipage}
@@ -196,7 +416,38 @@ Wi-Fi sensing as our target application.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.52\textwidth]{assets/FL_literature.png}
+\begin{tikzpicture}[font=\footnotesize,
+  dot/.style={circle,fill=clBlue,inner sep=2.6pt},
+  tl/.style={line width=1.5pt,clBlue},
+  box/.style={text width=4.1cm,align=left,inner sep=1pt}]
+  \draw[tl,->] (-0.4,0) -- (15.6,0);
+  % ---- above ----
+  \node[dot] (n1) at (1.2,0) {};  \draw[tl] (n1) -- (1.2,1.9);
+  \node[box,anchor=south west] at (-0.5,2.0)
+    {\textbf{FedAvg (2017)}\\[2pt]Same architecture across clients.
+     Server aggregates model weights.};
+  \node[dot] (n3) at (7.0,0) {};  \draw[tl] (n3) -- (7.0,1.9);
+  \node[box,anchor=south west] at (5.3,2.0)
+    {\textbf{FedDF (2020)}\\[2pt]Supports different architectures.
+     Server ensembles client models on public data and distils a fused
+     student centrally.};
+  \node[dot] (n5) at (12.8,0) {}; \draw[tl] (n5) -- (12.8,1.9);
+  \node[box,anchor=south west] at (11.1,2.0)
+    {\textbf{FedMKS (ours)}\\[2pt]Supports different architectures.
+     Server averages model weights per tier $+$ soft labels.
+     Knowledge distillation is distributed across clients.};
+  % ---- below ----
+  \node[dot] (n2) at (4.1,0) {};  \draw[tl] (n2) -- (4.1,-1.9);
+  \node[box,anchor=north west] at (2.4,-2.0)
+    {\textbf{FedMD (2019)}\\[2pt]Supports different architectures.
+     Server aggregates only soft labels computed by clients on the
+     same public data.};
+  \node[dot] (n4) at (9.9,0) {};  \draw[tl] (n4) -- (9.9,-1.9);
+  \node[box,anchor=north west] at (8.2,-2.0)
+    {\textbf{FedAKD (2022)}\\[2pt]Supports different architectures.
+     Server aggregates only soft labels computed by clients on
+     augmented public data.};
+\end{tikzpicture}
 \caption{Timeline of federated-learning research relevant to this work.}
 \label{fig:fltimeline}
 \end{figure*}
@@ -222,18 +473,22 @@ only soft predictions on a public set, building on Hinton's distillation
 framework~\cite{hinton2015distill}; federated mutual
 learning~\cite{shen2020fedml} distils peer-to-peer.
 FedDF~\cite{lin2020ensemble} instead ensembles client models on the
-server and distils a fused student centrally.  Unlike FedDF, FedMKS
+server and distils a fused student centrally.
+FedAKD~\cite{gad2023fedakd} extends FedMD with Mixup-augmented public
+data for sensor-based HAR.  Unlike FedDF, FedMKS
 distributes distillation across clients, removing the server bottleneck
 at the cost of higher client workload.
 
 \subsection{Statistical Heterogeneity}
 
 Zhao~et~al.~\cite{zhao2018noniid} quantify the sharp accuracy drop of
-FL under non-IID data.  Weight averaging suffers from client drift,
-while soft-label distillation provides a weaker per-round signal; our
-results confirm that KD-only methods degrade more severely under label
-skew than weight-sharing methods, motivating hybrid designs that combine
-both channels.
+FL under non-IID data.  Weight averaging suffers from client drift---on
+our low-data CSI benchmark it collapses to chance level in two of three
+seeds, though the effect is milder on data-rich image tasks;
+soft-label distillation avoids drift but provides a weaker
+per-round signal that degrades when the public set is cross-domain.
+Neither channel is uniformly reliable, motivating hybrid designs that
+combine both.
 
 \subsection{Wi-Fi Sensing}
 
@@ -276,7 +531,7 @@ $\mathcal{D}^{\text{pub}}$   & Shared public (unlabelled) dataset\\
 $t_k$                        & Tier of client $k$: S, M, or L\\
 $\theta_k$                   & All trainable parameters of model $f_k$\\
 $\theta_k^{\text{bb}}$       & Backbone parameters (shared by both heads)\\
-$\mathbf{W}_t^{(r)}$         & Server-side averaged classifier weights for tier $t$ at round $r$\\
+$\mathbf{W}_t^{(r)}$         & Server-side averaged model weights for tier $t$ at round $r$\\
 $d$                          & Distillation-head output dimension (soft-label size)\\
 $s_k^{(r)}$                  & Soft-label matrix from client $k$ at round $r$,
                                $s_k^{(r)}\!\in\!\mathbb{R}^{|\mathcal{D}^{\text{pub}}|\times d}$\\
@@ -347,10 +602,12 @@ $\bar{s}^{(r)} = \frac{1}{K}\sum_k s_k^{(r)}$ and each client minimises
   \mathcal{L}_k(\theta_k) =
   \underbrace{\mathcal{L}_{\text{CE}}(\theta_k;\,\mathcal{D}_k)}_{\text{private classification}}
   +\;
-  \lambda\,\underbrace{\mathcal{L}_{\text{KD}}(\theta_k;\,\mathcal{D}^{\text{pub}},\bar{s}^{(r-1)})}_{\text{KD alignment}},
+  \underbrace{\mathcal{L}_{\text{KD}}(\theta_k;\,\mathcal{D}^{\text{pub}},\bar{s}^{(r-1)})}_{\text{KD alignment}},
   \label{eq:fedkd}
 \end{equation}
-where $\lambda$ balances local accuracy against knowledge absorption.
+where the two terms are optimised in alternation: the classification
+head on $\mathcal{D}_k$ and the distillation head on
+$\mathcal{D}^{\text{pub}}$ (Section~\ref{sec:methods}).
 Since $\bar{s}^{(r)}$ lives in a shared $d$-dimensional space, arbitrary
 backbones can join the same round.
 
@@ -402,7 +659,7 @@ Gradient flows are fully decoupled between heads; only the backbone is shared.
 \setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\columnwidth}{@{}lX@{}}
 \toprule
-\textbf{Tier} & \textbf{Backbone}\\
+\textbf{Tier} & \textbf{Architecture}\\
 \midrule
 \multicolumn{2}{@{}l}{\emph{CSI input}
   $x\in\mathbb{R}^{1500\times 12}$ ($T{=}1500$, $4{+}B{=}12$ features)}\\
@@ -422,8 +679,8 @@ M & Conv2D(64,3) $\to$ MP $\to$ Conv2D(128,3) $\to$ MP $\to$ Flatten
 L & Conv2D(64,3) $\to$ MP $\to$ Conv2D(128,3) $\to$ MP $\to$
     Conv2D(256,3) $\to$ MP $\to$ Flatten $\to$ Dense(512) $\to$ DO(0.40)\\
 \midrule
-\multicolumn{2}{@{}l}{\emph{Heads (all tiers):} classification
-  Dense($C$)+softmax; distillation Dense($d{=}64$)+ReLU}\\
+\multicolumn{2}{@{}l}{ classification head:
+  Dense($C$)+softmax; distillation head: Dense($d{=}64$)+ReLU}\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -436,10 +693,11 @@ architecture, while FedMD shares only soft labels and forfeits the
 accuracy gains of weight sharing.  FedMKS simultaneously (i)~FedAvgs
 weights within each tier, (ii)~distils knowledge across tiers via
 aggregated soft labels on the public set, and (iii)~applies Mixup
-augmentation to the public set (following FedAKD~\cite{zhang2018mixup}).
+augmentation~\cite{zhang2018mixup} to the public set
+(following FedAKD~\cite{gad2023fedakd}).
 
 In round $r{=}1$ each client trains only on private data and uploads its
-initial soft labels and classifier weights.  From $r{=}2$ the server returns
+initial soft labels and model weights.  From $r{=}2$ the server returns
 $\mathbf{W}_{t_k}^{(r-1)}$ and $\bar{s}^{(r-1)}$; the client loads the
 weights, fine-tunes the distillation head on $\bar{s}^{(r-1)}$ targets,
 trains the classification head on $\mathcal{D}_k$ for $E_{\text{loc}}$
@@ -465,7 +723,7 @@ Algorithm~\ref{alg:fedmks} formalises one FedMKS round.
 \EndIf
 \For{each client $k$ \textbf{in parallel}}
   \If{$r > 1$ and $\mathbf{W}_{t_k}^{(r-1)}$ received}
-    \State Load classifier weights $\gets \mathbf{W}_{t_k}^{(r-1)}$
+    \State Load model weights $\gets \mathbf{W}_{t_k}^{(r-1)}$
     \State Receive soft labels $\bar{s}^{(r-1)}$ as public-set targets
     \State Fine-tune dist.\ head on $\mathcal{D}^{\text{pub}}$ for $E_{\text{kd}}$ epochs
            minimising $\mathcal{L}_{\text{MSE}}(f_k^{\text{dist}}(\cdot), \bar{s}^{(r-1)})$
@@ -497,17 +755,17 @@ Table~\ref{tab:algosummary} summarises all evaluated algorithms.
 
 \begin{table}[t]
 \centering\small
-\caption{Algorithm summary ($\dagger$~efficiency ablation only).}
+\caption{Algorithm summary}
 \label{tab:algosummary}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lccl@{}}
 \toprule
-\textbf{Algo.} & \textbf{Soft} & \textbf{Wts} & \textbf{Topology}\\
+\textbf{Algo.} & \textbf{Soft labels} & \textbf{Wts} & \textbf{Topology}\\
 \midrule
 FedMD           & \checkmark & --         & Heterogeneous \\
 FedAKD          & \checkmark & --         & Heterogeneous \\
 FedMKS          & \checkmark & \checkmark & Semi-het.     \\
-FedDF$^\dagger$ & \checkmark & \checkmark & Heterogeneous \\
+FedDF & \checkmark & \checkmark & Heterogeneous \\
 FedAvg          & --         & \checkmark & Homogeneous   \\
 FedProx         & --         & \checkmark & Homogeneous   \\
 Local           & --         & --         & Isolated      \\
@@ -524,16 +782,22 @@ Central         & --         & --         & Centralised   \\
 \subsection{Experiment Design}
 
 \textbf{Datasets.}
-\emph{HomeOccupancy}~\cite{homesensekd2024}: 3-class CSI (empty/sleep/work),
+\emph{HomeOccupancy}: 3-class CSI (empty/sleep/work),
 sessions 1--2 as train, session 3 as test; public data is the
-\emph{HomeHAR} CSI corpus~\cite{homesensekd2024}.
+\emph{HomeHAR} CSI corpus.
 \emph{MNIST}: 10-class digit images; public data is CIFAR-10.
 \emph{CIFAR-10}: 10-class object images; public data is MNIST.
 
 \textbf{Hyperparameters} (Table~\ref{tab:hyperparam}): image benchmarks
 use $n_c{=}100$, $E_{\text{loc}}{=}5$, $E_{\text{kd}}{=}3$; all other
-settings are shared.  Results are mean validation accuracy over up to 3
-seeds; in-progress runs are single-seed (\dag).
+settings are shared.  Results are mean validation accuracy over completed seeds (up to
+three); shaded bands in the figures show the seed range.
+Reported accuracy is the mean over clients of each client's validation
+accuracy \emph{after} its local update on the shared test set---the only
+metric defined uniformly across all methods, since the KD-based
+algorithms maintain no single global model.  For FedAvg/FedProx this
+evaluates the deployed model after one round of local adaptation rather
+than the server-side aggregate.
 
 \begin{table}[t]
 \centering\small
@@ -552,7 +816,7 @@ Local epochs $E_{\text{loc}}$ & 4 (CSI) / 5 (image) \\
 KD epochs $E_{\text{kd}}$ & 2 (CSI) / 3 (image) \\
 Soft-label dimension $d$ & 64 \\
 FedProx $\mu$ & 0.01 \\
-Alignment samples & 10\,000 (cap) \\
+Public alignment samples $|\mathcal{D}^{\text{pub}}|$ & 1\,375 (CSI) / 10\,000 (image) \\
 CSI window $T$ & 1500 \\
 STFT bins $B$ & 8 \\
 \bottomrule
@@ -584,15 +848,60 @@ accuracy over 50 rounds under IID and non-IID partitions.
     xlabels at=edge bottom,
     ylabels at=edge left,
     group size=3 by 1,
-    horizontal sep=0.9cm,
+    horizontal sep=0.55cm,
   },
   p1panel,
-  width=0.31\textwidth,
+  width=0.32\textwidth,
+  height=3.6cm,
 ]
 \nextgroupplot[ymin=25, ymax=100,
   legend to name=legendPiid,
   legend style={legend columns=7, font=\tiny,
     /tikz/every even column/.append style={column sep=0.3em}}]
+\addplot[draw=none, fill=black!15, forget plot] coordinates {
+  (1,70.99) (2,86.13) (3,82.88) (4,86.85) (5,92.25) (6,91.71) (7,91.89) (8,86.31) (9,88.65) (10,89.01)
+  (11,86.49) (12,85.77) (13,87.39) (14,86.85) (15,84.14) (16,86.13) (17,89.37) (18,87.57) (19,91.89) (20,90.63)
+  (21,90.81) (22,90.81) (23,90.63) (24,90.63) (25,90.63) (26,90.81) (27,90.81) (28,90.81) (29,90.81) (30,90.81)
+  (31,90.63) (32,90.81) (33,90.63) (34,90.63) (35,90.63) (36,90.63) (37,90.63) (38,90.81) (39,90.81) (40,90.81)
+  (41,90.45) (42,90.81) (43,90.63) (44,90.63) (45,90.81) (46,90.81) (47,90.81) (48,90.81) (49,90.81) (50,90.99)
+  (50,92.43) (49,92.25) (48,92.43) (47,92.61) (46,92.61) (45,92.61) (44,92.43) (43,92.61) (42,92.61) (41,92.61)
+  (40,92.61) (39,92.79) (38,92.61) (37,92.97) (36,92.97) (35,92.97) (34,92.97) (33,92.97) (32,92.97) (31,92.97)
+  (30,92.97) (29,92.97) (28,93.15) (27,93.15) (26,93.15) (25,93.15) (24,92.97) (23,92.97) (22,92.97) (21,92.97)
+  (20,92.61) (19,92.25) (18,91.53) (17,90.45) (16,90.81) (15,92.43) (14,93.15) (13,87.93) (12,88.65) (11,87.39)
+  (10,92.07) (9,92.25) (8,90.99) (7,92.79) (6,94.05) (5,92.97) (4,90.63) (3,91.53) (2,90.27) (1,83.78)};
+\addplot[draw=none, fill=clPurple!15, forget plot] coordinates {
+  (1,39.71) (2,32.61) (3,32.89) (4,26.60) (5,29.44) (6,52.52) (7,52.38) (8,53.39) (9,59.39) (10,59.25)
+  (11,66.37) (12,68.99) (13,70.49) (14,69.98) (15,71.23) (16,72.40) (17,72.81) (18,73.32) (19,72.42) (20,72.86)
+  (21,73.21) (22,72.49) (23,73.89) (24,72.48) (25,74.50) (26,73.31) (27,74.19) (28,75.20) (29,77.74) (30,81.46)
+  (31,84.03) (32,84.65) (33,87.90) (34,88.72) (35,89.19) (36,89.16) (37,89.53) (38,89.15) (39,89.32) (40,89.35)
+  (41,89.89) (42,89.81) (43,89.53) (44,89.35) (45,88.98) (46,88.71) (47,89.44) (48,90.34) (49,88.69) (50,90.08)
+  (50,91.05) (49,90.82) (48,91.32) (47,91.30) (46,90.28) (45,91.47) (44,91.05) (43,90.52) (42,90.97) (41,91.22)
+  (40,91.26) (39,90.68) (38,91.46) (37,90.90) (36,91.06) (35,90.85) (34,90.37) (33,91.34) (32,91.15) (31,91.11)
+  (30,90.50) (29,91.12) (28,90.86) (27,90.47) (26,90.07) (25,90.11) (24,89.65) (23,89.50) (22,89.95) (21,90.09)
+  (20,88.13) (19,85.23) (18,80.90) (17,74.89) (16,73.89) (15,73.44) (14,73.58) (13,73.29) (12,72.70) (11,73.13)
+  (10,70.55) (9,66.01) (8,65.02) (7,58.23) (6,59.95) (5,42.40) (4,37.20) (3,33.48) (2,33.38) (1,44.83)};
+\addplot[draw=none, fill=clOlive!15, forget plot] coordinates {
+  (1,40.70) (2,32.61) (3,32.61) (4,32.61) (5,32.61) (6,32.61) (7,32.61) (8,32.61) (9,32.61) (10,32.61)
+  (11,32.61) (12,32.61) (13,32.61) (14,32.61) (15,32.61) (16,32.61) (17,32.61) (18,32.61) (19,32.61) (20,32.61)
+  (21,39.61) (22,37.55) (23,50.50) (24,55.02) (25,56.37) (26,56.65) (27,58.59) (28,62.41) (29,63.66) (30,69.02)
+  (31,67.03) (32,69.62) (33,72.59) (34,73.59) (35,81.96) (36,87.34) (37,86.39) (38,86.59) (39,87.69) (40,88.04)
+  (41,89.49) (42,87.05) (43,88.44) (44,87.50) (45,88.36) (46,87.08) (47,87.99) (48,89.06) (49,88.74) (50,88.25)
+  (50,88.68) (49,89.41) (48,90.36) (47,89.34) (46,89.26) (45,90.05) (44,88.77) (43,89.58) (42,89.74) (41,89.72)
+  (40,89.64) (39,89.28) (38,90.31) (37,89.73) (36,88.75) (35,88.13) (34,88.49) (33,89.30) (32,87.68) (31,87.70)
+  (30,86.95) (29,88.74) (28,87.75) (27,86.72) (26,87.41) (25,86.65) (24,88.23) (23,85.63) (22,87.50) (21,87.45)
+  (20,86.14) (19,78.34) (18,69.80) (17,72.19) (16,70.36) (15,69.75) (14,71.58) (13,67.18) (12,62.77) (11,61.87)
+  (10,53.73) (9,54.77) (8,43.17) (7,42.61) (6,33.13) (5,32.61) (4,32.61) (3,32.61) (2,32.61) (1,47.13)};
+\addplot[draw=none, fill=clGray!15, forget plot] coordinates {
+  (1,41.59) (2,54.78) (3,56.98) (4,63.60) (5,68.20) (6,68.93) (7,72.12) (8,74.18) (9,75.32) (10,75.03)
+  (11,76.67) (12,75.65) (13,78.10) (14,77.04) (15,78.59) (16,76.00) (17,79.20) (18,78.23) (19,79.31) (20,77.54)
+  (21,78.94) (22,80.20) (23,78.95) (24,78.81) (25,79.42) (26,79.95) (27,80.06) (28,81.47) (29,80.18) (30,80.34)
+  (31,79.65) (32,80.47) (33,80.86) (34,81.42) (35,81.78) (36,80.26) (37,80.67) (38,80.27) (39,81.32) (40,80.59)
+  (41,78.67) (42,80.12) (43,80.41) (44,79.46) (45,80.41) (46,80.14) (47,79.36) (48,80.50) (49,81.46) (50,80.53)
+  (50,83.03) (49,82.69) (48,82.25) (47,82.34) (46,81.54) (45,81.61) (44,80.92) (43,81.99) (42,80.72) (41,82.91)
+  (40,82.02) (39,82.86) (38,80.74) (37,81.58) (36,81.27) (35,82.55) (34,82.29) (33,82.71) (32,81.83) (31,82.46)
+  (30,82.09) (29,82.10) (28,82.23) (27,80.83) (26,81.34) (25,81.40) (24,82.94) (23,83.83) (22,82.85) (21,81.26)
+  (20,81.68) (19,82.43) (18,78.83) (17,80.56) (16,81.45) (15,81.58) (14,81.20) (13,80.46) (12,80.26) (11,77.46)
+  (10,79.68) (9,81.47) (8,77.37) (7,73.87) (6,72.78) (5,69.94) (4,65.75) (3,61.25) (2,56.11) (1,42.14)};
 \addplot[black,thick,dashed] coordinates {
   (1,77.39) (2,88.20) (3,87.21) (4,88.74) (5,92.61) (6,92.88) (7,92.34) (8,88.65) (9,90.45) (10,90.54)
   (11,86.94) (12,87.21) (13,87.66) (14,90.00) (15,88.29) (16,88.47) (17,89.91) (18,89.55) (19,92.07) (20,91.62)
@@ -642,101 +951,254 @@ accuracy over 50 rounds under IID and non-IID partitions.
   (31,81.05) (32,81.15) (33,81.79) (34,81.86) (35,82.17) (36,80.77) (37,81.12) (38,80.50) (39,82.09) (40,81.31)
   (41,80.79) (42,80.42) (43,81.20) (44,80.19) (45,81.01) (46,80.84) (47,80.85) (48,81.38) (49,82.08) (50,81.78)};
 \addlegendentry{Local}
-\nextgroupplot[ymin=88, ymax=100,]
+\nextgroupplot[ymin=88, ymax=100]
+\addplot[draw=none, fill=black!15, forget plot] coordinates {
+  (1,98.86) (2,98.89) (3,99.03) (4,98.08) (5,98.84) (6,98.64) (7,98.80) (8,98.80) (9,98.53) (10,98.75)
+  (11,98.90) (12,98.94) (13,98.94) (14,98.90) (15,98.83) (16,98.68) (17,98.71) (18,98.95) (19,98.84) (20,98.92)
+  (21,98.51) (22,98.98) (23,98.79) (24,99.01) (25,98.88) (26,98.59) (27,99.00) (28,98.94) (29,98.86) (30,98.81)
+  (31,98.83) (32,98.93) (33,98.97) (34,98.95) (35,99.00) (36,99.01) (37,99.02) (38,99.07) (39,98.90) (40,99.02)
+  (41,98.96) (42,98.99) (43,98.84) (44,98.93) (45,98.78) (46,98.92) (47,98.93) (48,98.87) (49,99.01) (50,98.80)
+  (50,99.04) (49,99.22) (48,99.04) (47,99.02) (46,99.23) (45,99.12) (44,99.12) (43,99.09) (42,99.21) (41,99.18)
+  (40,99.03) (39,99.12) (38,99.18) (37,99.08) (36,99.09) (35,99.14) (34,99.04) (33,99.08) (32,99.00) (31,99.12)
+  (30,99.20) (29,99.04) (28,99.05) (27,99.06) (26,98.98) (25,98.96) (24,99.08) (23,99.05) (22,99.15) (21,99.11)
+  (20,99.10) (19,99.11) (18,99.04) (17,99.08) (16,99.06) (15,99.12) (14,99.08) (13,99.05) (12,99.06) (11,99.22)
+  (10,99.00) (9,99.02) (8,99.00) (7,99.20) (6,98.95) (5,99.15) (4,99.05) (3,99.16) (2,99.01) (1,98.93)};
+\addplot[draw=none, fill=clBlue!15, forget plot] coordinates {
+  (1,92.85) (2,94.14) (3,94.76) (4,95.27) (5,95.45) (6,95.57) (7,95.66) (8,95.65) (9,95.78) (10,95.77)
+  (11,95.81) (12,95.77) (13,95.73) (14,95.80) (15,95.69) (16,95.73) (17,95.69) (18,95.67) (19,95.58) (20,95.70)
+  (21,95.66) (22,95.61) (23,95.75) (24,95.72) (25,95.78) (26,95.64) (27,95.67) (28,95.75) (29,95.75) (30,95.54)
+  (31,95.72) (32,95.71) (33,95.71) (34,95.69) (35,95.75) (36,95.65) (37,95.72) (38,95.67) (39,95.58) (40,95.58)
+  (41,95.62) (42,95.71) (43,95.70) (44,95.56) (45,95.66) (46,95.67) (47,95.61) (48,95.76) (49,95.69) (50,95.72)
+  (50,95.81) (49,95.88) (48,95.84) (47,95.90) (46,95.76) (45,95.83) (44,95.72) (43,95.85) (42,95.82) (41,95.83)
+  (40,95.79) (39,95.78) (38,95.85) (37,95.93) (36,95.89) (35,95.83) (34,95.77) (33,95.80) (32,95.86) (31,95.83)
+  (30,95.75) (29,95.79) (28,95.92) (27,95.87) (26,95.88) (25,95.93) (24,95.90) (23,95.82) (22,95.70) (21,95.86)
+  (20,95.84) (19,95.86) (18,95.87) (17,95.90) (16,95.88) (15,95.85) (14,95.86) (13,95.93) (12,95.97) (11,95.88)
+  (10,95.88) (9,95.85) (8,95.82) (7,95.76) (6,95.70) (5,95.55) (4,95.40) (3,95.00) (2,94.41) (1,93.10)};
+\addplot[draw=none, fill=clTeal!15, forget plot] coordinates {
+  (1,92.78) (2,93.88) (3,94.82) (4,95.20) (5,95.43) (6,95.56) (7,95.61) (8,95.62) (9,95.67) (10,95.70)
+  (11,95.77) (12,95.79) (13,95.70) (14,95.70) (15,95.61) (16,95.82) (17,95.78) (18,95.90) (19,95.86) (20,95.79)
+  (21,95.67) (22,95.27) (23,95.61) (24,95.73) (25,95.78) (26,95.78) (27,95.89) (28,95.80) (29,95.87) (30,95.78)
+  (31,95.67) (32,95.83) (33,95.87) (34,95.51) (35,95.51) (36,95.50) (37,95.74) (38,95.84) (39,95.85) (40,95.85)
+  (41,95.61) (42,95.51) (43,95.85) (44,95.86) (45,95.81) (46,95.88) (47,95.79) (48,95.82) (49,95.56) (50,95.71)
+  (50,95.95) (49,95.86) (48,95.93) (47,95.96) (46,96.00) (45,95.99) (44,95.93) (43,95.92) (42,95.90) (41,95.96)
+  (40,95.93) (39,95.96) (38,95.93) (37,95.97) (36,95.82) (35,95.92) (34,95.97) (33,95.97) (32,95.91) (31,95.88)
+  (30,95.97) (29,95.96) (28,96.01) (27,96.02) (26,95.97) (25,95.93) (24,95.91) (23,95.92) (22,95.77) (21,95.92)
+  (20,95.94) (19,95.93) (18,95.98) (17,95.84) (16,95.99) (15,95.91) (14,95.90) (13,95.83) (12,95.91) (11,95.81)
+  (10,95.84) (9,95.82) (8,95.81) (7,95.76) (6,95.69) (5,95.53) (4,95.40) (3,94.90) (2,94.52) (1,93.16)};
+\addplot[draw=none, fill=clRed!15, forget plot] coordinates {
+  (1,92.65) (2,90.44) (3,91.72) (4,92.80) (5,93.83) (6,94.44) (7,95.05) (8,95.53) (9,95.75) (10,96.00)
+  (11,96.20) (12,96.36) (13,96.42) (14,96.57) (15,96.70) (16,96.71) (17,96.80) (18,96.88) (19,96.76) (20,96.91)
+  (21,96.88) (22,97.00) (23,97.10) (24,97.06) (25,97.18) (26,97.10) (27,97.16) (28,97.21) (29,97.09) (30,97.23)
+  (31,97.02) (32,97.31) (33,97.34) (34,97.18) (35,97.22) (36,97.07) (37,97.37) (38,97.40) (39,97.27) (40,97.17)
+  (41,97.37) (42,97.37) (43,97.16) (44,97.36) (45,97.49) (46,97.27) (47,97.46) (48,97.19) (49,97.25) (50,97.49)
+  (50,97.70) (49,97.67) (48,97.55) (47,97.56) (46,97.66) (45,97.64) (44,97.47) (43,97.52) (42,97.45) (41,97.61)
+  (40,97.41) (39,97.52) (38,97.48) (37,97.61) (36,97.51) (35,97.34) (34,97.24) (33,97.58) (32,97.40) (31,97.34)
+  (30,97.37) (29,97.31) (28,97.37) (27,97.36) (26,97.32) (25,97.21) (24,97.32) (23,97.36) (22,97.16) (21,97.23)
+  (20,97.11) (19,97.22) (18,97.04) (17,97.06) (16,97.05) (15,96.82) (14,96.82) (13,96.73) (12,96.62) (11,96.45)
+  (10,96.27) (9,96.01) (8,95.75) (7,95.32) (6,95.11) (5,94.50) (4,93.52) (3,92.37) (2,91.22) (1,93.39)};
+\addplot[draw=none, fill=clPurple!15, forget plot] coordinates {
+  (1,90.38) (2,88.28) (3,89.82) (4,90.97) (5,91.80) (6,92.78) (7,93.15) (8,93.58) (9,93.85) (10,94.14)
+  (11,94.51) (12,94.64) (13,94.74) (14,94.89) (15,95.17) (16,95.24) (17,95.30) (18,95.39) (19,95.54) (20,95.66)
+  (21,95.60) (22,95.72) (23,95.84) (24,95.92) (25,95.94) (26,95.98) (27,96.13) (28,96.06) (29,96.20) (30,96.20)
+  (31,96.19) (32,96.30) (33,96.33) (34,96.44) (35,96.41) (36,96.57) (37,96.46) (38,96.56) (39,96.60) (40,96.67)
+  (41,96.57) (42,96.69) (43,96.71) (44,96.71) (45,96.89) (46,96.87) (47,96.89) (48,96.81) (49,96.96) (50,97.01)
+  (50,97.12) (49,97.08) (48,96.96) (47,97.01) (46,97.01) (45,96.93) (44,96.96) (43,96.87) (42,96.84) (41,96.72)
+  (40,96.81) (39,96.72) (38,96.66) (37,96.65) (36,96.59) (35,96.54) (34,96.56) (33,96.45) (32,96.43) (31,96.33)
+  (30,96.26) (29,96.24) (28,96.26) (27,96.22) (26,96.06) (25,96.07) (24,95.99) (23,95.97) (22,95.86) (21,95.79)
+  (20,95.71) (19,95.63) (18,95.66) (17,95.43) (16,95.38) (15,95.27) (14,95.04) (13,95.01) (12,94.78) (11,94.52)
+  (10,94.25) (9,93.94) (8,93.71) (7,93.32) (6,92.94) (5,92.08) (4,91.60) (3,90.45) (2,88.58) (1,90.56)};
+\addplot[draw=none, fill=clOlive!15, forget plot] coordinates {
+  (1,90.24) (2,86.47) (3,89.07) (4,90.64) (5,91.57) (6,92.52) (7,92.91) (8,93.48) (9,93.70) (10,93.87)
+  (11,94.13) (12,94.41) (13,94.56) (14,94.58) (15,94.71) (16,95.07) (17,95.11) (18,95.13) (19,95.29) (20,95.45)
+  (21,95.50) (22,95.64) (23,95.73) (24,95.80) (25,95.92) (26,95.89) (27,95.97) (28,96.08) (29,96.11) (30,96.18)
+  (31,96.26) (32,96.30) (33,96.34) (34,96.33) (35,96.36) (36,96.39) (37,96.52) (38,96.61) (39,96.54) (40,96.75)
+  (41,96.77) (42,96.73) (43,96.87) (44,96.97) (45,96.80) (46,96.91) (47,97.00) (48,97.04) (49,97.04) (50,97.04)
+  (50,97.27) (49,97.30) (48,97.27) (47,97.13) (46,97.12) (45,97.19) (44,97.05) (43,97.07) (42,96.98) (41,96.98)
+  (40,96.89) (39,96.84) (38,96.86) (37,96.74) (36,96.70) (35,96.69) (34,96.65) (33,96.57) (32,96.43) (31,96.51)
+  (30,96.32) (29,96.33) (28,96.21) (27,96.21) (26,96.20) (25,96.02) (24,95.87) (23,95.88) (22,95.80) (21,95.68)
+  (20,95.65) (19,95.59) (18,95.44) (17,95.24) (16,95.20) (15,94.82) (14,94.86) (13,94.80) (12,94.60) (11,94.24)
+  (10,94.04) (9,93.72) (8,93.55) (7,93.13) (6,92.67) (5,91.97) (4,90.82) (3,89.43) (2,86.93) (1,90.50)};
+\addplot[draw=none, fill=clGray!15, forget plot] coordinates {
+  (1,92.72) (2,93.70) (3,94.51) (4,94.75) (5,94.94) (6,94.76) (7,94.93) (8,94.92) (9,94.96) (10,95.22)
+  (11,95.25) (12,95.07) (13,95.03) (14,95.20) (15,95.06) (16,95.34) (17,95.31) (18,95.47) (19,95.49) (20,95.57)
+  (21,95.47) (22,95.58) (23,95.45) (24,95.60) (25,95.15) (26,95.48) (27,95.66) (28,95.57) (29,95.49) (30,95.54)
+  (31,95.52) (32,95.72) (33,95.70) (34,95.62) (35,95.64) (36,95.60) (37,95.59) (38,95.64) (39,95.72) (40,95.64)
+  (41,95.70) (42,95.63) (43,95.80) (44,95.63) (45,95.77) (46,95.64) (47,95.47) (48,95.66) (49,95.74) (50,95.74)
+  (50,95.98) (49,95.91) (48,95.86) (47,95.87) (46,95.85) (45,95.88) (44,95.93) (43,95.95) (42,95.91) (41,95.89)
+  (40,95.78) (39,95.96) (38,95.84) (37,95.76) (36,95.75) (35,95.78) (34,95.79) (33,95.88) (32,95.82) (31,95.77)
+  (30,95.73) (29,95.75) (28,95.80) (27,95.81) (26,95.79) (25,95.66) (24,95.87) (23,95.54) (22,95.61) (21,95.61)
+  (20,95.61) (19,95.64) (18,95.60) (17,95.53) (16,95.63) (15,95.51) (14,95.49) (13,95.43) (12,95.27) (11,95.26)
+  (10,95.45) (9,95.32) (8,95.21) (7,95.04) (6,95.04) (5,95.11) (4,94.97) (3,94.66) (2,94.12) (1,93.26)};
 \addplot[black,thick,dashed] coordinates {
-  (1,98.87) (2,99.01) (3,99.06) (4,98.08) (5,98.84) (6,98.95) (7,98.96) (8,99.0) (9,99.02) (10,98.75)
-  (11,98.98) (12,99.06) (13,99.05) (14,99.08) (15,99.12) (16,98.74) (17,98.96) (18,98.95) (19,98.84) (20,98.92)
-  (21,99.11) (22,99.15) (23,99.05) (24,99.01) (25,98.96) (26,98.98) (27,99.0) (28,98.95) (29,99.04) (30,99.2)
-  (31,98.83) (32,99.0) (33,99.06) (34,98.98) (35,99.01) (36,99.01) (37,99.08) (38,99.07) (39,99.12) (40,99.03)
-  (41,98.96) (42,99.07) (43,99.02) (44,99.03) (45,98.94) (46,99.03) (47,98.93) (48,98.97) (49,99.22) (50,99.04)};
+  (1,98.89) (2,98.93) (3,99.08) (4,98.67) (5,98.98) (6,98.84) (7,98.99) (8,98.93) (9,98.80) (10,98.91)
+  (11,99.03) (12,99.01) (13,99.00) (14,99.01) (15,98.94) (16,98.83) (17,98.92) (18,99.01) (19,98.93) (20,99.02)
+  (21,98.90) (22,99.04) (23,98.91) (24,99.05) (25,98.92) (26,98.81) (27,99.03) (28,98.98) (29,98.97) (30,99.00)
+  (31,98.96) (32,98.98) (33,99.04) (34,98.99) (35,99.05) (36,99.04) (37,99.05) (38,99.11) (39,99.03) (40,99.03)
+  (41,99.07) (42,99.09) (43,98.98) (44,99.03) (45,98.95) (46,99.06) (47,98.99) (48,98.96) (49,99.11) (50,98.95)};
 \addplot[clBlue] coordinates {
-  (1,92.94) (2,94.14) (3,94.76) (4,95.27) (5,95.5) (6,95.7) (7,95.66) (8,95.78) (9,95.78) (10,95.77)
-  (11,95.88) (12,95.89) (13,95.73) (14,95.86) (15,95.69) (16,95.73) (17,95.69) (18,95.67) (19,95.59) (20,95.7)
-  (21,95.66) (22,95.64) (23,95.75) (24,95.72) (25,95.78) (26,95.64) (27,95.67) (28,95.75) (29,95.79) (30,95.54)
-  (31,95.75) (32,95.71) (33,95.78) (34,95.69) (35,95.77) (36,95.65) (37,95.72) (38,95.74) (39,95.58) (40,95.58)
-  (41,95.62) (42,95.71) (43,95.7) (44,95.56) (45,95.66) (46,95.75) (47,95.61) (48,95.76) (49,95.73) (50,95.72)};
+  (1,92.96) (2,94.27) (3,94.86) (4,95.33) (5,95.50) (6,95.65) (7,95.70) (8,95.75) (9,95.80) (10,95.82)
+  (11,95.86) (12,95.88) (13,95.80) (14,95.83) (15,95.78) (16,95.82) (17,95.77) (18,95.79) (19,95.68) (20,95.79)
+  (21,95.79) (22,95.65) (23,95.79) (24,95.82) (25,95.84) (26,95.78) (27,95.79) (28,95.83) (29,95.77) (30,95.65)
+  (31,95.77) (32,95.79) (33,95.77) (34,95.74) (35,95.78) (36,95.74) (37,95.84) (38,95.75) (39,95.71) (40,95.72)
+  (41,95.76) (42,95.77) (43,95.80) (44,95.65) (45,95.74) (46,95.73) (47,95.76) (48,95.81) (49,95.77) (50,95.78)};
 \addplot[clTeal] coordinates {
-  (1,92.78) (2,93.88) (3,94.89) (4,95.2) (5,95.43) (6,95.57) (7,95.64) (8,95.62) (9,95.67) (10,95.7)
-  (11,95.81) (12,95.79) (13,95.7) (14,95.7) (15,95.78) (16,95.82) (17,95.84) (18,95.92) (19,95.88) (20,95.94)
-  (21,95.77) (22,95.65) (23,95.61) (24,95.91) (25,95.78) (26,95.97) (27,95.92) (28,95.85) (29,95.87) (30,95.97)
-  (31,95.88) (32,95.91) (33,95.94) (34,95.76) (35,95.51) (36,95.66) (37,95.8) (38,95.85) (39,95.85) (40,95.93)
-  (41,95.89) (42,95.9) (43,95.85) (44,95.9) (45,95.81) (46,95.88) (47,95.96) (48,95.86) (49,95.84) (50,95.95)};
+  (1,92.99) (2,94.22) (3,94.87) (4,95.31) (5,95.48) (6,95.61) (7,95.67) (8,95.74) (9,95.74) (10,95.79)
+  (11,95.78) (12,95.85) (13,95.77) (14,95.78) (15,95.77) (16,95.91) (17,95.82) (18,95.93) (19,95.89) (20,95.86)
+  (21,95.78) (22,95.56) (23,95.78) (24,95.83) (25,95.86) (26,95.87) (27,95.94) (28,95.89) (29,95.93) (30,95.85)
+  (31,95.78) (32,95.88) (33,95.93) (34,95.75) (35,95.71) (36,95.66) (37,95.84) (38,95.88) (39,95.91) (40,95.89)
+  (41,95.82) (42,95.77) (43,95.89) (44,95.90) (45,95.90) (46,95.95) (47,95.90) (48,95.87) (49,95.76) (50,95.82)};
 \addplot[clRed,thick] coordinates {
-  (1,92.9) (2,91.18) (3,91.88) (4,92.8) (5,93.92) (6,94.56) (7,95.05) (8,95.54) (9,95.75) (10,96.05)
-  (11,96.36) (12,96.36) (13,96.57) (14,96.81) (15,96.78) (16,96.71) (17,97.01) (18,97.0) (19,96.99) (20,97.04)
-  (21,97.01) (22,97.16) (23,97.1) (24,97.28) (25,97.21) (26,97.32) (27,97.2) (28,97.3) (29,97.23) (30,97.37)
-  (31,97.34) (32,97.4) (33,97.36) (34,97.18) (35,97.22) (36,97.47) (37,97.45) (38,97.46) (39,97.52) (40,97.38)
-  (41,97.37) (42,97.37) (43,97.3) (44,97.41) (45,97.51) (46,97.53) (47,97.56) (48,97.19) (49,97.67) (50,97.68)};
+  (1,92.98) (2,90.95) (3,91.99) (4,93.11) (5,94.08) (6,94.70) (7,95.16) (8,95.61) (9,95.88) (10,96.11)
+  (11,96.34) (12,96.46) (13,96.57) (14,96.73) (15,96.77) (16,96.84) (17,96.96) (18,96.97) (19,96.99) (20,97.02)
+  (21,97.04) (22,97.07) (23,97.20) (24,97.22) (25,97.20) (26,97.19) (27,97.24) (28,97.29) (29,97.21) (30,97.30)
+  (31,97.21) (32,97.36) (33,97.43) (34,97.21) (35,97.28) (36,97.35) (37,97.48) (38,97.45) (39,97.43) (40,97.32)
+  (41,97.48) (42,97.42) (43,97.33) (44,97.41) (45,97.55) (46,97.49) (47,97.50) (48,97.39) (49,97.44) (50,97.62)};
 \addplot[clPurple] coordinates {
-  (1,90.56) (2,88.58) (3,90.16) (4,91.14) (5,91.93) (6,92.83) (7,93.32) (8,93.71) (9,93.94) (10,94.17)
-  (11,94.51) (12,94.67) (13,94.95) (14,94.89) (15,95.19) (16,95.24) (17,95.41) (18,95.39) (19,95.54) (20,95.66)
-  (21,95.6) (22,95.72) (23,95.84) (24,95.96) (25,95.94) (26,95.98) (27,96.17) (28,96.06) (29,96.2) (30,96.2)
-  (31,96.19) (32,96.3) (33,96.33) (34,96.44) (35,96.41) (36,96.59) (37,96.46) (38,96.56) (39,96.6) (40,96.67)
-  (41,96.57) (42,96.69) (43,96.71) (44,96.71) (45,96.89) (46,96.87) (47,96.89) (48,96.81) (49,96.96) (50,97.01)};
+  (1,90.44) (2,88.46) (3,90.14) (4,91.24) (5,91.93) (6,92.85) (7,93.25) (8,93.66) (9,93.90) (10,94.19)
+  (11,94.51) (12,94.69) (13,94.90) (14,94.96) (15,95.21) (16,95.29) (17,95.38) (18,95.49) (19,95.60) (20,95.68)
+  (21,95.72) (22,95.81) (23,95.89) (24,95.96) (25,96.02) (26,96.03) (27,96.17) (28,96.18) (29,96.22) (30,96.23)
+  (31,96.26) (32,96.37) (33,96.39) (34,96.52) (35,96.47) (36,96.58) (37,96.57) (38,96.61) (39,96.66) (40,96.75)
+  (41,96.63) (42,96.78) (43,96.79) (44,96.83) (45,96.90) (46,96.92) (47,96.95) (48,96.91) (49,97.03) (50,97.07)};
 \addplot[clOlive] coordinates {
-  (1,90.24) (2,86.93) (3,89.07) (4,90.82) (5,91.85) (6,92.54) (7,93.13) (8,93.48) (9,93.72) (10,94.02)
-  (11,94.13) (12,94.41) (13,94.56) (14,94.58) (15,94.71) (16,95.09) (17,95.11) (18,95.13) (19,95.29) (20,95.45)
-  (21,95.5) (22,95.64) (23,95.77) (24,95.85) (25,95.92) (26,95.89) (27,96.05) (28,96.08) (29,96.15) (30,96.18)
-  (31,96.26) (32,96.31) (33,96.34) (34,96.37) (35,96.47) (36,96.44) (37,96.63) (38,96.63) (39,96.7) (40,96.76)
-  (41,96.83) (42,96.73) (43,96.89) (44,96.97) (45,97.01) (46,97.04) (47,97.05) (48,97.13) (49,97.1) (50,97.16)};
+  (1,90.38) (2,86.72) (3,89.21) (4,90.71) (5,91.80) (6,92.58) (7,93.01) (8,93.52) (9,93.71) (10,93.98)
+  (11,94.20) (12,94.51) (13,94.71) (14,94.75) (15,94.77) (16,95.12) (17,95.18) (18,95.30) (19,95.42) (20,95.53)
+  (21,95.58) (22,95.72) (23,95.79) (24,95.84) (25,95.96) (26,96.01) (27,96.08) (28,96.14) (29,96.20) (30,96.23)
+  (31,96.37) (32,96.35) (33,96.45) (34,96.45) (35,96.51) (36,96.51) (37,96.63) (38,96.70) (39,96.69) (40,96.80)
+  (41,96.86) (42,96.83) (43,96.94) (44,97.00) (45,97.00) (46,97.03) (47,97.06) (48,97.15) (49,97.15) (50,97.16)};
 \addplot[clGray,dotted] coordinates {
-  (1,92.99) (2,93.8) (3,94.54) (4,94.75) (5,94.94) (6,94.76) (7,94.93) (8,94.92) (9,94.96) (10,95.22)
-  (11,95.25) (12,95.27) (13,95.34) (14,95.26) (15,95.51) (16,95.34) (17,95.31) (18,95.47) (19,95.49) (20,95.57)
-  (21,95.5) (22,95.61) (23,95.54) (24,95.6) (25,95.15) (26,95.48) (27,95.66) (28,95.57) (29,95.49) (30,95.54)
-  (31,95.52) (32,95.72) (33,95.7) (34,95.62) (35,95.64) (36,95.6) (37,95.68) (38,95.79) (39,95.72) (40,95.64)
-  (41,95.77) (42,95.82) (43,95.81) (44,95.63) (45,95.77) (46,95.64) (47,95.47) (48,95.66) (49,95.74) (50,95.74)};
-
-\nextgroupplot[ymin=25, ymax=75,]
+  (1,92.99) (2,93.87) (3,94.57) (4,94.86) (5,95.01) (6,94.91) (7,94.99) (8,95.10) (9,95.18) (10,95.31)
+  (11,95.25) (12,95.17) (13,95.27) (14,95.31) (15,95.30) (16,95.44) (17,95.44) (18,95.51) (19,95.57) (20,95.59)
+  (21,95.53) (22,95.59) (23,95.49) (24,95.73) (25,95.44) (26,95.68) (27,95.75) (28,95.70) (29,95.66) (30,95.67)
+  (31,95.68) (32,95.77) (33,95.79) (34,95.70) (35,95.73) (36,95.67) (37,95.68) (38,95.76) (39,95.80) (40,95.72)
+  (41,95.78) (42,95.78) (43,95.85) (44,95.80) (45,95.83) (46,95.75) (47,95.72) (48,95.77) (49,95.85) (50,95.87)};
+\nextgroupplot[ymin=25, ymax=75]
+\addplot[draw=none, fill=black!15, forget plot] coordinates {
+  (1,60.59) (2,66.78) (3,66.37) (4,65.37) (5,65.94) (6,66.31) (7,66.71) (8,65.70) (9,66.51) (10,67.15)
+  (11,67.03) (12,67.20) (13,66.51) (14,66.30) (15,66.16) (16,66.08) (17,65.26) (18,66.88) (19,67.18) (20,67.11)
+  (21,66.82) (22,66.30) (23,66.84) (24,66.17) (25,67.07) (26,66.28) (27,65.73) (28,67.01) (29,65.95) (30,66.61)
+  (31,66.81) (32,65.88) (33,66.01) (34,67.18) (35,65.51) (36,67.10) (37,66.88) (38,66.04) (39,65.69) (40,66.58)
+  (41,67.12) (42,67.03) (43,66.86) (44,67.54) (45,66.49) (46,66.30) (47,66.27) (48,67.26) (49,66.86) (50,66.92)
+  (50,67.60) (49,68.31) (48,67.54) (47,68.34) (46,67.85) (45,67.74) (44,68.05) (43,67.97) (42,67.58) (41,67.74)
+  (40,68.17) (39,67.71) (38,67.43) (37,68.00) (36,67.76) (35,67.83) (34,67.96) (33,67.83) (32,67.47) (31,68.04)
+  (30,67.56) (29,68.03) (28,68.89) (27,68.21) (26,68.41) (25,67.83) (24,68.34) (23,68.02) (22,67.90) (21,68.09)
+  (20,68.19) (19,67.85) (18,67.89) (17,68.30) (16,67.49) (15,68.08) (14,67.33) (13,67.52) (12,67.48) (11,67.15)
+  (10,67.79) (9,68.50) (8,67.85) (7,67.26) (6,68.39) (5,67.65) (4,66.67) (3,67.68) (2,67.32) (1,66.49)};
+\addplot[draw=none, fill=clBlue!15, forget plot] coordinates {
+  (1,37.37) (2,40.23) (3,40.25) (4,41.05) (5,40.43) (6,41.41) (7,41.40) (8,41.34) (9,41.49) (10,41.70)
+  (11,41.77) (12,41.98) (13,42.03) (14,42.17) (15,42.03) (16,41.91) (17,41.73) (18,41.79) (19,41.61) (20,41.71)
+  (21,41.44) (22,41.44) (23,41.19) (24,41.24) (25,41.31) (26,40.90) (27,41.23) (28,41.13) (29,41.02) (30,41.07)
+  (31,41.01) (32,40.82) (33,40.91) (34,40.83) (35,40.87) (36,40.83) (37,40.61) (38,40.53) (39,40.54) (40,40.59)
+  (41,40.53) (42,40.46) (43,40.66) (44,40.44) (45,40.22) (46,40.72) (47,40.60) (48,40.13) (49,40.40) (50,40.04)
+  (50,41.20) (49,40.91) (48,41.11) (47,41.16) (46,41.06) (45,41.11) (44,41.27) (43,41.21) (42,41.11) (41,41.38)
+  (40,41.42) (39,41.39) (38,41.53) (37,41.64) (36,41.64) (35,41.34) (34,41.67) (33,41.48) (32,41.52) (31,41.52)
+  (30,41.67) (29,41.76) (28,41.84) (27,41.74) (26,41.86) (25,41.84) (24,41.86) (23,42.07) (22,42.10) (21,42.26)
+  (20,42.42) (19,42.30) (18,42.41) (17,42.45) (16,42.45) (15,42.42) (14,42.74) (13,42.68) (12,42.44) (11,42.47)
+  (10,42.36) (9,42.29) (8,42.46) (7,42.53) (6,42.10) (5,41.56) (4,41.58) (3,41.18) (2,40.55) (1,37.50)};
+\addplot[draw=none, fill=clTeal!15, forget plot] coordinates {
+  (1,37.37) (2,39.84) (3,40.38) (4,40.53) (5,40.96) (6,40.93) (7,41.21) (8,41.67) (9,41.34) (10,41.62)
+  (11,41.74) (12,41.50) (13,41.74) (14,41.73) (15,41.68) (16,41.80) (17,41.79) (18,42.08) (19,41.69) (20,41.76)
+  (21,41.63) (22,41.48) (23,41.62) (24,41.20) (25,41.55) (26,41.61) (27,41.14) (28,41.40) (29,41.22) (30,41.10)
+  (31,41.11) (32,40.95) (33,41.24) (34,41.00) (35,40.85) (36,40.48) (37,41.00) (38,40.62) (39,40.72) (40,40.92)
+  (41,40.76) (42,40.71) (43,40.65) (44,40.74) (45,40.61) (46,40.71) (47,40.48) (48,40.63) (49,40.56) (50,40.48)
+  (50,41.18) (49,41.07) (48,41.29) (47,41.11) (46,41.37) (45,41.25) (44,41.78) (43,41.66) (42,41.56) (41,41.69)
+  (40,41.75) (39,41.66) (38,41.74) (37,41.65) (36,41.80) (35,41.76) (34,41.73) (33,41.67) (32,42.11) (31,41.95)
+  (30,42.08) (29,41.96) (28,42.10) (27,41.92) (26,41.98) (25,42.15) (24,42.24) (23,42.25) (22,42.36) (21,42.33)
+  (20,42.60) (19,42.39) (18,42.66) (17,42.57) (16,42.56) (15,42.69) (14,42.70) (13,42.81) (12,42.75) (11,42.55)
+  (10,42.38) (9,42.18) (8,42.34) (7,42.30) (6,41.99) (5,41.46) (4,41.64) (3,41.34) (2,40.85) (1,37.54)};
+\addplot[draw=none, fill=clRed!15, forget plot] coordinates {
+  (1,36.64) (2,29.38) (3,32.00) (4,33.36) (5,37.34) (6,39.42) (7,40.88) (8,41.90) (9,43.08) (10,44.18)
+  (11,44.74) (12,45.93) (13,46.75) (14,47.68) (15,48.20) (16,48.72) (17,49.23) (18,49.32) (19,49.54) (20,49.88)
+  (21,50.14) (22,49.96) (23,50.23) (24,50.17) (25,50.18) (26,50.14) (27,50.42) (28,50.68) (29,50.67) (30,50.77)
+  (31,50.94) (32,50.87) (33,50.86) (34,50.93) (35,51.01) (36,50.88) (37,51.18) (38,51.15) (39,51.38) (40,51.20)
+  (41,51.14) (42,51.17) (43,51.41) (44,51.42) (45,51.68) (46,51.51) (47,51.59) (48,51.55) (49,51.47) (50,51.76)
+  (50,52.57) (49,52.21) (48,52.38) (47,52.41) (46,52.27) (45,52.54) (44,52.23) (43,52.49) (42,52.86) (41,52.58)
+  (40,52.74) (39,52.37) (38,52.76) (37,52.71) (36,52.86) (35,52.72) (34,52.70) (33,52.83) (32,52.58) (31,52.39)
+  (30,52.63) (29,52.70) (28,52.61) (27,52.72) (26,52.53) (25,52.61) (24,52.63) (23,51.86) (22,52.08) (21,51.56)
+  (20,51.65) (19,51.43) (18,51.13) (17,50.44) (16,50.59) (15,50.47) (14,49.95) (13,49.41) (12,48.62) (11,47.48)
+  (10,46.91) (9,45.88) (8,44.56) (7,42.95) (6,40.85) (5,39.05) (4,37.04) (3,33.99) (2,31.11) (1,37.72)};
+\addplot[draw=none, fill=clPurple!15, forget plot] coordinates {
+  (1,35.71) (2,18.29) (3,23.42) (4,29.14) (5,34.40) (6,38.30) (7,40.23) (8,42.45) (9,43.54) (10,44.85)
+  (11,45.44) (12,46.69) (13,46.93) (14,47.56) (15,47.91) (16,48.06) (17,48.71) (18,48.88) (19,49.19) (20,49.24)
+  (21,49.33) (22,49.55) (23,49.89) (24,50.32) (25,50.35) (26,50.40) (27,50.69) (28,50.51) (29,50.74) (30,50.81)
+  (31,50.95) (32,51.11) (33,51.23) (34,51.30) (35,51.26) (36,51.66) (37,51.75) (38,51.49) (39,51.45) (40,51.61)
+  (41,51.46) (42,52.06) (43,51.83) (44,51.90) (45,52.14) (46,52.11) (47,52.07) (48,52.10) (49,52.08) (50,52.17)
+  (50,54.15) (49,54.28) (48,54.19) (47,54.28) (46,54.02) (45,54.03) (44,54.12) (43,54.16) (42,54.20) (41,54.07)
+  (40,54.15) (39,54.19) (38,54.09) (37,54.00) (36,53.94) (35,53.81) (34,53.91) (33,53.41) (32,53.73) (31,53.95)
+  (30,53.58) (29,53.47) (28,53.29) (27,53.26) (26,53.11) (25,52.96) (24,52.72) (23,52.71) (22,52.66) (21,52.51)
+  (20,52.49) (19,52.28) (18,52.24) (17,52.10) (16,51.75) (15,51.39) (14,50.89) (13,50.33) (12,49.92) (11,49.12)
+  (10,48.14) (9,47.37) (8,46.25) (7,44.90) (6,42.34) (5,39.99) (4,36.76) (3,29.34) (2,21.72) (1,37.85)};
+\addplot[draw=none, fill=clOlive!15, forget plot] coordinates {
+  (1,36.64) (2,13.39) (3,12.20) (4,19.12) (5,22.53) (6,25.10) (7,27.69) (8,31.50) (9,34.97) (10,36.75)
+  (11,38.22) (12,40.40) (13,41.36) (14,42.02) (15,43.15) (16,44.10) (17,44.65) (18,45.19) (19,45.60) (20,45.97)
+  (21,46.49) (22,46.85) (23,47.19) (24,47.55) (25,47.65) (26,47.99) (27,48.12) (28,47.88) (29,48.29) (30,48.16)
+  (31,48.61) (32,48.48) (33,48.79) (34,48.91) (35,48.86) (36,48.94) (37,48.98) (38,48.93) (39,49.30) (40,49.28)
+  (41,49.23) (42,49.32) (43,49.31) (44,49.48) (45,49.70) (46,49.61) (47,49.60) (48,49.59) (49,49.89) (50,49.70)
+  (50,53.89) (49,54.09) (48,53.92) (47,53.78) (46,53.65) (45,53.82) (44,53.75) (43,53.72) (42,53.57) (41,53.36)
+  (40,53.60) (39,53.43) (38,53.30) (37,53.22) (36,53.03) (35,53.05) (34,52.92) (33,52.90) (32,52.64) (31,52.61)
+  (30,52.17) (29,52.24) (28,52.32) (27,52.13) (26,51.63) (25,51.91) (24,51.53) (23,51.24) (22,51.03) (21,50.72)
+  (20,50.50) (19,50.10) (18,49.88) (17,49.25) (16,48.84) (15,48.41) (14,47.90) (13,47.48) (12,46.27) (11,44.99)
+  (10,43.96) (9,42.20) (8,40.00) (7,38.09) (6,36.02) (5,30.79) (4,25.95) (3,21.36) (2,15.31) (1,36.96)};
+\addplot[draw=none, fill=clGray!15, forget plot] coordinates {
+  (1,37.35) (2,40.26) (3,41.31) (4,41.52) (5,42.15) (6,42.33) (7,42.54) (8,42.59) (9,42.38) (10,42.43)
+  (11,42.53) (12,42.49) (13,41.98) (14,42.14) (15,42.21) (16,42.28) (17,42.25) (18,42.29) (19,41.97) (20,42.32)
+  (21,42.12) (22,41.87) (23,41.62) (24,41.61) (25,41.54) (26,41.84) (27,41.78) (28,41.82) (29,41.02) (30,41.46)
+  (31,41.53) (32,41.27) (33,41.62) (34,41.10) (35,41.36) (36,40.88) (37,41.21) (38,40.86) (39,40.97) (40,40.71)
+  (41,40.86) (42,40.84) (43,40.73) (44,40.97) (45,40.83) (46,40.58) (47,40.86) (48,40.63) (49,40.47) (50,40.43)
+  (50,40.88) (49,40.94) (48,41.43) (47,41.08) (46,41.21) (45,40.97) (44,41.04) (43,41.12) (42,41.43) (41,41.38)
+  (40,41.28) (39,41.29) (38,41.38) (37,41.56) (36,41.19) (35,41.82) (34,41.70) (33,41.79) (32,42.10) (31,41.87)
+  (30,41.78) (29,41.93) (28,42.00) (27,41.85) (26,41.93) (25,41.80) (24,42.24) (23,42.32) (22,42.19) (21,42.46)
+  (20,42.45) (19,42.62) (18,42.53) (17,42.71) (16,42.67) (15,42.43) (14,42.69) (13,42.73) (12,43.03) (11,43.01)
+  (10,42.84) (9,42.88) (8,42.68) (7,42.92) (6,42.71) (5,42.83) (4,41.94) (3,41.72) (2,41.31) (1,37.78)};
 \addplot[black,thick,dashed] coordinates {
-  (1,60.59) (2,67.14) (3,66.37) (4,65.37) (5,67.36) (6,68.15) (7,67.25) (8,67.85) (9,67.46) (10,67.79)
-  (11,67.15) (12,67.48) (13,67.52) (14,67.33) (15,66.5) (16,67.12) (17,68.3) (18,67.89) (19,67.18) (20,68.19)
-  (21,68.09) (22,67.9) (23,68.02) (24,68.34) (25,67.83) (26,68.41) (27,68.02) (28,68.89) (29,67.64) (30,66.71)
-  (31,68.04) (32,67.47) (33,67.19) (34,67.18) (35,67.36) (36,67.75) (37,67.14) (38,66.8) (39,67.71) (40,68.17)
-  (41,67.63) (42,67.58) (43,67.81) (44,68.05) (45,67.74) (46,66.69) (47,67.2) (48,67.36) (49,66.86) (50,66.92)};
+  (1,64.31) (2,67.08) (3,66.82) (4,65.80) (5,66.98) (6,67.62) (7,67.07) (8,66.89) (9,67.49) (10,67.37)
+  (11,67.09) (12,67.29) (13,66.90) (14,66.87) (15,66.91) (16,66.90) (17,67.06) (18,67.49) (19,67.53) (20,67.71)
+  (21,67.40) (22,66.95) (23,67.60) (24,67.50) (25,67.56) (26,67.67) (27,67.32) (28,68.13) (29,67.21) (30,66.96)
+  (31,67.46) (32,66.93) (33,67.01) (34,67.56) (35,66.90) (36,67.54) (37,67.34) (38,66.76) (39,66.96) (40,67.20)
+  (41,67.50) (42,67.31) (43,67.55) (44,67.77) (45,67.01) (46,66.95) (47,67.27) (48,67.39) (49,67.44) (50,67.20)};
 \addplot[clBlue] coordinates {
-  (1,37.46) (2,40.5) (3,40.25) (4,41.06) (5,40.43) (6,41.41) (7,41.4) (8,41.34) (9,41.49) (10,41.7)
-  (11,41.77) (12,41.98) (13,42.03) (14,42.18) (15,42.03) (16,41.91) (17,41.73) (18,41.79) (19,41.61) (20,41.71)
-  (21,41.44) (22,41.44) (23,41.19) (24,41.24) (25,41.31) (26,40.9) (27,41.23) (28,41.13) (29,41.02) (30,41.07)
-  (31,41.17) (32,40.82) (33,40.91) (34,40.83) (35,40.87) (36,40.83) (37,40.61) (38,40.53) (39,40.54) (40,40.59)
-  (41,40.53) (42,40.46) (43,40.66) (44,40.44) (45,40.22) (46,40.72) (47,40.6) (48,40.13) (49,40.4) (50,40.04)};
+  (1,37.44) (2,40.43) (3,40.74) (4,41.23) (5,41.00) (6,41.80) (7,42.00) (8,42.06) (9,42.01) (10,42.03)
+  (11,42.11) (12,42.26) (13,42.40) (14,42.36) (15,42.29) (16,42.21) (17,42.19) (18,42.14) (19,41.99) (20,42.02)
+  (21,41.82) (22,41.80) (23,41.74) (24,41.62) (25,41.61) (26,41.46) (27,41.50) (28,41.54) (29,41.45) (30,41.39)
+  (31,41.23) (32,41.24) (33,41.22) (34,41.29) (35,41.16) (36,41.19) (37,41.12) (38,41.12) (39,40.98) (40,41.04)
+  (41,41.06) (42,40.89) (43,40.90) (44,40.85) (45,40.80) (46,40.87) (47,40.93) (48,40.78) (49,40.74) (50,40.70)};
 \addplot[clTeal] coordinates {
-  (1,37.54) (2,40.52) (3,40.38) (4,40.53) (5,40.96) (6,40.93) (7,41.21) (8,41.67) (9,41.34) (10,41.62)
-  (11,41.74) (12,41.5) (13,41.74) (14,41.73) (15,41.68) (16,41.8) (17,41.79) (18,42.08) (19,41.69) (20,41.76)
-  (21,41.63) (22,41.48) (23,41.62) (24,41.2) (25,41.55) (26,41.61) (27,41.14) (28,41.4) (29,41.22) (30,41.1)
-  (31,41.11) (32,40.95) (33,41.24) (34,41.0) (35,40.85) (36,40.48) (37,41.0) (38,40.62) (39,40.72) (40,40.92)
-  (41,40.76) (42,40.71) (43,40.65) (44,40.74) (45,40.61) (46,40.71) (47,40.48) (48,40.63) (49,40.56) (50,40.48)};
+  (1,37.43) (2,40.40) (3,40.83) (4,41.15) (5,41.26) (6,41.59) (7,41.86) (8,42.09) (9,41.88) (10,42.04)
+  (11,42.23) (12,42.27) (13,42.41) (14,42.33) (15,42.32) (16,42.25) (17,42.30) (18,42.42) (19,42.09) (20,42.22)
+  (21,42.09) (22,42.05) (23,41.98) (24,41.80) (25,41.83) (26,41.75) (27,41.64) (28,41.81) (29,41.69) (30,41.69)
+  (31,41.66) (32,41.58) (33,41.40) (34,41.43) (35,41.38) (36,41.35) (37,41.43) (38,41.25) (39,41.22) (40,41.32)
+  (41,41.30) (42,41.16) (43,41.22) (44,41.29) (45,40.97) (46,41.14) (47,40.88) (48,40.95) (49,40.88) (50,40.91)};
 \addplot[clRed,thick] coordinates {
-  (1,37.72) (2,31.11) (3,33.99) (4,37.04) (5,39.05) (6,40.85) (7,42.95) (8,44.56) (9,45.88) (10,46.91)
-  (11,47.48) (12,48.62) (13,49.41) (14,49.95) (15,50.47) (16,50.59) (17,50.44) (18,51.13) (19,51.43) (20,51.65)
-  (21,51.56) (22,52.08) (23,51.86) (24,52.63) (25,52.61) (26,52.53) (27,52.72) (28,52.61) (29,52.7) (30,52.63)
-  (31,52.39) (32,52.58) (33,52.83) (34,52.7) (35,52.72) (36,52.86) (37,52.71) (38,52.76) (39,52.37) (40,52.74)
-  (41,52.58) (42,52.86) (43,52.49) (44,52.23) (45,52.54) (46,52.27) (47,52.41) (48,52.38) (49,52.21) (50,52.57)};
+  (1,37.32) (2,30.50) (3,32.87) (4,35.07) (5,37.94) (6,40.15) (7,41.89) (8,43.37) (9,44.56) (10,45.42)
+  (11,46.27) (12,47.32) (13,47.99) (14,48.60) (15,49.23) (16,49.51) (17,49.74) (18,50.19) (19,50.30) (20,50.74)
+  (21,50.81) (22,51.00) (23,51.08) (24,51.31) (25,51.23) (26,51.32) (27,51.52) (28,51.57) (29,51.49) (30,51.68)
+  (31,51.58) (32,51.66) (33,51.75) (34,51.71) (35,51.75) (36,51.85) (37,51.85) (38,51.80) (39,51.74) (40,51.89)
+  (41,51.79) (42,51.98) (43,51.82) (44,51.70) (45,51.97) (46,51.78) (47,51.87) (48,51.86) (49,51.72) (50,52.03)};
 \addplot[clPurple] coordinates {
-  (1,37.85) (2,19.85) (3,27.68) (4,36.06) (5,39.99) (6,42.34) (7,44.9) (8,46.25) (9,47.37) (10,48.04)
-  (11,49.12) (12,49.92) (13,50.33) (14,50.89) (15,51.39) (16,51.75) (17,52.1) (18,52.24) (19,52.28) (20,52.49)
-  (21,52.51) (22,52.66) (23,52.71) (24,52.72) (25,52.96) (26,53.02) (27,52.98) (28,53.13) (29,53.07) (30,53.3)
-  (31,53.34) (32,53.15) (33,53.31) (34,53.56) (35,53.5) (36,53.49) (37,53.6) (38,53.6) (39,53.74) (40,53.48)
-  (41,53.66) (42,53.58) (43,53.7) (44,53.8) (45,53.72) (46,53.7) (47,53.67) (48,53.63) (49,53.56) (50,53.81)};
+  (1,36.91) (2,19.95) (3,26.81) (4,33.99) (5,38.06) (6,40.99) (7,43.20) (8,44.86) (9,46.07) (10,47.01)
+  (11,47.77) (12,48.82) (13,49.09) (14,49.66) (15,50.08) (16,50.42) (17,50.81) (18,50.97) (19,51.08) (20,51.23)
+  (21,51.44) (22,51.45) (23,51.75) (24,51.84) (25,52.03) (26,52.18) (27,52.31) (28,52.31) (29,52.43) (30,52.56)
+  (31,52.75) (32,52.66) (33,52.65) (34,52.92) (35,52.86) (36,53.03) (37,53.11) (38,53.06) (39,53.13) (40,53.08)
+  (41,53.06) (42,53.28) (43,53.23) (44,53.27) (45,53.29) (46,53.28) (47,53.34) (48,53.31) (49,53.31) (50,53.38)};
 \addplot[clOlive] coordinates {
-  (1,36.87) (2,14.87) (3,20.71) (4,24.74) (5,28.61) (6,33.05) (7,36.47) (8,38.94) (9,40.57) (10,41.98)
-  (11,42.91) (12,43.28) (13,44.36) (14,44.88) (15,45.47) (16,46.5) (17,46.76) (18,47.09) (19,47.66) (20,48.33)
-  (21,48.32) (22,48.87) (23,49.26) (24,49.63) (25,49.57) (26,50.03) (27,50.28) (28,50.47) (29,51.08) (30,50.85)
-  (31,51.17) (32,51.32) (33,51.41) (34,51.62) (35,51.65) (36,51.6) (37,51.75) (38,52.05) (39,52.17) (40,52.38)
-  (41,52.35) (42,52.46) (43,52.55) (44,52.76) (45,52.72) (46,52.62) (47,52.69) (48,52.67) (49,52.8) (50,52.93)};
+  (1,36.82) (2,14.53) (3,18.09) (4,23.27) (5,27.31) (6,31.39) (7,34.08) (8,36.81) (9,39.25) (10,40.89)
+  (11,42.04) (12,43.31) (13,44.40) (14,44.93) (15,45.68) (16,46.48) (17,46.89) (18,47.39) (19,47.79) (20,48.27)
+  (21,48.51) (22,48.92) (23,49.23) (24,49.57) (25,49.71) (26,49.88) (27,50.18) (28,50.22) (29,50.54) (30,50.39)
+  (31,50.80) (32,50.81) (33,51.03) (34,51.15) (35,51.19) (36,51.19) (37,51.32) (38,51.42) (39,51.63) (40,51.75)
+  (41,51.65) (42,51.78) (43,51.86) (44,51.99) (45,52.08) (46,51.96) (47,52.02) (48,52.06) (49,52.26) (50,52.18)};
 \addplot[clGray,dotted] coordinates {
-  (1,37.78) (2,40.77) (3,41.72) (4,41.52) (5,42.15) (6,42.33) (7,42.54) (8,42.59) (9,42.38) (10,42.43)
-  (11,42.53) (12,42.49) (13,41.98) (14,42.3) (15,42.21) (16,42.28) (17,42.71) (18,42.3) (19,41.97) (20,42.32)
-  (21,42.12) (22,42.19) (23,41.62) (24,41.61) (25,41.59) (26,41.84) (27,41.78) (28,41.91) (29,41.02) (30,41.46)
-  (31,41.53) (32,41.27) (33,41.67) (34,41.1) (35,41.36) (36,40.88) (37,41.56) (38,41.3) (39,41.06) (40,40.71)
-  (41,40.86) (42,40.84) (43,40.92) (44,40.97) (45,40.83) (46,41.19) (47,41.08) (48,40.91) (49,40.91) (50,40.53)};
-
+  (1,37.58) (2,40.78) (3,41.57) (4,41.80) (5,42.52) (6,42.55) (7,42.69) (8,42.64) (9,42.70) (10,42.70)
+  (11,42.82) (12,42.70) (13,42.37) (14,42.38) (15,42.32) (16,42.44) (17,42.47) (18,42.37) (19,42.24) (20,42.38)
+  (21,42.29) (22,42.08) (23,41.90) (24,41.90) (25,41.65) (26,41.90) (27,41.82) (28,41.91) (29,41.56) (30,41.61)
+  (31,41.69) (32,41.66) (33,41.69) (34,41.46) (35,41.62) (36,41.07) (37,41.37) (38,41.18) (39,41.11) (40,41.03)
+  (41,41.21) (42,41.23) (43,40.92) (44,41.01) (45,40.88) (46,40.99) (47,41.00) (48,40.99) (49,40.77) (50,40.61)};
 \end{groupplot}
 \end{tikzpicture}
 \par\vspace{4pt}
 \ref{legendPiid}
-\caption{Validation accuracy over 50 rounds under IID partitioning
-  (mean over completed seeds).  Panels: HomeOccupancy, MNIST, CIFAR-10.
-  FedAvg/FedProx use the all-small architecture.  \dag~single-seed runs.}
+\caption{Validation accuracy over 50 rounds under IID partitioning.
+  Panels: HomeOccupancy, MNIST, CIFAR-10.  Curves show the mean over
+  completed seeds (up to three); shaded bands show the seed range.
+  FedAvg/FedProx use the all-small architecture.}
 \label{fig:mainiid}
 \end{figure*}
 
@@ -747,149 +1209,338 @@ accuracy over 50 rounds under IID and non-IID partitions.
   group style={
     xlabels at=edge bottom,
     ylabels at=edge left,
-    group size=2 by 1,
+    group size=3 by 1,
     horizontal sep=0.55cm,
   },
   p1panel,
-  width=0.45\textwidth,
+  width=0.32\textwidth,
+  height=3.6cm,
 ]
+\nextgroupplot[ymin=25, ymax=100]
+\addplot[draw=none, fill=clPurple!15, forget plot] coordinates {
+  (1,33.26) (2,33.26) (3,33.15) (4,33.26) (5,33.26) (6,33.37) (7,33.26) (8,33.37) (9,32.63) (10,33.26)
+  (11,33.37) (12,32.77) (13,33.26) (14,33.26) (15,33.26) (16,33.37) (17,33.26) (18,33.26) (19,33.26) (20,33.15)
+  (21,33.26) (22,33.15) (23,33.15) (24,33.26) (25,33.15) (26,33.26) (27,33.15) (28,33.26) (29,33.26) (30,33.92)
+  (31,33.15) (32,33.26) (33,33.26) (34,33.26) (35,33.15) (36,33.26) (37,33.26) (38,33.26) (39,33.26) (40,33.26)
+  (41,33.26) (42,33.26) (43,33.26) (44,33.26) (45,33.26) (46,33.26) (47,34.03) (48,33.37) (49,33.26) (50,33.15)
+  (50,70.59) (49,68.87) (48,70.83) (47,69.50) (46,70.00) (45,69.01) (44,69.10) (43,68.25) (42,66.98) (41,67.53)
+  (40,68.56) (39,66.42) (38,67.85) (37,66.91) (36,67.99) (35,66.99) (34,67.56) (33,66.14) (32,65.87) (31,64.67)
+  (30,66.94) (29,65.38) (28,65.14) (27,64.57) (26,61.84) (25,63.06) (24,61.62) (23,60.32) (22,56.81) (21,54.80)
+  (20,53.81) (19,53.25) (18,50.93) (17,49.86) (16,49.89) (15,47.27) (14,41.19) (13,37.67) (12,33.80) (11,33.37)
+  (10,33.26) (9,33.37) (8,33.37) (7,33.37) (6,33.92) (5,33.37) (4,33.37) (3,34.77) (2,33.47) (1,34.91)};
+\addplot[draw=none, fill=clOlive!15, forget plot] coordinates {
+  (1,33.15) (2,33.15) (3,33.15) (4,33.26) (5,33.26) (6,33.26) (7,33.15) (8,33.26) (9,33.26) (10,33.15)
+  (11,33.26) (12,33.26) (13,33.26) (14,33.37) (15,33.26) (16,33.26) (17,33.26) (18,33.26) (19,33.05) (20,33.19)
+  (21,33.26) (22,33.26) (23,33.37) (24,33.26) (25,33.03) (26,33.26) (27,33.37) (28,33.37) (29,33.17) (30,33.37)
+  (31,33.37) (32,33.26) (33,33.26) (34,33.15) (35,33.15) (36,33.26) (37,33.26) (38,33.26) (39,33.26) (40,33.26)
+  (41,33.15) (42,33.26) (43,33.26) (44,33.26) (45,33.37) (46,33.26) (47,33.37) (48,33.26) (49,33.26) (50,33.26)
+  (50,64.56) (49,61.56) (48,64.12) (47,61.39) (46,61.14) (45,61.88) (44,62.32) (43,60.74) (42,60.54) (41,59.62)
+  (40,59.38) (39,59.46) (38,62.03) (37,61.58) (36,60.83) (35,60.45) (34,58.92) (33,57.65) (32,54.60) (31,53.09)
+  (30,48.68) (29,44.24) (28,37.39) (27,34.58) (26,37.38) (25,33.68) (24,33.37) (23,34.03) (22,33.37) (21,34.07)
+  (20,33.27) (19,33.26) (18,33.37) (17,33.37) (16,33.37) (15,33.37) (14,33.37) (13,33.37) (12,34.03) (11,33.37)
+  (10,33.50) (9,33.37) (8,33.37) (7,33.37) (6,33.37) (5,33.37) (4,33.37) (3,33.37) (2,34.90) (1,34.54)};
+\addplot[black,thick,dashed] coordinates {
+  (1,92.25) (2,83.06) (3,82.34) (4,86.85) (5,93.69) (6,93.15) (7,92.07) (8,84.14) (9,89.37) (10,90.27)
+  (11,92.07) (12,92.97) (13,93.69) (14,88.47) (15,92.61) (16,91.71) (17,91.89) (18,90.09) (19,90.45) (20,87.03)
+  (21,90.45) (22,92.43) (23,88.65) (24,92.07) (25,90.27) (26,92.07) (27,92.79) (28,91.35) (29,89.37) (30,90.09)
+  (31,91.53) (32,94.05) (33,91.89) (34,91.71) (35,92.07) (36,91.71) (37,90.81) (38,92.07) (39,91.35) (40,90.99)
+  (41,91.53) (42,93.33) (43,90.99) (44,90.81) (45,92.97) (46,92.25) (47,92.43) (48,92.25) (49,92.25) (50,93.87)};
+\addplot[clBlue] coordinates {
+  (1,34.68) (2,33.14) (3,33.13) (4,35.44) (5,33.70) (6,36.35) (7,36.79) (8,35.42) (9,38.57) (10,38.70)
+  (11,41.49) (12,42.82) (13,43.68) (14,45.52) (15,46.86) (16,46.85) (17,46.77) (18,48.68) (19,48.85) (20,50.61)
+  (21,51.74) (22,52.41) (23,52.29) (24,54.72) (25,55.47) (26,56.11) (27,57.50) (28,57.61) (29,58.67) (30,58.40)
+  (31,59.14) (32,59.95) (33,60.22) (34,61.37) (35,61.77) (36,62.77) (37,63.16) (38,62.61) (39,63.28) (40,62.86)
+  (41,62.99) (42,62.94) (43,63.27) (44,62.68) (45,63.04) (46,63.50) (47,63.23) (48,62.95) (49,62.70) (50,63.44)};
+\addplot[clTeal] coordinates {
+  (1,32.86) (2,34.44) (3,32.64) (4,34.17) (5,35.04) (6,35.42) (7,36.76) (8,38.40) (9,40.11) (10,39.87)
+  (11,41.07) (12,40.24) (13,44.49) (14,46.41) (15,46.13) (16,46.51) (17,47.38) (18,50.04) (19,50.09) (20,50.79)
+  (21,50.99) (22,51.32) (23,52.85) (24,53.08) (25,53.59) (26,55.30) (27,55.65) (28,56.83) (29,57.42) (30,57.99)
+  (31,58.48) (32,59.08) (33,58.64) (34,58.82) (35,59.00) (36,58.80) (37,59.03) (38,59.23) (39,58.67) (40,59.37)
+  (41,59.35) (42,59.63) (43,59.23) (44,58.53) (45,59.50) (46,59.96) (47,60.84) (48,61.25) (49,61.28) (50,61.84)};
+\addplot[clRed,thick] coordinates {
+  (1,33.14) (2,33.37) (3,33.26) (4,33.97) (5,32.44) (6,33.76) (7,34.96) (8,37.22) (9,37.50) (10,38.06)
+  (11,37.85) (12,38.42) (13,37.39) (14,39.21) (15,39.17) (16,42.03) (17,42.50) (18,43.52) (19,43.19) (20,43.65)
+  (21,43.50) (22,45.34) (23,46.30) (24,48.57) (25,48.11) (26,47.02) (27,48.72) (28,48.44) (29,48.58) (30,49.81)
+  (31,50.02) (32,49.78) (33,49.79) (34,50.22) (35,50.26) (36,50.12) (37,50.27) (38,50.69) (39,50.77) (40,51.20)
+  (41,51.11) (42,51.95) (43,51.96) (44,52.82) (45,53.15) (46,53.59) (47,53.49) (48,53.29) (49,53.95) (50,54.74)};
+\addplot[clPurple] coordinates {
+  (1,33.95) (2,33.33) (3,33.76) (4,33.30) (5,33.33) (6,33.55) (7,33.33) (8,33.37) (9,33.09) (10,33.26)
+  (11,33.37) (12,33.28) (13,34.75) (14,36.12) (15,37.97) (16,39.06) (17,39.04) (18,39.19) (19,40.18) (20,40.11)
+  (21,40.70) (22,41.08) (23,42.50) (24,42.75) (25,43.41) (26,42.82) (27,43.92) (28,43.89) (29,44.17) (30,44.93)
+  (31,43.69) (32,44.31) (33,44.22) (34,44.86) (35,44.47) (36,44.84) (37,44.48) (38,44.79) (39,44.32) (40,45.11)
+  (41,44.68) (42,44.54) (43,44.97) (44,45.24) (45,45.22) (46,46.04) (47,46.26) (48,47.60) (49,47.98) (50,48.35)};
+\addplot[clOlive] coordinates {
+  (1,33.69) (2,33.81) (3,33.23) (4,33.33) (5,33.33) (6,33.33) (7,33.26) (8,33.30) (9,33.30) (10,33.31)
+  (11,33.33) (12,33.55) (13,33.33) (14,33.37) (15,33.33) (16,33.30) (17,33.33) (18,33.33) (19,33.19) (20,33.24)
+  (21,33.57) (22,33.33) (23,33.59) (24,33.30) (25,33.36) (26,34.67) (27,33.77) (28,34.71) (29,36.89) (30,39.24)
+  (31,40.31) (32,40.45) (33,41.46) (34,41.81) (35,42.32) (36,42.67) (37,42.70) (38,43.06) (39,42.18) (40,42.00)
+  (41,42.01) (42,42.39) (43,42.46) (44,42.95) (45,43.32) (46,42.59) (47,43.00) (48,43.80) (49,42.85) (50,43.90)};
+\addplot[clGray,dotted] coordinates {
+  (1,32.83) (2,36.55) (3,34.22) (4,39.32) (5,38.89) (6,44.41) (7,48.82) (8,47.90) (9,49.51) (10,49.95)
+  (11,50.44) (12,51.03) (13,52.61) (14,52.68) (15,51.26) (16,54.49) (17,54.57) (18,55.77) (19,55.32) (20,56.84)
+  (21,55.22) (22,55.02) (23,56.22) (24,57.66) (25,56.96) (26,57.91) (27,58.13) (28,59.07) (29,58.20) (30,59.36)
+  (31,58.65) (32,59.31) (33,57.93) (34,59.40) (35,60.40) (36,59.23) (37,59.91) (38,58.94) (39,59.86) (40,59.11)
+  (41,60.22) (42,58.46) (43,59.75) (44,59.64) (45,59.68) (46,59.25) (47,60.10) (48,59.87) (49,60.25) (50,61.11)};
 \nextgroupplot[ymin=74, ymax=100,
   legend to name=legendPnoniid,
   legend style={legend columns=7, font=\tiny,
     /tikz/every even column/.append style={column sep=0.3em}}]
-\addplot[black,thick,dashed] coordinates {
-  (1,99.26) (2,99.15) (3,99.3) (4,99.27) (5,99.26) (6,99.31) (7,99.19) (8,99.18) (9,99.32) (10,98.88)
-  (11,99.22) (12,99.32) (13,99.13) (14,99.33) (15,99.31) (16,99.26) (17,99.35) (18,99.31) (19,99.33) (20,99.31)
-  (21,99.38) (22,99.2) (23,99.24) (24,99.39) (25,99.4) (26,99.32) (27,99.35) (28,99.4) (29,99.33) (30,99.39)
-  (31,99.29) (32,99.38) (33,99.3) (34,99.37) (35,99.38) (36,99.41) (37,99.24) (38,99.41) (39,99.38) (40,99.31)
-  (41,99.4) (42,99.4) (43,99.35) (44,99.38) (45,99.38) (46,99.4) (47,99.32) (48,99.41) (49,99.39) (50,99.38)};
-\addplot[clBlue] coordinates {
-  (1,80.44) (2,82.54) (3,83.49) (4,83.51) (5,84.04) (6,84.2) (7,84.29) (8,84.75) (9,84.28) (10,84.37)
+\addplot[draw=none, fill=black!15, forget plot] coordinates {
+  (1,99.05) (2,99.15) (3,99.17) (4,99.23) (5,99.09) (6,99.23) (7,99.19) (8,99.18) (9,99.19) (10,98.88)
+  (11,99.22) (12,99.19) (13,99.13) (14,99.03) (15,99.31) (16,99.17) (17,99.27) (18,99.29) (19,99.29) (20,99.22)
+  (21,99.32) (22,99.19) (23,99.23) (24,99.32) (25,99.35) (26,99.11) (27,99.23) (28,99.18) (29,99.15) (30,99.26)
+  (31,99.29) (32,99.24) (33,99.29) (34,99.33) (35,99.35) (36,99.35) (37,99.24) (38,99.30) (39,99.35) (40,99.31)
+  (41,99.12) (42,99.36) (43,99.18) (44,99.25) (45,99.27) (46,99.29) (47,99.20) (48,99.28) (49,99.36) (50,99.12)
+  (50,99.38) (49,99.39) (48,99.41) (47,99.32) (46,99.42) (45,99.38) (44,99.38) (43,99.35) (42,99.44) (41,99.40)
+  (40,99.38) (39,99.38) (38,99.41) (37,99.38) (36,99.41) (35,99.38) (34,99.42) (33,99.40) (32,99.45) (31,99.35)
+  (30,99.39) (29,99.33) (28,99.40) (27,99.35) (26,99.32) (25,99.43) (24,99.40) (23,99.40) (22,99.27) (21,99.38)
+  (20,99.35) (19,99.35) (18,99.31) (17,99.35) (16,99.26) (15,99.33) (14,99.33) (13,99.22) (12,99.32) (11,99.32)
+  (10,99.17) (9,99.32) (8,99.34) (7,99.38) (6,99.41) (5,99.26) (4,99.29) (3,99.30) (2,99.20) (1,99.26)};
+\addplot[draw=none, fill=clBlue!15, forget plot] coordinates {
+  (1,80.44) (2,82.54) (3,83.49) (4,83.51) (5,84.04) (6,84.20) (7,84.29) (8,84.75) (9,84.28) (10,84.37)
   (11,84.76) (12,84.52) (13,84.21) (14,84.29) (15,84.29) (16,84.71) (17,84.26) (18,84.28) (19,84.22) (20,84.17)
-  (21,84.42) (22,83.99) (23,84.49) (24,84.0) (25,84.44) (26,84.01) (27,84.13) (28,84.1) (29,84.13) (30,84.1)
-  (31,84.09) (32,84.03) (33,83.96) (34,84.33) (35,84.35) (36,84.33) (37,83.94) (38,84.12) (39,83.4) (40,83.67)
-  (41,83.57) (42,83.71) (43,83.71) (44,84.04) (45,83.96) (46,83.79) (47,83.7) (48,83.66) (49,83.53) (50,83.92)};
-\addplot[clTeal] coordinates {
-  (1,80.65) (2,82.6) (3,83.65) (4,83.43) (5,83.47) (6,84.07) (7,84.37) (8,83.77) (9,84.16) (10,84.27)
-  (11,84.34) (12,84.3) (13,84.66) (14,84.4) (15,83.93) (16,84.52) (17,84.44) (18,84.27) (19,84.58) (20,84.62)
-  (21,84.4) (22,84.41) (23,84.7) (24,84.75) (25,84.38) (26,84.12) (27,83.82) (28,84.28) (29,84.04) (30,84.17)
+  (21,84.42) (22,83.99) (23,84.49) (24,84.00) (25,84.44) (26,84.01) (27,84.13) (28,84.10) (29,84.13) (30,84.10)
+  (31,84.09) (32,84.03) (33,83.96) (34,84.33) (35,84.35) (36,84.33) (37,83.94) (38,84.12) (39,83.40) (40,83.67)
+  (41,83.57) (42,83.71) (43,83.71) (44,84.04) (45,83.96) (46,83.79) (47,83.70) (48,83.66) (49,83.53) (50,83.92)
+  (50,86.01) (49,85.89) (48,85.87) (47,86.10) (46,85.76) (45,86.36) (44,86.21) (43,86.22) (42,86.34) (41,86.15)
+  (40,86.35) (39,86.15) (38,86.38) (37,86.19) (36,86.56) (35,86.92) (34,86.69) (33,86.30) (32,86.49) (31,86.32)
+  (30,86.22) (29,86.23) (28,86.52) (27,86.49) (26,86.57) (25,86.96) (24,86.81) (23,86.53) (22,86.94) (21,85.84)
+  (20,86.42) (19,86.61) (18,86.67) (17,86.69) (16,86.61) (15,86.76) (14,86.60) (13,86.77) (12,86.85) (11,86.84)
+  (10,86.95) (9,87.02) (8,86.80) (7,87.07) (6,86.71) (5,86.46) (4,86.28) (3,85.97) (2,84.95) (1,83.42)};
+\addplot[draw=none, fill=clTeal!15, forget plot] coordinates {
+  (1,80.65) (2,82.60) (3,83.65) (4,83.43) (5,83.47) (6,84.07) (7,84.37) (8,83.77) (9,84.16) (10,84.27)
+  (11,84.34) (12,84.30) (13,84.66) (14,84.40) (15,83.93) (16,84.52) (17,84.44) (18,84.27) (19,84.58) (20,84.62)
+  (21,84.40) (22,84.41) (23,84.70) (24,84.75) (25,84.38) (26,84.12) (27,83.82) (28,84.28) (29,84.04) (30,84.17)
   (31,84.09) (32,84.23) (33,84.01) (34,84.19) (35,84.57) (36,84.37) (37,84.03) (38,84.47) (39,84.51) (40,84.37)
-  (41,84.12) (42,83.46) (43,84.08) (44,84.13) (45,83.86) (46,83.9) (47,84.0) (48,84.01) (49,84.01) (50,83.67)};
-\addplot[clRed,thick] coordinates {
-  (1,80.55) (2,79.18) (3,83.77) (4,87.19) (5,89.22) (6,91.34) (7,92.09) (8,92.7) (9,93.05) (10,93.67)
-  (11,93.62) (12,94.43) (13,94.61) (14,94.71) (15,94.78) (16,94.96) (17,95.45) (18,94.9) (19,95.17) (20,95.63)
+  (41,84.12) (42,83.46) (43,84.08) (44,84.13) (45,83.86) (46,83.90) (47,84.00) (48,84.01) (49,84.01) (50,83.67)
+  (50,85.66) (49,86.44) (48,86.45) (47,86.49) (46,86.35) (45,86.34) (44,86.20) (43,86.26) (42,86.38) (41,86.37)
+  (40,86.56) (39,86.27) (38,86.11) (37,86.54) (36,86.58) (35,86.67) (34,86.96) (33,86.70) (32,87.09) (31,87.00)
+  (30,86.83) (29,86.68) (28,86.72) (27,86.42) (26,86.77) (25,86.76) (24,86.76) (23,86.62) (22,86.68) (21,86.83)
+  (20,86.99) (19,86.94) (18,86.12) (17,86.88) (16,86.67) (15,87.05) (14,87.03) (13,86.89) (12,86.55) (11,86.94)
+  (10,86.92) (9,86.75) (8,86.54) (7,86.82) (6,86.57) (5,86.69) (4,86.71) (3,86.04) (2,85.70) (1,82.48)};
+\addplot[draw=none, fill=clRed!15, forget plot] coordinates {
+  (1,80.55) (2,79.18) (3,83.77) (4,87.19) (5,89.22) (6,91.34) (7,92.09) (8,92.70) (9,93.05) (10,93.67)
+  (11,93.62) (12,94.43) (13,94.61) (14,94.71) (15,94.78) (16,94.96) (17,95.45) (18,94.90) (19,95.17) (20,95.63)
   (21,95.13) (22,95.93) (23,95.59) (24,95.72) (25,95.45) (26,95.71) (27,96.37) (28,96.06) (29,95.93) (30,96.32)
-  (31,96.3) (32,95.64) (33,95.53) (34,96.73) (35,96.35) (36,96.33) (37,96.07) (38,96.96) (39,96.63) (40,96.3)
-  (41,96.22) (42,96.55) (43,96.76) (44,97.15) (45,95.75) (46,96.89) (47,97.24) (48,97.09) (49,96.84) (50,96.55)};
-\addplot[clPurple] coordinates {
-  (1,77.51) (2,74.6) (3,81.31) (4,84.98) (5,87.56) (6,89.62) (7,90.89) (8,92.01) (9,92.38) (10,93.11)
-  (11,93.88) (12,93.9) (13,94.3) (14,95.01) (15,95.22) (16,95.49) (17,95.49) (18,95.44) (19,95.63) (20,95.89)
-  (21,96.26) (22,96.23) (23,96.33) (24,96.24) (25,96.67) (26,96.6) (27,96.73) (28,96.74) (29,96.64) (30,96.73)
-  (31,96.66) (32,96.8) (33,96.94) (34,96.86) (35,96.99) (36,97.12) (37,97.12) (38,97.29) (39,97.26) (40,97.13)
-  (41,97.29) (42,97.36) (43,97.27) (44,97.36) (45,97.35) (46,97.34) (47,97.29) (48,97.24) (49,97.5) (50,97.41)};
-\addplot[clOlive] coordinates {
-  (1,77.16) (2,67.8) (3,75.88) (4,79.95) (5,84.41) (6,86.26) (7,87.74) (8,89.56) (9,89.99) (10,90.69)
-  (11,91.78) (12,92.78) (13,93.03) (14,93.46) (15,93.58) (16,94.08) (17,93.94) (18,94.71) (19,94.68) (20,95.09)
-  (21,95.3) (22,95.6) (23,95.56) (24,95.67) (25,95.75) (26,95.69) (27,95.96) (28,96.05) (29,96.53) (30,96.28)
-  (31,96.31) (32,96.27) (33,96.49) (34,96.63) (35,96.64) (36,96.98) (37,96.7) (38,96.97) (39,96.43) (40,96.87)
-  (41,96.95) (42,97.1) (43,97.05) (44,96.93) (45,97.02) (46,97.2) (47,97.28) (48,97.33) (49,97.02) (50,97.17)};
-\addplot[clGray,dotted] coordinates {
-  (1,80.01) (2,82.05) (3,82.82) (4,82.6) (5,82.89) (6,83.36) (7,83.44) (8,83.86) (9,83.93) (10,83.92)
+  (31,96.30) (32,95.64) (33,95.53) (34,96.73) (35,96.35) (36,96.33) (37,96.07) (38,96.73) (39,96.63) (40,96.30)
+  (41,96.22) (42,96.55) (43,96.76) (44,96.85) (45,95.75) (46,96.89) (47,97.24) (48,97.09) (49,96.84) (50,96.55)
+  (50,97.58) (49,97.75) (48,97.62) (47,97.63) (46,97.97) (45,97.84) (44,97.15) (43,97.79) (42,97.68) (41,97.68)
+  (40,97.42) (39,97.17) (38,97.31) (37,97.01) (36,97.45) (35,97.71) (34,97.04) (33,97.52) (32,97.31) (31,97.29)
+  (30,97.22) (29,97.24) (28,97.08) (27,97.27) (26,97.19) (25,96.69) (24,96.98) (23,96.84) (22,96.51) (21,96.53)
+  (20,96.76) (19,96.97) (18,96.35) (17,96.14) (16,96.34) (15,96.06) (14,96.25) (13,96.16) (12,95.53) (11,95.64)
+  (10,95.36) (9,95.01) (8,94.69) (7,94.16) (6,92.95) (5,92.31) (4,90.35) (3,87.36) (2,81.91) (1,82.04)};
+\addplot[draw=none, fill=clPurple!15, forget plot] coordinates {
+  (1,77.51) (2,74.60) (3,81.31) (4,84.98) (5,87.56) (6,89.62) (7,90.89) (8,92.01) (9,92.38) (10,93.11)
+  (11,93.88) (12,93.90) (13,94.30) (14,95.01) (15,95.22) (16,95.49) (17,95.49) (18,95.44) (19,95.63) (20,95.89)
+  (21,96.26) (22,96.23) (23,96.33) (24,96.24) (25,96.67) (26,96.60) (27,96.73) (28,96.74) (29,96.64) (30,96.73)
+  (31,96.66) (32,96.80) (33,96.94) (34,96.86) (35,96.99) (36,97.12) (37,97.12) (38,97.29) (39,97.26) (40,97.13)
+  (41,97.29) (42,97.36) (43,97.27) (44,97.36) (45,97.35) (46,97.34) (47,97.29) (48,97.24) (49,97.50) (50,97.41)
+  (50,97.79) (49,97.88) (48,97.86) (47,97.79) (46,97.67) (45,97.77) (44,97.70) (43,97.68) (42,97.63) (41,97.64)
+  (40,97.78) (39,97.51) (38,97.71) (37,97.50) (36,97.42) (35,97.46) (34,97.49) (33,97.43) (32,97.49) (31,97.26)
+  (30,97.36) (29,97.33) (28,97.21) (27,97.06) (26,97.08) (25,97.01) (24,96.95) (23,96.90) (22,96.99) (21,96.60)
+  (20,96.75) (19,96.56) (18,96.47) (17,96.43) (16,96.26) (15,96.31) (14,95.89) (13,95.47) (12,95.62) (11,95.23)
+  (10,94.89) (9,94.71) (8,93.75) (7,92.65) (6,91.73) (5,90.20) (4,88.43) (3,84.18) (2,76.40) (1,78.80)};
+\addplot[draw=none, fill=clOlive!15, forget plot] coordinates {
+  (1,77.16) (2,67.80) (3,74.82) (4,79.95) (5,82.82) (6,86.26) (7,87.69) (8,89.05) (9,89.99) (10,90.69)
+  (11,91.55) (12,92.37) (13,93.03) (14,93.46) (15,93.58) (16,94.08) (17,93.94) (18,94.71) (19,94.68) (20,94.99)
+  (21,95.30) (22,95.58) (23,95.56) (24,95.67) (25,95.74) (26,95.69) (27,95.96) (28,96.05) (29,96.29) (30,96.28)
+  (31,96.31) (32,96.27) (33,96.48) (34,96.63) (35,96.64) (36,96.94) (37,96.69) (38,96.97) (39,96.43) (40,96.87)
+  (41,96.95) (42,97.10) (43,97.05) (44,96.93) (45,97.02) (46,97.20) (47,97.28) (48,97.33) (49,97.02) (50,97.17)
+  (50,97.71) (49,97.52) (48,97.60) (47,97.47) (46,97.53) (45,97.41) (44,97.44) (43,97.41) (42,97.39) (41,97.38)
+  (40,97.29) (39,97.27) (38,97.09) (37,97.21) (36,97.18) (35,96.97) (34,96.93) (33,97.16) (32,96.96) (31,97.05)
+  (30,96.82) (29,96.58) (28,96.58) (27,96.79) (26,96.59) (25,96.58) (24,96.36) (23,95.99) (22,96.10) (21,95.77)
+  (20,95.94) (19,95.52) (18,95.50) (17,95.32) (16,94.95) (15,95.21) (14,94.94) (13,94.27) (12,93.90) (11,93.63)
+  (10,92.56) (9,91.50) (8,91.92) (7,90.86) (6,88.87) (5,87.23) (4,83.54) (3,78.45) (2,70.71) (1,78.52)};
+\addplot[draw=none, fill=clGray!15, forget plot] coordinates {
+  (1,80.01) (2,82.05) (3,82.82) (4,82.60) (5,82.89) (6,83.36) (7,83.44) (8,83.86) (9,83.93) (10,83.92)
   (11,84.07) (12,83.82) (13,84.03) (14,83.56) (15,84.13) (16,84.47) (17,83.77) (18,83.85) (19,84.64) (20,84.27)
-  (21,83.81) (22,83.94) (23,83.97) (24,84.0) (25,83.89) (26,84.24) (27,84.27) (28,83.49) (29,84.04) (30,84.0)
-  (31,83.85) (32,83.4) (33,84.12) (34,84.1) (35,84.05) (36,84.29) (37,83.78) (38,84.16) (39,83.66) (40,83.6)
-  (41,84.03) (42,83.82) (43,83.67) (44,84.06) (45,84.11) (46,84.05) (47,84.24) (48,84.21) (49,84.36) (50,84.28)};
-
-\nextgroupplot[ymin=22, ymax=82,]
+  (21,83.81) (22,83.94) (23,83.97) (24,84.00) (25,83.89) (26,84.24) (27,84.27) (28,83.49) (29,84.04) (30,84.00)
+  (31,83.85) (32,83.40) (33,84.12) (34,84.10) (35,84.05) (36,84.29) (37,83.78) (38,84.16) (39,83.66) (40,83.60)
+  (41,84.03) (42,83.82) (43,83.67) (44,84.06) (45,84.11) (46,84.05) (47,84.24) (48,84.21) (49,84.36) (50,84.28)
+  (50,86.95) (49,86.53) (48,86.70) (47,86.81) (46,86.27) (45,86.99) (44,86.38) (43,86.41) (42,86.22) (41,86.39)
+  (40,86.93) (39,86.87) (38,86.65) (37,86.65) (36,86.52) (35,86.42) (34,86.55) (33,86.72) (32,86.59) (31,86.60)
+  (30,86.77) (29,86.70) (28,86.52) (27,86.66) (26,86.31) (25,86.67) (24,86.35) (23,86.88) (22,86.46) (21,86.42)
+  (20,86.62) (19,85.84) (18,86.46) (17,86.68) (16,86.71) (15,86.68) (14,86.39) (13,85.88) (12,86.38) (11,85.99)
+  (10,86.08) (9,86.38) (8,86.07) (7,86.21) (6,86.62) (5,86.05) (4,85.98) (3,86.27) (2,85.06) (1,82.93)};
 \addplot[black,thick,dashed] coordinates {
-  (1,74.92) (2,72.86) (3,72.67) (4,73.94) (5,75.54) (6,75.04) (7,74.7) (8,75.46) (9,74.63) (10,75.29)
-  (11,75.46) (12,75.75) (13,75.28) (14,75.75) (15,75.75) (16,75.18) (17,75.73) (18,75.79) (19,75.09) (20,75.12)
-  (21,74.58) (22,75.48) (23,74.83) (24,75.25) (25,74.93) (26,75.68) (27,75.75) (28,75.35) (29,74.78) (30,75.5)
-  (31,75.57) (32,75.47) (33,74.84) (34,75.28) (35,75.39) (36,74.58) (37,74.45) (38,76.38) (39,75.2) (40,75.59)
-  (41,75.65) (42,74.73) (43,75.06) (44,75.25) (45,75.49) (46,75.43) (47,75.28) (48,75.18) (49,74.65) (50,75.12)};
+  (1,99.15) (2,99.18) (3,99.23) (4,99.26) (5,99.19) (6,99.32) (7,99.27) (8,99.27) (9,99.25) (10,99.06)
+  (11,99.27) (12,99.27) (13,99.19) (14,99.22) (15,99.32) (16,99.21) (17,99.30) (18,99.30) (19,99.32) (20,99.29)
+  (21,99.35) (22,99.22) (23,99.29) (24,99.37) (25,99.39) (26,99.19) (27,99.31) (28,99.29) (29,99.24) (30,99.31)
+  (31,99.32) (32,99.36) (33,99.33) (34,99.37) (35,99.36) (36,99.39) (37,99.29) (38,99.34) (39,99.37) (40,99.34)
+  (41,99.27) (42,99.40) (43,99.29) (44,99.33) (45,99.34) (46,99.37) (47,99.28) (48,99.36) (49,99.38) (50,99.29)};
+\addlegendentry{Central}
 \addplot[clBlue] coordinates {
-  (1,33.05) (2,37.32) (3,37.42) (4,37.58) (5,38.31) (6,38.53) (7,38.84) (8,39.15) (9,38.75) (10,38.97)
-  (11,38.77) (12,38.88) (13,38.89) (14,38.54) (15,38.52) (16,38.54) (17,38.34) (18,38.6) (19,38.56) (20,37.87)
-  (21,38.18) (22,37.86) (23,38.26) (24,38.12) (25,38.2) (26,38.1) (27,37.72) (28,37.91) (29,37.84) (30,38.31)
-  (31,38.02) (32,37.7) (33,37.86) (34,37.8) (35,37.33) (36,37.5) (37,37.34) (38,37.62) (39,37.29) (40,38.03)
-  (41,37.38) (42,37.63) (43,37.3) (44,37.35) (45,37.28) (46,37.27) (47,37.22) (48,37.08) (49,37.53) (50,37.17)};
+  (1,81.82) (2,83.81) (3,84.59) (4,84.89) (5,85.26) (6,85.36) (7,85.64) (8,85.60) (9,85.67) (10,85.43)
+  (11,85.65) (12,85.49) (13,85.27) (14,85.39) (15,85.59) (16,85.61) (17,85.51) (18,85.43) (19,85.42) (20,85.30)
+  (21,85.33) (22,85.43) (23,85.41) (24,85.52) (25,85.70) (26,85.24) (27,85.24) (28,85.17) (29,85.26) (30,85.20)
+  (31,85.18) (32,85.31) (33,85.17) (34,85.46) (35,85.52) (36,85.40) (37,85.02) (38,85.11) (39,84.81) (40,85.15)
+  (41,84.93) (42,85.11) (43,85.02) (44,85.11) (45,85.14) (46,84.81) (47,84.78) (48,84.80) (49,84.78) (50,84.97)};
+\addlegendentry{FedMD}
 \addplot[clTeal] coordinates {
-  (1,32.9) (2,36.56) (3,37.34) (4,38.41) (5,38.63) (6,38.61) (7,38.74) (8,39.04) (9,39.13) (10,38.58)
-  (11,39.19) (12,39.01) (13,38.95) (14,38.58) (15,38.22) (16,38.41) (17,38.71) (18,38.58) (19,38.77) (20,38.45)
-  (21,38.18) (22,37.84) (23,38.07) (24,38.01) (25,38.36) (26,38.02) (27,38.18) (28,37.95) (29,37.87) (30,37.86)
-  (31,37.83) (32,37.8) (33,37.75) (34,37.64) (35,37.53) (36,37.58) (37,37.78) (38,37.63) (39,37.86) (40,37.74)
-  (41,37.48) (42,37.39) (43,37.62) (44,37.58) (45,37.39) (46,37.4) (47,37.5) (48,37.26) (49,37.45) (50,37.44)};
+  (1,81.78) (2,84.09) (3,84.80) (4,84.85) (5,85.03) (6,85.14) (7,85.45) (8,85.07) (9,85.29) (10,85.55)
+  (11,85.56) (12,85.54) (13,85.65) (14,85.72) (15,85.55) (16,85.40) (17,85.53) (18,85.26) (19,85.51) (20,85.59)
+  (21,85.58) (22,85.53) (23,85.53) (24,85.64) (25,85.57) (26,85.24) (27,85.20) (28,85.49) (29,85.29) (30,85.47)
+  (31,85.52) (32,85.51) (33,85.31) (34,85.49) (35,85.65) (36,85.44) (37,85.26) (38,85.17) (39,85.35) (40,85.34)
+  (41,85.30) (42,85.11) (43,85.26) (44,85.21) (45,85.18) (46,85.22) (47,85.43) (48,85.25) (49,85.32) (50,84.94)};
+\addlegendentry{FedAKD}
 \addplot[clRed,thick] coordinates {
-  (1,33.18) (2,26.86) (3,30.95) (4,33.67) (5,35.97) (6,38.0) (7,40.6) (8,41.65) (9,43.25) (10,43.98)
-  (11,44.89) (12,44.76) (13,45.37) (14,45.83) (15,46.35) (16,46.21) (17,46.68) (18,47.05) (19,46.81) (20,47.07)
-  (21,46.76) (22,47.49) (23,47.8) (24,47.77) (25,47.55) (26,47.5) (27,48.06) (28,47.95) (29,47.89) (30,48.18)
-  (31,47.8) (32,48.12) (33,48.15) (34,48.22) (35,48.2) (36,48.14) (37,48.07) (38,48.26) (39,47.64) (40,48.25)
-  (41,48.04) (42,47.8) (43,47.78) (44,48.29) (45,47.44) (46,48.05) (47,48.2) (48,48.12) (49,48.0) (50,48.29)};
+  (1,81.43) (2,80.94) (3,85.57) (4,88.89) (5,90.90) (6,92.12) (7,93.02) (8,93.61) (9,94.17) (10,94.59)
+  (11,94.70) (12,95.08) (13,95.42) (14,95.55) (15,95.55) (16,95.76) (17,95.69) (18,95.79) (19,96.14) (20,96.36)
+  (21,95.92) (22,96.24) (23,96.41) (24,96.47) (25,96.19) (26,96.36) (27,96.86) (28,96.54) (29,96.77) (30,96.72)
+  (31,96.77) (32,96.59) (33,96.77) (34,96.89) (35,97.00) (36,97.01) (37,96.69) (38,97.00) (39,96.94) (40,96.87)
+  (41,97.10) (42,97.28) (43,97.32) (44,97.03) (45,97.03) (46,97.34) (47,97.49) (48,97.43) (49,97.40) (50,96.98)};
+\addlegendentry{FedMKS}
 \addplot[clPurple] coordinates {
-  (1,32.12) (2,24.2) (3,32.69) (4,35.99) (5,38.17) (6,40.09) (7,41.32) (8,42.24) (9,42.66) (10,43.72)
-  (11,44.08) (12,44.77) (13,45.44) (14,45.77) (15,45.42) (16,46.52) (17,46.73) (18,46.37) (19,46.69) (20,46.99)
-  (21,47.42) (22,47.17) (23,47.51) (24,47.62) (25,47.35) (26,47.71) (27,47.35) (28,47.86) (29,47.44) (30,47.97)
-  (31,48.35) (32,47.81) (33,48.24) (34,48.6) (35,48.0) (36,48.22) (37,48.16) (38,48.8) (39,48.0) (40,48.49)
-  (41,48.65) (42,48.76) (43,48.9) (44,48.75) (45,48.56) (46,48.58) (47,49.21) (48,49.14) (49,49.21) (50,49.07)};
+  (1,78.20) (2,75.79) (3,82.70) (4,86.78) (5,89.06) (6,91.02) (7,91.91) (8,93.04) (9,93.48) (10,94.13)
+  (11,94.71) (12,94.96) (13,94.98) (14,95.55) (15,95.78) (16,95.88) (17,96.04) (18,96.04) (19,96.21) (20,96.30)
+  (21,96.46) (22,96.62) (23,96.68) (24,96.64) (25,96.88) (26,96.86) (27,96.89) (28,97.03) (29,97.10) (30,97.10)
+  (31,97.00) (32,97.12) (33,97.25) (34,97.17) (35,97.26) (36,97.30) (37,97.33) (38,97.50) (39,97.42) (40,97.43)
+  (41,97.50) (42,97.50) (43,97.53) (44,97.55) (45,97.54) (46,97.53) (47,97.62) (48,97.57) (49,97.67) (50,97.65)};
+\addlegendentry{FedAvg}
 \addplot[clOlive] coordinates {
-  (1,31.52) (2,17.03) (3,20.91) (4,24.3) (5,27.84) (6,31.04) (7,32.45) (8,34.67) (9,35.43) (10,37.13)
-  (11,37.47) (12,38.98) (13,39.58) (14,39.65) (15,40.67) (16,40.96) (17,42.42) (18,42.75) (19,42.59) (20,42.75)
-  (21,44.06) (22,44.43) (23,43.85) (24,44.52) (25,44.46) (26,45.07) (27,46.05) (28,45.71) (29,46.17) (30,46.34)
-  (31,46.43) (32,46.05) (33,46.41) (34,47.7) (35,47.62) (36,47.29) (37,47.44) (38,47.92) (39,47.36) (40,47.71)
-  (41,47.68) (42,48.07) (43,47.67) (44,48.17) (45,48.48) (46,48.34) (47,48.39) (48,47.95) (49,48.77) (50,48.89)};
+  (1,77.95) (2,69.08) (3,76.38) (4,81.33) (5,84.82) (6,87.16) (7,88.76) (8,90.18) (9,90.51) (10,91.35)
+  (11,92.32) (12,93.01) (13,93.45) (14,94.11) (15,94.19) (16,94.54) (17,94.55) (18,95.04) (19,95.21) (20,95.34)
+  (21,95.53) (22,95.76) (23,95.75) (24,95.91) (25,96.02) (26,96.14) (27,96.37) (28,96.28) (29,96.47) (30,96.51)
+  (31,96.63) (32,96.58) (33,96.71) (34,96.79) (35,96.84) (36,97.03) (37,96.87) (38,97.01) (39,96.93) (40,97.14)
+  (41,97.23) (42,97.28) (43,97.27) (44,97.25) (45,97.26) (46,97.36) (47,97.40) (48,97.48) (49,97.34) (50,97.50)};
+\addlegendentry{FedProx}
 \addplot[clGray,dotted] coordinates {
-  (1,33.25) (2,37.44) (3,37.83) (4,38.39) (5,38.63) (6,38.51) (7,39.13) (8,38.61) (9,38.84) (10,38.25)
-  (11,38.02) (12,38.1) (13,38.85) (14,38.71) (15,37.91) (16,37.97) (17,37.86) (18,38.26) (19,38.37) (20,37.77)
-  (21,38.53) (22,37.58) (23,37.98) (24,37.85) (25,37.4) (26,37.37) (27,37.65) (28,37.67) (29,37.84) (30,37.53)
-  (31,37.5) (32,37.93) (33,37.81) (34,37.89) (35,37.47) (36,37.79) (37,37.78) (38,37.49) (39,37.29) (40,37.49)
-  (41,37.46) (42,37.8) (43,37.22) (44,37.59) (45,37.59) (46,37.1) (47,36.97) (48,36.98) (49,37.91) (50,37.3)};
-
+  (1,81.61) (2,83.42) (3,84.32) (4,84.25) (5,84.37) (6,84.82) (7,84.88) (8,84.89) (9,85.11) (10,85.01)
+  (11,85.06) (12,84.92) (13,85.09) (14,85.10) (15,85.27) (16,85.46) (17,85.29) (18,84.87) (19,85.20) (20,85.44)
+  (21,85.14) (22,85.06) (23,85.38) (24,85.13) (25,85.19) (26,85.08) (27,85.36) (28,85.16) (29,85.45) (30,85.38)
+  (31,85.35) (32,85.18) (33,85.37) (34,85.30) (35,85.26) (36,85.34) (37,85.20) (38,85.32) (39,85.22) (40,85.38)
+  (41,85.34) (42,85.15) (43,85.25) (44,85.20) (45,85.37) (46,85.04) (47,85.42) (48,85.37) (49,85.38) (50,85.55)};
+\addlegendentry{Local}
+\nextgroupplot[ymin=22, ymax=82]
+\addplot[draw=none, fill=black!15, forget plot] coordinates {
+  (1,72.60) (2,72.86) (3,72.67) (4,73.94) (5,75.11) (6,74.53) (7,74.70) (8,74.81) (9,74.63) (10,75.29)
+  (11,74.20) (12,74.65) (13,75.03) (14,75.05) (15,73.78) (16,75.18) (17,74.92) (18,75.11) (19,75.09) (20,75.12)
+  (21,74.58) (22,74.58) (23,74.83) (24,75.25) (25,74.93) (26,74.48) (27,74.30) (28,75.25) (29,74.78) (30,75.50)
+  (31,74.88) (32,74.02) (33,74.22) (34,74.96) (35,74.97) (36,74.58) (37,74.22) (38,75.33) (39,74.53) (40,75.54)
+  (41,75.38) (42,74.02) (43,75.06) (44,75.10) (45,75.07) (46,74.94) (47,74.69) (48,75.06) (49,74.13) (50,74.80)
+  (50,75.12) (49,74.94) (48,76.18) (47,76.20) (46,76.52) (45,76.29) (44,75.67) (43,75.86) (42,77.18) (41,75.78)
+  (40,76.44) (39,75.62) (38,76.38) (37,76.25) (36,75.79) (35,75.96) (34,76.00) (33,76.16) (32,76.13) (31,75.78)
+  (30,75.87) (29,75.67) (28,76.02) (27,75.75) (26,75.68) (25,76.10) (24,75.82) (23,75.97) (22,75.74) (21,76.21)
+  (20,76.27) (19,75.90) (18,75.85) (17,75.73) (16,75.43) (15,75.75) (14,75.75) (13,75.34) (12,76.04) (11,75.46)
+  (10,75.77) (9,75.37) (8,75.51) (7,75.39) (6,75.65) (5,75.66) (4,75.74) (3,75.94) (2,74.88) (1,74.92)};
+\addplot[draw=none, fill=clBlue!15, forget plot] coordinates {
+  (1,28.94) (2,31.47) (3,32.50) (4,33.13) (5,33.41) (6,33.85) (7,33.79) (8,34.12) (9,33.94) (10,34.17)
+  (11,34.38) (12,34.21) (13,34.12) (14,34.46) (15,34.22) (16,34.07) (17,33.99) (18,34.22) (19,34.12) (20,33.55)
+  (21,33.52) (22,33.90) (23,33.57) (24,33.69) (25,33.53) (26,33.61) (27,33.57) (28,33.58) (29,33.73) (30,33.35)
+  (31,33.16) (32,33.52) (33,33.42) (34,33.59) (35,33.19) (36,33.10) (37,33.34) (38,32.81) (39,33.25) (40,32.75)
+  (41,33.06) (42,33.16) (43,33.12) (44,32.86) (45,32.83) (46,32.60) (47,32.68) (48,32.83) (49,32.61) (50,33.02)
+  (50,37.17) (49,37.53) (48,37.08) (47,37.22) (46,37.27) (45,37.28) (44,37.35) (43,37.30) (42,37.63) (41,37.38)
+  (40,38.03) (39,37.29) (38,37.62) (37,37.34) (36,37.50) (35,37.33) (34,37.80) (33,37.86) (32,37.70) (31,38.02)
+  (30,38.31) (29,37.84) (28,37.91) (27,37.72) (26,38.10) (25,38.20) (24,38.12) (23,38.26) (22,37.86) (21,38.18)
+  (20,37.87) (19,38.56) (18,38.60) (17,38.34) (16,38.54) (15,38.52) (14,38.54) (13,38.89) (12,38.88) (11,38.77)
+  (10,38.97) (9,38.75) (8,39.15) (7,38.84) (6,38.53) (5,38.31) (4,37.58) (3,37.42) (2,37.32) (1,33.05)};
+\addplot[draw=none, fill=clTeal!15, forget plot] coordinates {
+  (1,28.43) (2,32.08) (3,32.24) (4,33.47) (5,34.20) (6,34.27) (7,34.33) (8,34.64) (9,34.62) (10,34.42)
+  (11,34.59) (12,34.22) (13,33.93) (14,34.39) (15,34.11) (16,34.45) (17,34.09) (18,33.69) (19,33.95) (20,33.80)
+  (21,33.83) (22,34.14) (23,33.88) (24,34.17) (25,33.88) (26,33.65) (27,34.11) (28,33.84) (29,33.89) (30,33.60)
+  (31,33.82) (32,33.65) (33,33.39) (34,33.59) (35,33.74) (36,33.59) (37,33.34) (38,33.85) (39,33.41) (40,33.33)
+  (41,33.18) (42,33.35) (43,33.16) (44,33.33) (45,33.17) (46,33.22) (47,33.27) (48,33.26) (49,33.05) (50,33.40)
+  (50,37.44) (49,37.45) (48,37.26) (47,37.50) (46,37.40) (45,37.39) (44,37.58) (43,37.62) (42,37.39) (41,37.48)
+  (40,37.74) (39,37.86) (38,37.63) (37,37.78) (36,37.58) (35,37.53) (34,37.64) (33,37.75) (32,37.80) (31,37.83)
+  (30,37.86) (29,37.87) (28,37.95) (27,38.18) (26,38.02) (25,38.36) (24,38.01) (23,38.07) (22,37.84) (21,38.18)
+  (20,38.45) (19,38.77) (18,38.58) (17,38.71) (16,38.41) (15,38.22) (14,38.58) (13,38.95) (12,39.01) (11,39.19)
+  (10,38.58) (9,39.13) (8,39.04) (7,38.74) (6,38.61) (5,38.63) (4,38.41) (3,37.34) (2,36.56) (1,32.90)};
+\addplot[draw=none, fill=clRed!15, forget plot] coordinates {
+  (1,28.20) (2,25.68) (3,29.23) (4,33.02) (5,35.52) (6,37.12) (7,38.93) (8,39.88) (9,40.55) (10,41.41)
+  (11,41.41) (12,42.38) (13,42.20) (14,42.72) (15,42.59) (16,42.88) (17,42.89) (18,43.37) (19,43.22) (20,43.72)
+  (21,43.86) (22,44.35) (23,44.04) (24,44.06) (25,44.27) (26,44.24) (27,44.24) (28,44.39) (29,44.69) (30,44.36)
+  (31,44.43) (32,44.65) (33,44.95) (34,44.26) (35,44.83) (36,44.86) (37,44.55) (38,45.01) (39,44.93) (40,44.63)
+  (41,44.80) (42,44.29) (43,44.80) (44,44.86) (45,44.82) (46,44.61) (47,44.75) (48,44.94) (49,44.84) (50,44.54)
+  (50,48.29) (49,48.00) (48,48.12) (47,48.20) (46,48.05) (45,47.44) (44,48.29) (43,47.78) (42,47.80) (41,48.04)
+  (40,48.25) (39,47.64) (38,48.26) (37,48.07) (36,48.14) (35,48.20) (34,48.22) (33,48.15) (32,48.12) (31,47.80)
+  (30,48.18) (29,47.89) (28,47.95) (27,48.06) (26,47.50) (25,47.55) (24,47.77) (23,47.80) (22,47.49) (21,46.76)
+  (20,47.07) (19,46.81) (18,47.05) (17,46.68) (16,46.21) (15,46.35) (14,45.83) (13,45.37) (12,44.76) (11,44.89)
+  (10,43.98) (9,43.25) (8,41.65) (7,40.60) (6,38.00) (5,35.97) (4,33.67) (3,30.95) (2,26.86) (1,33.18)};
+\addplot[draw=none, fill=clPurple!15, forget plot] coordinates {
+  (1,27.14) (2,19.87) (3,27.90) (4,32.19) (5,34.96) (6,36.14) (7,37.72) (8,38.62) (9,39.70) (10,40.62)
+  (11,40.71) (12,40.96) (13,41.17) (14,41.77) (15,42.25) (16,42.34) (17,42.86) (18,42.81) (19,43.45) (20,43.25)
+  (21,43.08) (22,43.41) (23,43.40) (24,43.61) (25,44.20) (26,44.00) (27,44.13) (28,43.61) (29,44.50) (30,44.24)
+  (31,44.53) (32,44.44) (33,44.82) (34,44.54) (35,44.76) (36,44.18) (37,44.71) (38,44.45) (39,44.65) (40,44.60)
+  (41,44.78) (42,45.01) (43,44.83) (44,44.73) (45,45.01) (46,45.06) (47,45.22) (48,44.91) (49,44.70) (50,45.20)
+  (50,49.07) (49,49.21) (48,49.14) (47,49.21) (46,48.58) (45,48.56) (44,48.75) (43,48.90) (42,48.76) (41,48.65)
+  (40,48.49) (39,48.00) (38,48.80) (37,48.16) (36,48.22) (35,48.00) (34,48.60) (33,48.24) (32,47.81) (31,48.35)
+  (30,47.97) (29,47.44) (28,47.86) (27,47.35) (26,47.71) (25,47.35) (24,47.62) (23,47.51) (22,47.17) (21,47.42)
+  (20,46.99) (19,46.69) (18,46.37) (17,46.73) (16,46.52) (15,45.42) (14,45.77) (13,45.44) (12,44.77) (11,44.08)
+  (10,43.72) (9,42.66) (8,42.24) (7,41.32) (6,40.09) (5,38.17) (4,35.99) (3,32.69) (2,24.20) (1,32.12)};
+\addplot[draw=none, fill=clOlive!15, forget plot] coordinates {
+  (1,27.38) (2,16.45) (3,19.53) (4,22.53) (5,25.70) (6,28.03) (7,30.44) (8,31.28) (9,32.55) (10,32.84)
+  (11,34.03) (12,35.59) (13,36.79) (14,36.35) (15,37.48) (16,38.23) (17,38.92) (18,39.60) (19,40.09) (20,40.84)
+  (21,40.77) (22,42.03) (23,41.34) (24,42.04) (25,43.26) (26,42.87) (27,43.50) (28,43.82) (29,43.99) (30,43.98)
+  (31,44.52) (32,44.84) (33,44.78) (34,45.23) (35,45.30) (36,44.85) (37,45.53) (38,45.66) (39,45.76) (40,45.79)
+  (41,45.54) (42,46.50) (43,45.97) (44,46.60) (45,46.10) (46,46.34) (47,46.48) (48,46.63) (49,46.46) (50,47.04)
+  (50,48.89) (49,48.77) (48,47.95) (47,48.39) (46,48.34) (45,48.48) (44,48.17) (43,47.67) (42,48.07) (41,47.68)
+  (40,47.71) (39,47.36) (38,47.92) (37,47.44) (36,47.29) (35,47.62) (34,47.70) (33,46.41) (32,46.05) (31,46.43)
+  (30,46.34) (29,46.17) (28,45.71) (27,46.05) (26,45.07) (25,44.46) (24,44.52) (23,43.85) (22,44.43) (21,44.06)
+  (20,42.82) (19,42.59) (18,42.75) (17,42.42) (16,40.96) (15,40.67) (14,39.65) (13,39.58) (12,38.98) (11,37.47)
+  (10,37.13) (9,35.43) (8,34.67) (7,33.45) (6,31.43) (5,28.51) (4,26.29) (3,22.08) (2,17.98) (1,31.52)};
+\addplot[draw=none, fill=clGray!15, forget plot] coordinates {
+  (1,28.38) (2,31.96) (3,33.96) (4,34.10) (5,34.21) (6,33.96) (7,34.32) (8,34.16) (9,33.79) (10,34.47)
+  (11,33.99) (12,33.64) (13,33.79) (14,34.05) (15,33.83) (16,33.54) (17,33.97) (18,33.52) (19,33.50) (20,33.58)
+  (21,33.78) (22,33.21) (23,33.56) (24,33.36) (25,33.36) (26,33.26) (27,33.70) (28,33.69) (29,33.47) (30,33.26)
+  (31,33.06) (32,33.50) (33,33.40) (34,33.24) (35,32.70) (36,33.25) (37,33.22) (38,33.23) (39,33.02) (40,32.81)
+  (41,32.47) (42,32.61) (43,33.00) (44,33.21) (45,33.06) (46,32.87) (47,33.33) (48,32.93) (49,32.94) (50,33.14)
+  (50,37.30) (49,37.91) (48,36.98) (47,36.97) (46,37.10) (45,37.59) (44,37.59) (43,37.22) (42,37.80) (41,37.46)
+  (40,37.49) (39,37.29) (38,37.49) (37,37.78) (36,37.79) (35,37.47) (34,37.89) (33,37.81) (32,37.93) (31,37.50)
+  (30,37.53) (29,37.84) (28,37.67) (27,37.65) (26,37.37) (25,37.40) (24,37.85) (23,37.98) (22,37.58) (21,38.53)
+  (20,37.77) (19,38.37) (18,38.26) (17,37.86) (16,37.97) (15,37.91) (14,38.71) (13,38.85) (12,38.10) (11,38.02)
+  (10,38.25) (9,38.84) (8,38.61) (7,39.13) (6,38.51) (5,38.63) (4,38.39) (3,37.83) (2,37.44) (1,33.25)};
+\addplot[black,thick,dashed] coordinates {
+  (1,73.83) (2,73.80) (3,74.50) (4,74.60) (5,75.44) (6,75.07) (7,75.12) (8,75.26) (9,74.96) (10,75.57)
+  (11,75.00) (12,75.48) (13,75.22) (14,75.44) (15,74.91) (16,75.31) (17,75.36) (18,75.58) (19,75.43) (20,75.61)
+  (21,75.16) (22,75.27) (23,75.36) (24,75.62) (25,75.49) (26,75.19) (27,75.13) (28,75.54) (29,75.32) (30,75.69)
+  (31,75.41) (32,75.21) (33,75.07) (34,75.41) (35,75.44) (36,75.12) (37,74.97) (38,75.85) (39,75.12) (40,75.86)
+  (41,75.60) (42,75.31) (43,75.33) (44,75.34) (45,75.62) (46,75.63) (47,75.39) (48,75.47) (49,74.57) (50,74.92)};
+\addplot[clBlue] coordinates {
+  (1,30.86) (2,34.14) (3,34.81) (4,35.37) (5,35.84) (6,35.99) (7,36.03) (8,36.41) (9,36.15) (10,36.36)
+  (11,36.41) (12,36.32) (13,36.37) (14,36.34) (15,36.16) (16,36.07) (17,36.04) (18,36.21) (19,36.11) (20,35.53)
+  (21,35.70) (22,35.72) (23,35.82) (24,35.72) (25,35.68) (26,35.49) (27,35.47) (28,35.66) (29,35.50) (30,35.61)
+  (31,35.48) (32,35.44) (33,35.49) (34,35.52) (35,35.25) (36,35.15) (37,35.09) (38,35.09) (39,35.12) (40,35.27)
+  (41,35.05) (42,35.16) (43,35.07) (44,35.02) (45,34.92) (46,34.73) (47,34.88) (48,34.76) (49,34.82) (50,35.01)};
+\addplot[clTeal] coordinates {
+  (1,30.86) (2,34.26) (3,34.91) (4,35.84) (5,36.37) (6,36.29) (7,36.23) (8,36.58) (9,36.72) (10,36.45)
+  (11,36.81) (12,36.46) (13,36.35) (14,36.42) (15,36.19) (16,36.27) (17,36.14) (18,36.01) (19,36.23) (20,36.04)
+  (21,36.03) (22,35.99) (23,35.83) (24,35.95) (25,36.05) (26,35.82) (27,35.94) (28,35.94) (29,35.65) (30,35.87)
+  (31,35.64) (32,35.65) (33,35.60) (34,35.54) (35,35.67) (36,35.51) (37,35.62) (38,35.63) (39,35.66) (40,35.48)
+  (41,35.33) (42,35.28) (43,35.29) (44,35.34) (45,35.22) (46,35.31) (47,35.23) (48,35.20) (49,35.17) (50,35.30)};
+\addplot[clRed,thick] coordinates {
+  (1,30.70) (2,26.45) (3,29.93) (4,33.40) (5,35.72) (6,37.41) (7,39.58) (8,40.59) (9,41.59) (10,42.37)
+  (11,42.78) (12,43.23) (13,43.36) (14,43.91) (15,44.15) (16,44.09) (17,44.39) (18,44.65) (19,44.65) (20,44.90)
+  (21,44.92) (22,45.44) (23,45.42) (24,45.41) (25,45.41) (26,45.65) (27,45.68) (28,45.81) (29,45.80) (30,45.77)
+  (31,45.82) (32,45.96) (33,46.07) (34,45.90) (35,46.12) (36,45.96) (37,45.95) (38,46.11) (39,45.89) (40,45.90)
+  (41,46.04) (42,45.64) (43,45.89) (44,46.15) (45,45.92) (46,46.01) (47,46.00) (48,46.19) (49,46.20) (50,46.01)};
+\addplot[clPurple] coordinates {
+  (1,29.67) (2,21.75) (3,29.84) (4,33.77) (5,36.18) (6,37.85) (7,39.02) (8,40.16) (9,40.74) (10,41.66)
+  (11,41.99) (12,42.42) (13,43.06) (14,43.26) (15,43.65) (16,43.93) (17,44.30) (18,44.18) (19,44.68) (20,44.54)
+  (21,44.83) (22,44.69) (23,45.12) (24,45.14) (25,45.50) (26,45.36) (27,45.48) (28,45.40) (29,45.71) (30,45.95)
+  (31,46.15) (32,45.93) (33,46.25) (34,46.40) (35,46.23) (36,46.16) (37,46.28) (38,46.56) (39,46.27) (40,46.52)
+  (41,46.75) (42,46.75) (43,46.79) (44,46.82) (45,46.69) (46,46.80) (47,46.98) (48,46.99) (49,47.02) (50,47.14)};
+\addplot[clOlive] coordinates {
+  (1,29.46) (2,17.16) (3,20.84) (4,24.37) (5,27.35) (6,30.17) (7,32.12) (8,33.51) (9,34.17) (10,35.17)
+  (11,36.26) (12,37.66) (13,38.35) (14,38.36) (15,39.16) (16,39.80) (17,40.76) (18,41.46) (19,41.58) (20,42.13)
+  (21,42.33) (22,43.13) (23,42.87) (24,43.03) (25,43.68) (26,44.07) (27,44.52) (28,44.46) (29,44.81) (30,44.88)
+  (31,45.31) (32,45.39) (33,45.70) (34,46.18) (35,46.24) (36,45.72) (37,46.24) (38,46.59) (39,46.38) (40,46.48)
+  (41,46.44) (42,47.10) (43,46.65) (44,47.12) (45,47.16) (46,47.05) (47,47.32) (48,47.19) (49,47.32) (50,47.74)};
+\addplot[clGray,dotted] coordinates {
+  (1,31.00) (2,34.56) (3,35.72) (4,36.13) (5,36.15) (6,36.40) (7,36.51) (8,36.32) (9,36.32) (10,36.33)
+  (11,36.06) (12,36.02) (13,36.28) (14,36.40) (15,35.96) (16,35.89) (17,35.88) (18,35.95) (19,35.80) (20,35.59)
+  (21,35.94) (22,35.51) (23,35.70) (24,35.44) (25,35.29) (26,35.19) (27,35.70) (28,35.55) (29,35.59) (30,35.48)
+  (31,35.43) (32,35.59) (33,35.60) (34,35.54) (35,35.30) (36,35.47) (37,35.34) (38,35.24) (39,35.16) (40,35.28)
+  (41,34.98) (42,34.99) (43,34.98) (44,35.33) (45,35.20) (46,34.97) (47,35.09) (48,34.97) (49,35.28) (50,35.16)};
 \end{groupplot}
 \end{tikzpicture}
 \par\vspace{4pt}
 \ref{legendPnoniid}
-\caption{Validation accuracy under non-IID partitioning
-  (Dirichlet $\alpha{=}0.5$).  Panels: MNIST, CIFAR-10 (HomeOccupancy
-  non-IID runs in progress).}
+\caption{Validation accuracy over 50 rounds under non-IID partitioning
+  (Dirichlet $\alpha{=}0.5$).  Panels: HomeOccupancy, MNIST, CIFAR-10.
+  Curves show the mean over completed seeds; shaded bands show the seed
+  range.  FedAvg/FedProx use the all-small architecture.}
 \label{fig:mainnoniid}
 \end{figure*}
-
-\textbf{HomeOccupancy.}
-Under IID, FedMKS (90.4\%) and FedAvg (89.5\%) approach the centralised
-ceiling (90.8\%), while FedMD (88.5\%) and FedAKD (87.0\%) lag without
-weight sharing; Local plateaus at 80.4\%.  Under non-IID, completed
-weight-sharing runs (FedAvg 38.4\%, FedProx 33.7\%) already trail
-local-only training (60.1\%).
-
-\textbf{MNIST.}
-IID: Central 99.0\%, FedMKS 97.7\%, FedAvg/FedProx 97.0\%/97.2\%,
-FedMD/FedAKD/Local ${\approx}95.8\%$.  Non-IID: FedAvg 97.4\%, FedProx
-97.2\%, FedMKS 96.6\%, while FedMD/FedAKD/Local plateau at
-${\approx}84\%$---${\approx}13$ points below the all-small weight-sharing
-methods despite their larger architectures.
-
-\textbf{CIFAR-10.}
-Cross-domain public data (MNIST) gives little signal: all FL methods fall
-$10$--$30\%$ below centralised.  FedAvg (53.8\%) edges FedProx (52.9\%)
-and FedMKS (52.6\%) under IID, and leads under non-IID (49.1\% vs.\
-48.9\%/48.3\%).  KD-only methods (FedMD 37.2\%, FedAKD 37.4\%) do not
-beat Local (37.3\%).
-
-\paragraph{Key observation.}
-Under non-IID, weight sharing beats cross-architecture distillation even
-when weight sharers are forced onto the smallest model (MNIST:
-${\approx}97\%$ vs.\ ${\approx}84\%$).  FedMKS is designed to recover
-model-sharing accuracy while preserving the heterogeneity that only
-distillation permits.
-
-\subsubsection{Ablation Studies}
-
-\paragraph{Tier heterogeneity.}
-Fig.~\ref{fig:tierablation} ablates the tier distribution for FedMD on
-HomeOccupancy.  Under IID all configurations converge to
-${\approx}86\%$; under non-IID \texttt{uniform} (61.5\%) beats
-\texttt{all\_small} (59.1\%) and \texttt{skewed} (58.6\%)---small-dominated
-tiers underperform a balanced mix under label skew.
 
 \begin{figure*}[t]
 \centering
@@ -898,15 +1549,534 @@ tiers underperform a balanced mix under label skew.
   group style={
     xlabels at=edge bottom,
     ylabels at=edge left,
+    group size=3 by 1,
+    horizontal sep=1.1cm,
+  },
+  width=0.31\textwidth,
+  height=4.4cm,
+]
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=6.6,
+  xtick={1,2,3,4,5,6},
+  xticklabels={Local,FedAvg,FedProx,FedMD,FedAKD,FedMKS},
+  x tick label style={font=\tiny, rotate=25, anchor=east},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (6.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.6, forget plot] coordinates {
+  (1.027,65.23) (1.121,52.07) (1.058,67.03) (1.025,65.23) (0.957,40.07) (1.082,78.31) (0.965,67.06) (1.219,62.67) (1.260,65.23) (0.935,66.74)
+  (1.163,52.58) (1.016,57.66) (1.038,59.17) (1.238,47.60) (0.760,59.96) (0.769,71.14) (0.731,27.82) (1.186,68.61) (1.156,60.90) (1.207,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.68,60.12) (1.32,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (2.268,32.61) (2.168,32.61) (1.978,32.61) (2.157,32.61) (1.786,32.61) (2.078,33.91) (1.800,34.77) (2.249,34.77) (2.012,32.61) (1.952,32.61)
+  (1.868,32.61) (2.154,34.77) (1.975,36.54) (2.038,32.61) (1.731,34.77) (2.066,32.61) (2.063,34.77) (2.065,32.61) (2.248,32.61) (2.102,32.61)
+  (1.921,65.23) (1.965,65.23) (2.111,73.59) (1.754,90.88) (2.093,87.75) (2.096,39.03) (1.838,84.32) (1.792,88.97) (1.897,76.86) (1.924,34.77)
+  (2.039,80.40) (1.966,68.00) (2.273,65.26) (1.777,66.34) (1.837,54.88) (1.810,67.32) (2.086,65.33) (1.862,66.49) (1.981,87.82) (1.857,70.70)
+  (1.809,32.61) (1.782,36.43) (2.088,32.72) (1.797,32.68) (1.830,34.77) (1.926,32.61) (2.180,34.85) (1.774,34.77) (2.189,64.97) (1.774,44.65)
+  (2.267,32.61) (1.982,32.61) (2.267,34.77) (2.059,32.61) (2.134,38.85) (1.742,39.14) (1.878,43.46) (1.787,39.06) (1.886,52.18) (1.786,40.79)};
+\addplot[black, thick, forget plot] coordinates {(1.6800000000000002,47.24) (2.3200000000000003,47.24)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOlive, opacity=0.6, forget plot] coordinates {
+  (2.898,32.61) (2.952,32.61) (2.756,32.61) (3.108,32.61) (3.037,32.61) (2.869,35.57) (3.013,34.77) (2.773,34.77) (3.043,32.61) (3.240,32.61)
+  (2.898,32.61) (3.094,34.77) (2.794,34.77) (3.121,32.61) (2.882,34.77) (2.823,32.61) (3.048,34.77) (2.731,32.61) (3.184,32.61) (2.723,32.61)
+  (3.100,65.19) (2.871,65.23) (3.132,48.68) (3.259,80.11) (2.859,79.82) (3.043,59.42) (3.052,59.21) (3.040,66.70) (2.845,65.15) (3.254,34.77)
+  (2.970,67.32) (3.194,41.41) (3.112,65.66) (2.887,65.23) (3.176,58.59) (2.942,67.21) (3.213,65.19) (3.046,67.17) (3.214,62.63) (3.108,66.34)
+  (3.126,32.61) (3.001,37.26) (3.255,32.61) (3.081,32.61) (2.957,34.77) (3.060,32.61) (2.731,34.77) (2.889,34.77) (3.090,32.61) (2.882,32.61)
+  (3.066,32.61) (2.960,32.61) (2.796,34.77) (2.887,32.61) (3.039,39.28) (3.051,32.61) (3.042,32.61) (3.086,34.77) (3.085,32.61) (2.962,32.76)};
+\addplot[black, thick, forget plot] coordinates {(2.68,43.23) (3.3200000000000003,43.23)};
+\addplot[only marks, mark=*, mark size=0.9pt, clBlue, opacity=0.6, forget plot] coordinates {
+  (4.222,65.23) (3.926,52.07) (3.964,65.23) (4.219,65.23) (4.171,64.97) (4.114,52.22) (3.776,65.51) (4.235,73.37) (4.120,65.23) (4.279,70.27)
+  (3.804,53.05) (4.206,72.61) (3.811,78.31) (4.065,57.15) (3.789,51.60) (4.195,71.57) (4.172,41.44) (4.039,66.02) (3.948,65.23) (3.759,66.99)};
+\addplot[black, thick, forget plot] coordinates {(3.68,63.16) (4.32,63.16)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (5.111,65.23) (4.974,52.07) (5.124,65.23) (5.205,57.77) (5.266,47.64) (5.199,57.37) (4.727,65.55) (4.922,71.32) (5.129,65.23) (4.816,67.28)
+  (5.012,53.08) (4.750,71.03) (4.832,72.68) (4.730,56.86) (5.164,53.91) (4.845,70.27) (4.913,29.91) (5.240,66.81) (5.114,65.23) (4.738,66.23)};
+\addplot[black, thick, forget plot] coordinates {(4.68,61.03) (5.32,61.03)};
+\addplot[only marks, mark=*, mark size=0.9pt, clRed, opacity=0.6, forget plot] coordinates {
+  (5.812,46.70) (6.068,34.77) (6.043,47.93) (5.853,35.78) (6.243,38.74) (6.064,45.59) (6.020,34.77) (6.050,66.77) (6.129,65.23) (5.895,79.93)
+  (5.943,51.89) (5.838,66.95) (5.824,71.75) (6.249,48.11) (6.134,35.14) (5.995,74.27) (5.847,34.77) (5.862,65.23) (5.752,65.23) (5.963,66.70)};
+\addplot[black, thick, forget plot] coordinates {(5.68,53.81) (6.32,53.81)};
+\nextgroupplot[ymin=55, ymax=100, xmin=0.4, xmax=6.6,
+  xtick={1,2,3,4,5,6},
+  xticklabels={Local,FedAvg,FedProx,FedMD,FedAKD,FedMKS},
+  x tick label style={font=\tiny, rotate=25, anchor=east},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.6, forget plot] coordinates {
+  (0.895,80.92) (1.110,82.15) (0.932,81.86) (0.821,85.82) (0.734,87.41) (0.758,91.62) (1.100,79.87) (0.974,85.86) (1.020,72.54) (1.222,81.18)
+  (1.275,77.53) (0.841,79.10) (1.091,86.80) (0.867,87.72) (0.732,85.71) (1.145,97.10) (0.899,97.46) (0.935,87.45) (1.049,85.90) (1.185,89.55)
+  (1.072,85.06) (1.209,86.63) (0.873,64.90) (1.167,96.42) (0.824,87.20) (1.254,79.73) (1.105,86.01) (0.841,81.49) (1.251,92.45) (1.129,93.69)
+  (0.862,96.50) (0.839,93.79) (1.010,90.06) (0.734,86.60) (0.836,84.25) (0.958,87.12) (0.930,77.49) (0.980,87.62) (0.875,88.89) (1.049,87.12)
+  (1.204,85.75) (0.786,77.45) (1.010,94.12) (0.794,79.76) (1.121,74.58) (0.942,92.63) (1.037,58.41) (0.823,94.95) (0.801,87.55) (0.993,95.17)
+  (0.919,89.13) (1.247,90.12) (1.149,77.09) (1.139,95.26) (1.226,80.63) (0.767,78.67) (1.029,78.82) (1.047,87.33) (1.259,87.57) (0.884,79.56)};
+\addplot[black, thick, forget plot] coordinates {(0.68,85.35) (1.32,85.35)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (1.855,97.27) (1.776,97.74) (1.729,98.46) (2.241,97.78) (2.095,97.87) (2.160,98.42) (1.878,97.95) (2.048,97.47) (1.756,98.02) (1.992,95.76)
+  (2.267,96.50) (2.211,97.41) (1.909,97.92) (2.258,97.88) (1.850,98.07) (2.252,98.26) (2.247,98.03) (2.168,98.28) (2.073,97.90) (2.210,97.96)
+  (1.884,97.26) (2.195,97.55) (2.066,96.16) (1.727,98.44) (1.914,97.55) (1.803,98.05) (2.270,97.99) (1.988,97.41) (1.999,98.03) (2.078,98.25)
+  (1.926,98.09) (1.797,97.49) (2.180,97.72) (1.826,97.95) (2.006,98.33) (1.846,97.70) (1.775,97.20) (2.203,97.15) (2.265,98.28) (2.258,97.72)
+  (2.228,97.97) (2.153,95.33) (1.907,97.61) (1.765,96.53) (1.948,97.91) (1.850,97.40) (1.794,96.39) (1.750,98.11) (2.126,97.15) (1.726,97.79)
+  (2.152,97.55) (1.802,97.70) (1.765,97.37) (1.770,97.90) (2.096,97.16) (1.857,96.79) (1.956,97.28) (2.032,98.00) (2.202,97.76) (2.127,97.43)};
+\addplot[black, thick, forget plot] coordinates {(1.6800000000000002,97.61) (2.3200000000000003,97.61)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOlive, opacity=0.6, forget plot] coordinates {
+  (2.871,97.08) (2.794,97.61) (2.751,97.89) (2.889,96.91) (2.867,97.64) (2.975,98.38) (3.103,97.83) (3.110,97.29) (2.879,97.65) (2.933,96.29)
+  (2.821,96.85) (3.162,97.40) (2.752,97.42) (3.110,97.68) (3.156,97.64) (3.155,97.84) (2.865,97.90) (2.929,97.68) (3.049,98.02) (2.873,97.55)
+  (2.928,97.47) (2.830,97.21) (2.978,96.36) (2.745,98.27) (3.168,97.10) (2.763,98.19) (3.011,97.80) (2.892,97.32) (3.043,96.84) (3.257,98.20)
+  (3.082,98.20) (2.740,97.32) (2.961,97.52) (3.006,97.95) (3.020,98.08) (3.102,97.37) (2.875,97.20) (2.792,96.42) (2.940,97.93) (3.256,97.66)
+  (2.825,97.70) (3.226,96.02) (3.025,97.66) (2.976,96.70) (3.214,97.64) (2.977,97.47) (3.126,96.91) (2.943,97.63) (3.226,96.81) (3.106,97.65)
+  (3.112,97.40) (2.904,97.78) (3.144,96.33) (3.076,98.06) (2.854,96.20) (2.810,97.36) (3.166,96.79) (3.257,97.41) (2.977,97.17) (3.051,97.32)};
+\addplot[black, thick, forget plot] coordinates {(2.68,97.42) (3.3200000000000003,97.42)};
+\addplot[only marks, mark=*, mark size=0.9pt, clBlue, opacity=0.6, forget plot] coordinates {
+  (4.200,81.59) (3.976,82.92) (4.253,80.23) (4.042,86.54) (4.180,87.82) (4.229,90.09) (4.177,79.77) (3.809,86.52) (4.072,72.93) (3.943,80.25)
+  (3.755,76.89) (3.957,77.63) (3.865,85.68) (4.195,88.82) (3.739,86.42) (4.257,96.20) (3.919,96.66) (3.920,86.32) (3.729,84.34) (3.824,89.12)
+  (3.945,85.79) (4.240,86.54) (3.776,66.55) (4.249,96.21) (4.207,88.26) (3.974,80.61) (3.903,86.76) (3.850,80.12) (4.064,88.30) (3.739,93.84)
+  (3.729,96.41) (3.960,93.90) (3.758,89.39) (3.861,87.14) (3.844,81.15) (3.862,84.96) (3.793,79.13) (3.727,82.83) (3.785,84.22) (4.066,86.41)
+  (4.266,87.06) (4.275,76.89) (3.949,94.01) (3.811,77.60) (4.078,75.04) (3.995,92.67) (4.274,58.40) (3.757,94.94) (4.159,85.95) (3.882,93.96)
+  (3.855,89.56) (4.091,90.95) (3.858,76.77) (4.093,95.25) (4.010,74.17) (3.957,77.65) (4.031,80.22) (3.881,86.75) (4.116,86.95) (3.952,79.67)};
+\addplot[black, thick, forget plot] coordinates {(3.68,84.83) (4.32,84.83)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (4.922,81.85) (5.184,84.02) (5.238,81.16) (4.746,85.82) (4.850,88.10) (4.915,90.51) (5.176,80.98) (5.272,86.64) (5.263,74.15) (5.227,80.01)
+  (4.886,78.32) (5.276,78.84) (4.860,87.72) (4.779,88.21) (5.253,86.97) (4.851,96.88) (5.106,96.67) (4.753,85.76) (5.129,86.14) (5.214,91.29)
+  (4.873,85.36) (4.932,86.46) (4.930,66.39) (5.139,96.13) (4.853,87.73) (4.816,80.07) (4.972,86.41) (4.891,80.96) (5.190,89.88) (4.853,94.09)
+  (5.001,96.52) (5.248,93.18) (5.075,90.11) (5.206,87.17) (5.247,80.81) (5.140,86.41) (5.112,80.88) (5.262,83.29) (5.277,87.97) (4.973,85.72)
+  (4.760,85.90) (4.884,76.26) (4.805,94.15) (4.954,77.98) (4.794,75.17) (5.058,91.97) (4.934,60.32) (5.221,95.13) (5.262,87.75) (5.026,94.49)
+  (4.874,88.59) (5.052,89.75) (5.222,79.73) (4.948,95.33) (5.029,74.32) (4.872,77.06) (4.975,78.62) (4.945,86.86) (4.859,87.03) (5.003,81.98)};
+\addplot[black, thick, forget plot] coordinates {(4.68,85.23) (5.32,85.23)};
+\addplot[only marks, mark=*, mark size=0.9pt, clRed, opacity=0.6, forget plot] coordinates {
+  (5.894,96.19) (5.929,97.11) (6.014,97.43) (6.140,96.50) (5.907,95.64) (6.238,97.65) (6.203,96.37) (5.747,98.10) (5.862,97.91) (5.970,97.08)
+  (5.779,97.30) (5.915,98.04) (6.134,98.10) (6.101,98.25) (6.069,97.44) (6.118,98.52) (5.835,98.41) (5.911,98.11) (6.099,98.04) (6.212,98.23)
+  (6.024,96.75) (5.878,97.05) (5.737,96.11) (6.118,98.02) (5.724,96.59) (5.929,97.66) (6.017,97.82) (6.236,97.87) (5.770,98.43) (5.947,98.50)
+  (5.734,98.51) (5.912,98.18) (6.068,98.52) (5.876,97.83) (5.837,97.97) (5.785,97.19) (6.043,96.57) (6.109,96.71) (6.096,97.56) (6.251,97.07)
+  (5.722,97.24) (6.082,95.20) (6.056,97.18) (6.050,95.79) (6.259,97.32) (5.729,96.93) (6.110,96.31) (6.176,98.19) (6.005,97.63) (5.907,98.05)
+  (6.163,97.26) (5.774,97.70) (5.968,96.91) (6.011,98.39) (6.109,94.25) (5.771,95.83) (5.848,96.48) (5.950,97.35) (6.069,97.14) (6.217,97.31)};
+\addplot[black, thick, forget plot] coordinates {(5.68,97.33) (6.32,97.33)};
+\nextgroupplot[ymin=15, ymax=80, xmin=0.4, xmax=6.6,
+  xtick={1,2,3,4,5,6},
+  xticklabels={Local,FedAvg,FedProx,FedMD,FedAKD,FedMKS},
+  x tick label style={font=\tiny, rotate=25, anchor=east},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,10.0) (6.6,10.0)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.6, forget plot] coordinates {
+  (1.067,32.36) (0.795,33.31) (1.269,35.06) (1.208,37.50) (1.002,29.50) (1.237,35.81) (1.023,37.59) (1.237,40.84) (1.185,32.47) (1.262,33.20)
+  (1.235,40.60) (0.740,29.09) (0.818,43.99) (0.938,32.97) (1.253,39.28) (0.888,37.78) (0.810,24.61) (1.216,29.98) (0.970,34.26) (1.228,39.62)
+  (0.810,24.85) (1.090,28.43) (0.967,34.44) (0.763,29.02) (1.110,37.78) (0.859,31.44) (0.742,33.64) (0.754,25.39) (0.754,37.90) (1.228,41.01)
+  (1.134,28.61) (1.223,34.24) (1.097,32.15) (1.016,31.23) (0.890,42.09) (1.279,40.22) (0.923,35.58) (0.984,34.70) (0.932,25.16) (1.269,32.98)
+  (0.818,36.18) (0.904,35.08) (1.101,31.79) (0.755,34.00) (1.060,30.35) (0.987,39.60) (0.879,30.46) (0.854,40.24) (1.008,33.42) (0.926,31.05)
+  (0.976,41.76) (0.909,42.39) (1.263,36.60) (0.795,37.53) (0.774,39.55) (0.912,48.71) (1.051,42.07) (1.089,38.30) (0.942,38.02) (1.280,37.95)};
+\addplot[black, thick, forget plot] coordinates {(0.68,35.10) (1.32,35.10)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (1.917,47.60) (2.124,47.88) (2.077,50.76) (2.175,50.35) (2.267,48.20) (2.218,48.60) (2.148,48.53) (2.111,52.03) (1.908,42.24) (1.803,44.20)
+  (1.755,50.79) (1.855,44.70) (1.962,52.42) (2.012,42.96) (2.153,46.65) (2.257,51.33) (1.786,36.55) (1.780,39.24) (2.050,46.30) (2.137,46.54)
+  (2.195,40.14) (2.244,47.12) (2.271,50.05) (1.944,35.81) (1.933,53.30) (1.803,46.39) (2.104,45.43) (2.088,33.10) (2.203,40.73) (1.774,49.86)
+  (1.999,41.50) (2.045,47.27) (1.855,43.34) (1.815,41.70) (2.201,49.65) (1.753,51.09) (1.984,45.92) (1.785,49.14) (1.976,40.61) (2.269,48.18)
+  (1.957,51.29) (2.200,50.12) (1.786,41.65) (1.872,45.52) (1.946,43.46) (1.944,52.79) (2.096,47.58) (1.913,51.66) (2.120,47.67) (2.078,44.02)
+  (1.944,49.50) (1.962,52.65) (2.064,46.01) (1.759,51.90) (2.181,51.22) (2.086,56.60) (2.127,51.94) (2.021,50.72) (1.782,47.30) (1.947,47.29)};
+\addplot[black, thick, forget plot] coordinates {(1.6800000000000002,46.98) (2.3200000000000003,46.98)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOlive, opacity=0.6, forget plot] coordinates {
+  (2.947,46.78) (2.900,47.82) (2.737,49.79) (3.133,49.21) (2.781,45.65) (3.060,47.85) (3.114,48.53) (3.075,51.88) (3.257,43.63) (2.778,42.43)
+  (3.206,48.04) (2.736,43.09) (3.020,50.66) (2.946,46.43) (3.014,48.71) (2.924,51.31) (2.827,38.88) (2.731,40.54) (3.010,46.30) (3.192,49.76)
+  (2.929,44.57) (2.845,47.67) (2.765,52.95) (2.768,36.66) (2.844,53.78) (2.776,47.80) (2.868,47.18) (2.757,34.94) (2.757,41.35) (3.200,50.93)
+  (2.811,45.25) (3.033,50.40) (3.153,45.42) (2.976,43.13) (2.806,50.75) (2.832,50.66) (2.962,47.00) (3.016,48.97) (2.916,42.24) (3.158,51.32)
+  (3.141,50.37) (3.239,47.41) (2.736,42.12) (3.222,45.42) (2.940,41.59) (3.212,49.33) (3.107,46.46) (3.273,51.97) (3.145,46.26) (2.924,44.06)
+  (3.001,48.97) (2.931,53.34) (2.924,45.59) (2.866,50.76) (2.998,52.52) (3.102,57.46) (2.875,50.88) (3.014,52.19) (2.786,45.92) (2.810,46.75)};
+\addplot[black, thick, forget plot] coordinates {(2.68,47.33) (3.3200000000000003,47.33)};
+\addplot[only marks, mark=*, mark size=0.9pt, clBlue, opacity=0.6, forget plot] coordinates {
+  (3.746,30.75) (4.264,32.60) (3.722,32.82) (3.820,36.38) (4.063,29.32) (3.766,35.56) (4.214,36.59) (4.123,41.44) (4.261,30.62) (4.004,34.09)
+  (3.888,40.27) (4.028,29.28) (4.241,45.05) (4.012,33.86) (3.870,38.80) (4.211,36.85) (3.928,23.97) (3.721,30.31) (3.859,32.66) (3.898,38.98)
+  (4.201,23.55) (3.977,29.23) (3.969,34.34) (3.908,28.31) (4.213,38.10) (4.249,30.79) (4.275,33.11) (3.931,25.30) (4.261,38.43) (4.163,43.25)
+  (4.098,28.53) (3.857,31.96) (3.841,31.38) (3.813,30.66) (4.237,42.10) (3.885,39.24) (3.974,35.59) (3.997,33.77) (4.156,23.78) (4.193,33.57)
+  (3.798,34.97) (3.959,34.05) (4.192,32.67) (4.178,33.11) (3.777,29.89) (3.808,41.08) (3.890,29.89) (3.762,40.87) (3.958,35.78) (3.780,31.27)
+  (4.038,42.27) (3.858,43.13) (4.054,36.22) (3.786,38.37) (4.266,39.65) (4.242,47.88) (3.939,40.93) (3.856,37.58) (3.860,36.80) (3.991,38.71)};
+\addplot[black, thick, forget plot] coordinates {(3.68,34.84) (4.32,34.84)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (4.742,32.02) (5.078,34.13) (4.949,35.33) (4.931,37.05) (5.173,29.39) (5.117,35.31) (5.254,36.72) (4.917,42.22) (5.223,33.07) (5.151,34.11)
+  (4.920,40.57) (5.068,29.20) (4.882,43.90) (5.210,33.78) (4.783,39.32) (4.839,37.06) (4.822,24.96) (4.946,30.89) (5.137,32.89) (5.015,39.60)
+  (4.993,24.43) (4.720,28.57) (4.958,33.54) (4.756,28.64) (4.837,39.43) (5.242,31.39) (4.841,33.91) (5.201,25.48) (5.170,37.74) (4.809,42.78)
+  (5.059,29.85) (4.785,33.33) (5.128,32.26) (5.077,30.93) (5.175,41.89) (4.988,39.86) (5.232,36.35) (4.748,36.01) (4.884,25.27) (5.120,33.13)
+  (4.954,35.86) (4.817,34.05) (4.780,33.03) (5.178,35.44) (4.985,31.24) (5.214,39.73) (5.131,29.98) (4.949,40.83) (4.929,34.54) (5.009,31.46)
+  (5.218,42.56) (5.133,43.36) (4.723,35.77) (5.109,39.10) (5.235,39.09) (5.118,48.17) (4.819,42.07) (4.991,36.57) (4.799,36.83) (4.921,38.51)};
+\addplot[black, thick, forget plot] coordinates {(4.68,35.24) (5.32,35.24)};
+\addplot[only marks, mark=*, mark size=0.9pt, clRed, opacity=0.6, forget plot] coordinates {
+  (6.245,40.82) (6.237,43.65) (5.878,43.81) (5.910,45.28) (6.056,41.30) (6.259,43.10) (5.803,42.73) (5.864,53.71) (6.209,48.31) (5.995,45.04)
+  (6.223,52.63) (5.824,46.41) (6.018,54.54) (5.903,47.15) (5.897,45.16) (5.970,48.33) (5.963,38.08) (5.920,37.95) (6.232,45.45) (6.130,44.03)
+  (6.127,36.46) (5.882,41.58) (6.044,45.37) (6.156,33.73) (6.166,48.90) (5.913,42.08) (6.152,43.05) (6.132,34.69) (5.799,42.67) (6.205,50.94)
+  (5.967,44.38) (5.992,52.74) (5.971,45.82) (6.038,44.31) (6.068,47.41) (5.999,48.74) (6.205,49.16) (6.072,48.91) (5.945,43.19) (5.953,50.60)
+  (6.174,45.74) (5.915,43.71) (5.838,37.30) (5.753,41.65) (6.211,39.32) (6.234,46.04) (5.787,42.46) (5.907,53.90) (5.818,49.75) (5.785,47.11)
+  (6.224,51.17) (5.752,54.93) (6.269,47.38) (5.774,53.39) (6.204,51.45) (6.037,58.08) (5.926,52.46) (5.912,51.03) (6.144,47.41) (5.896,48.37)};
+\addplot[black, thick, forget plot] coordinates {(5.68,46.08) (6.32,46.08)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Per-client final validation accuracy (mean of the last five
+  rounds, evaluated on each client's model \emph{after} its local
+  update) under non-IID partitioning.  Each dot is one client; all
+  completed seeds are pooled (60 dots per three-seed method, 20 per
+  single-seed method).  Black dashes mark method means; the grey dashed
+  line marks chance level (33.3\% for HomeOccupancy, 10\% for
+  CIFAR-10).  Left: HomeOccupancy---in the two collapsed
+  FedAvg/FedProx seeds \emph{all} clients sit at chance, while
+  KD-based and local clients spread around ${\approx}60\%$.
+  Middle/right: MNIST and CIFAR-10---no client collapses; weight
+  sharing lifts every client above the local mean.}
+\label{fig:clientdist}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    xlabels at=edge bottom,
+    ylabels at=edge left,
+    group size=4 by 1,
+    horizontal sep=0.9cm,
+  },
+  width=0.23\textwidth,
+  height=4.2cm,
+]
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize Local}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (0.968,65.23) (0.763,52.07) (1.025,67.03) (0.968,65.23) (0.960,40.07) (0.915,78.31) (0.852,67.06) (1.060,62.67) (0.900,65.23) (0.883,66.74)
+  (1.061,52.58) (1.015,57.66) (0.817,59.17) (1.007,47.60) (0.842,59.96) (1.143,71.14) (1.177,27.82) (0.997,68.61) (1.173,60.90) (0.790,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize FedAvg seed 1}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (1.003,65.23) (0.783,52.07) (0.964,67.03) (0.798,65.23) (0.814,40.07) (1.048,78.31) (0.863,67.06) (0.803,62.67) (0.860,65.23) (0.925,66.74)
+  (0.984,52.58) (0.851,57.66) (1.070,59.17) (0.992,47.60) (1.003,59.96) (0.943,71.14) (1.147,27.82) (1.040,68.61) (0.831,60.90) (1.100,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {
+  (2.232,32.61) (2.000,32.61) (2.195,32.61) (1.921,32.61) (2.034,32.61) (1.964,33.91) (1.968,34.77) (2.138,34.77) (2.018,32.61) (2.227,32.61)
+  (2.022,32.61) (1.791,34.77) (1.933,36.54) (2.175,32.61) (1.953,34.77) (1.764,32.61) (1.874,34.77) (1.784,32.61) (2.247,32.61) (2.235,32.61)};
+\addplot[black, thick, forget plot] coordinates {(1.7,33.41) (2.3,33.41)};
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize FedAvg seed 2}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (1.150,65.23) (1.051,52.07) (1.132,67.03) (0.835,65.23) (0.897,40.07) (1.012,78.31) (0.928,67.06) (0.773,62.67) (1.242,65.23) (0.971,66.74)
+  (1.002,52.58) (0.912,57.66) (0.880,59.17) (0.943,47.60) (1.166,59.96) (1.118,71.14) (0.940,27.82) (0.757,68.61) (1.149,60.90) (0.885,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {
+  (2.041,65.23) (1.763,65.23) (2.081,73.59) (1.944,90.88) (1.999,87.75) (1.957,39.03) (1.925,84.32) (2.025,88.97) (2.236,76.86) (1.806,34.77)
+  (1.907,80.40) (1.771,68.00) (2.119,65.26) (2.079,66.34) (1.857,54.88) (1.958,67.32) (2.072,65.33) (2.081,66.49) (1.835,87.82) (2.191,70.70)};
+\addplot[black, thick, forget plot] coordinates {(1.7,69.96) (2.3,69.96)};
+\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={Local,FedAvg},
+  x tick label style={font=\tiny},
+  title={\footnotesize FedAvg seed 3}, title style={yshift=-2pt},
+  ylabel={Val.\ Acc.\ (\%)}, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny}]
+\addplot[clGray, dashed, forget plot] coordinates {(0.4,33.3) (2.6,33.3)};
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {
+  (1.139,65.23) (0.817,52.07) (1.184,67.03) (1.124,65.23) (1.149,40.07) (1.022,78.31) (0.860,67.06) (1.209,62.67) (1.046,65.23) (0.923,66.74)
+  (0.882,52.58) (1.207,57.66) (0.960,59.17) (1.020,47.60) (1.054,59.96) (1.163,71.14) (1.062,27.82) (0.838,68.61) (1.046,60.90) (0.995,67.28)};
+\addplot[black, thick, forget plot] coordinates {(0.7,60.12) (1.3,60.12)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {
+  (2.024,32.61) (2.100,36.43) (1.873,32.72) (1.843,32.68) (1.805,34.77) (1.887,32.61) (1.755,34.85) (2.065,34.77) (1.898,64.97) (1.844,44.65)
+  (1.798,32.61) (1.892,32.61) (1.857,34.77) (1.893,32.61) (1.986,38.85) (2.025,39.14) (2.173,43.46) (2.244,39.06) (1.774,52.18) (1.866,40.79)};
+\addplot[black, thick, forget plot] coordinates {(1.7,38.36) (2.3,38.36)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{HomeOccupancy non-IID, per-client final accuracy by seed
+  (each client's model evaluated after its local update).
+  Grey dots (identical in every panel) are the Local-only clients;
+  purple dots are FedAvg clients in seeds 1--3.  In seeds 1 and 3
+  \emph{every} FedAvg client sits at chance (33.3\%)---the shared
+  model collapses collectively---while seed 2 retains a healthy
+  spread comparable to Local.}
+\label{fig:clientseeds}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
     group size=2 by 1,
-    horizontal sep=1.2cm,
+    horizontal sep=1.5cm,
+  },
+  width=0.44\textwidth,
+  height=4.6cm,
+]
+\nextgroupplot[xlabel={Dominant-class share (\%)},
+  ylabel={Val.\ Acc.\ (\%)},
+  xmin=30, xmax=105, ymin=20, ymax=95, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny},
+  legend style={font=\tiny, at={(0.03,0.97)}, anchor=north west,
+    draw=none, fill=none}]
+\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.6] coordinates {
+  (76.9,65.23) (75.0,52.07) (56.0,67.03) (94.1,65.23) (87.2,40.07) (54.4,78.31) (59.6,67.06) (74.0,62.67) (70.5,65.23) (52.4,66.74) (96.6,52.58) (64.3,57.66)
+  (47.9,59.17) (72.8,47.60) (59.1,59.96) (50.0,71.14) (66.7,27.82) (66.7,68.61) (94.1,60.90) (56.2,67.28)};
+\addlegendentry{Local}
+\addplot[only marks, mark=*, mark size=0.9pt, clBlue, opacity=0.6] coordinates {
+  (76.9,65.23) (75.0,52.07) (56.0,65.23) (94.1,65.23) (87.2,64.97) (54.4,52.22) (59.6,65.51) (74.0,73.37) (70.5,65.23) (52.4,70.27) (96.6,53.05) (64.3,72.61)
+  (47.9,78.31) (72.8,57.15) (59.1,51.60) (50.0,71.57) (66.7,41.44) (66.7,66.02) (94.1,65.23) (56.2,66.99)};
+\addlegendentry{FedMD}
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6] coordinates {
+  (76.9,32.61) (75.0,32.61) (56.0,32.61) (94.1,32.61) (87.2,32.61) (54.4,33.91) (59.6,34.77) (74.0,34.77) (70.5,32.61) (52.4,32.61) (96.6,32.61) (64.3,34.77)
+  (47.9,36.54) (72.8,32.61) (59.1,34.77) (50.0,32.61) (66.7,34.77) (66.7,32.61) (94.1,32.61) (56.2,32.61) (71.6,65.23) (51.5,65.23) (100.0,73.59) (42.3,90.88)
+  (52.1,87.75) (50.0,39.03) (63.2,84.32) (58.3,88.97) (85.7,76.86) (96.6,34.77) (57.5,80.40) (95.8,68.00) (56.7,65.26) (90.3,66.34) (88.9,54.88) (68.4,67.32)
+  (53.8,65.33) (63.6,66.49) (84.8,87.82) (53.8,70.70) (78.0,32.61) (42.4,36.43) (77.3,32.72) (62.7,32.68) (66.7,34.77) (58.3,32.61) (64.3,34.85) (50.9,34.77)
+  (51.2,64.97) (74.1,44.65) (100.0,32.61) (77.8,32.61) (57.3,34.77) (78.1,32.61) (44.3,38.85) (42.9,39.14) (57.1,43.46) (59.5,39.06) (54.4,52.18) (44.0,40.79)};
+\addlegendentry{FedAvg}
+\addplot[clGray, dashed, forget plot] coordinates {(30,33.3) (105,33.3)};
+\nextgroupplot[xmode=log,
+  xlabel={Samples per client}, ylabel={Dominant-class share (\%)},
+  xmin=8, xmax=9000, ymin=15, ymax=105, grid=major,
+  grid style={gray!18, line width=0.3pt},
+  tick label style={font=\tiny}, label style={font=\tiny},
+  legend style={font=\tiny, at={(0.97,0.03)}, anchor=south east,
+    draw=none, fill=none}]
+\addplot[only marks, mark=*, mark size=0.9pt, clRed, opacity=0.55] coordinates {
+  (13,76.9) (12,75.0) (25,56.0) (17,94.1) (47,87.2) (103,54.4) (52,59.6) (73,74.0) (88,70.5) (21,52.4) (203,96.6) (28,64.3)
+  (71,47.9) (136,72.8) (22,59.1) (74,50.0) (21,66.7) (9,66.7) (17,94.1) (16,56.2) (109,71.6) (68,51.5) (1,100.0) (52,42.3)
+  (48,52.1) (36,50.0) (38,63.2) (84,58.3) (14,85.7) (29,96.6) (214,57.5) (24,95.8) (30,56.7) (93,90.3) (54,88.9) (38,68.4)
+  (13,53.8) (11,63.6) (79,84.8) (13,53.8) (91,78.0) (33,42.4) (44,77.3) (51,62.7) (6,66.7) (24,58.3) (14,64.3) (57,50.9)
+  (80,51.2) (139,74.1) (32,100.0) (18,77.8) (82,57.3) (64,78.1) (88,44.3) (7,42.9) (7,57.1) (79,59.5) (57,54.4) (75,44.0)};
+\addlegendentry{HomeOcc (3 cls)}
+\addplot[only marks, mark=*, mark size=2.2pt, clRed!45!black, forget plot] coordinates {(36,66.7)};
+\addplot[only marks, mark=*, mark size=0.9pt, clBlue, opacity=0.55] coordinates {
+  (1734,31.9) (2154,46.7) (2590,29.6) (4453,34.3) (2361,60.3) (3880,23.9) (3936,26.0) (1574,27.4) (837,33.0) (1494,28.2) (2163,34.1) (1412,44.4)
+  (5429,32.6) (3457,34.1) (1519,55.6) (4998,39.3) (3250,52.4) (3988,31.5) (2830,35.4) (5941,45.8) (1886,37.6) (2320,47.8) (3390,31.6) (4628,44.2)
+  (3262,24.2) (2456,30.5) (2180,41.5) (353,30.6) (2733,39.2) (2126,36.3) (7219,27.7) (2212,40.3) (3325,27.9) (3322,24.5) (1182,69.0) (2632,42.9)
+  (6854,29.3) (2590,40.2) (1798,60.4) (3532,34.3) (3065,59.9) (1999,27.4) (1964,40.8) (3738,50.6) (4183,35.2) (2428,28.2) (2858,39.8) (3334,44.2)
+  (1786,60.2) (4959,57.4) (2139,42.2) (2555,30.2) (4771,35.0) (1405,17.5) (1684,39.5) (2486,39.7) (4484,39.1) (3638,26.6) (3832,28.7) (2692,41.9)};
+\addlegendentry{MNIST (10 cls)}
+\addplot[only marks, mark=*, mark size=2.2pt, clBlue!45!black, forget plot] coordinates {(2675,38.2)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOlive, opacity=0.55] coordinates {
+  (2454,48.0) (825,26.8) (2503,35.8) (2856,22.6) (1365,37.1) (2583,25.9) (3377,33.7) (3062,34.3) (1958,44.9) (3054,51.4) (3150,25.4) (1431,36.1)
+  (5115,49.6) (2105,36.2) (4413,37.4) (1144,27.8) (1450,65.5) (2364,66.0) (1066,43.9) (3725,37.8) (1328,73.1) (2158,65.5) (2674,28.8) (4186,57.3)
+  (2281,33.4) (1626,34.9) (2534,33.5) (2820,56.7) (7374,37.4) (3470,40.7) (2046,45.7) (1665,34.5) (1948,31.9) (2703,45.4) (3835,24.7) (2826,29.9)
+  (1352,32.5) (1168,22.6) (716,52.9) (1290,45.9) (1799,29.0) (2467,39.4) (3319,46.2) (3184,40.8) (1468,34.5) (3041,27.0) (1370,55.6) (1880,24.2)
+  (2167,31.5) (2950,57.7) (4214,22.7) (3315,31.3) (2542,39.6) (2363,47.0) (2090,30.2) (1899,16.2) (3388,35.1) (1618,41.0) (2883,31.0) (2043,40.6)};
+\addlegendentry{CIFAR-10 (10 cls)}
+\addplot[only marks, mark=*, mark size=2.2pt, clOlive!45!black, forget plot] coordinates {(2272,38.9)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Data distribution decides per-client accuracy.
+  (a)~HomeOccupancy non-IID: each client's final accuracy vs.\ the
+  dominant-class share of its Dirichlet partition.  Local and FedMD
+  accuracies degrade as the partition approaches a single class
+  ($r{=}{-}0.36$ for Local); FedAvg clients in the two collapsed
+  seeds sit at chance at \emph{every} share---collapse is a global
+  property of the averaged model, not of any client's data.
+  (b)~Per-client partitions of all benchmarks in the
+  (samples, dominant-share) plane (all seeds pooled; large dots mark
+  dataset means).  HomeOccupancy occupies the high-skew/low-data
+  corner---the regime where weight averaging can collapse---while
+  MNIST and CIFAR-10 clients hold ${\approx}60{\times}$ more
+  samples at lower dominant shares.}
+\label{fig:partition}
+\end{figure*}
+
+\begin{table*}[t]
+\centering\small
+\caption{Final validation accuracy (\%): mean of the last five rounds,
+  averaged over completed seeds ($\pm$ std.\ dev.\ where more than one
+  seed completed).  ``--'' marks settings without a completed run.
+  Corresponds to Figs.~\ref{fig:mainiid} and~\ref{fig:mainnoniid}.}
+\label{tab:mainscores}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& \multicolumn{3}{c}{\textbf{IID}} & \multicolumn{3}{c}{\textbf{non-IID}}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+\textbf{Algorithm} & \textbf{HomeOcc.} & \textbf{MNIST} & \textbf{CIFAR-10}
+  & \textbf{HomeOcc.} & \textbf{MNIST} & \textbf{CIFAR-10}\\
+\midrule
+Central & 91.7$\pm$0.8 & 99.0$\pm$0.0 & 67.2$\pm$0.5 & 92.6 & 99.3$\pm$0.0 & 75.2$\pm$0.1 \\
+FedMD & 88.5 & 95.8$\pm$0.0 & 40.8$\pm$0.3 & 63.2 & 84.8$\pm$0.9 & 34.8$\pm$1.9 \\
+FedAKD & 87.0 & 95.9$\pm$0.1 & 41.0$\pm$0.3 & 61.0 & 85.2$\pm$1.0 & 35.2$\pm$1.7 \\
+FedMKS & 90.4 & 97.5$\pm$0.1 & 51.9$\pm$0.4 & 53.8 & 97.3$\pm$0.3 & 46.1$\pm$1.5 \\
+FedAvg & 90.3$\pm$0.6 & 97.0$\pm$0.1 & 53.3$\pm$0.9 & 47.2$\pm$16.2 & 97.6$\pm$0.2 & 47.0$\pm$1.6 \\
+FedProx & 88.8$\pm$0.5 & 97.1$\pm$0.1 & 52.1$\pm$1.8 & 43.2$\pm$13.7 & 97.4$\pm$0.2 & 47.3$\pm$0.8 \\
+Local & 81.4$\pm$1.0 & 95.8$\pm$0.1 & 40.9$\pm$0.2 & 60.1 & 85.4$\pm$1.0 & 35.1$\pm$1.7 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\textbf{HomeOccupancy.}
+Under IID, FedMKS (90.4\%) and FedAvg (90.3\%) approach the centralised
+ceiling (91.7\%), while FedMD (88.5\%) and FedAKD (87.0\%) lag without
+weight sharing; Local plateaus at 81.4\%.  Under non-IID, the
+weight-sharing methods (FedAvg 47.2\%, FedProx 43.2\%) trail
+local-only training (60.1\%), whereas the soft-label channel
+sustains 63.2\% (FedMD) and 61.0\% (FedAKD)---at or above local
+training---and the hybrid FedMKS reaches 53.8\%, still above both
+weight-sharing methods.  The gap is not graceful degradation:
+in two of three seeds the averaged model converges to a single-class
+predictor (validation accuracy ${\approx}33\%$, the test majority
+share) within the first round and never recovers.  With only
+${\approx}90$ samples per client, most local datasets are dominated by
+one class, so each round's local optimum is a majority-class predictor;
+averaging twenty incompatible single-class models keeps the global
+model in that basin, and skewed local updates cannot escape it.
+FedProx's proximal term does not help---it anchors clients to the
+already-collapsed global model.
+
+\paragraph{Per-client view.}
+Fig.~\ref{fig:clientdist} resolves this asymmetry at client granularity.
+Local-only clients are heterogeneous---most reach $50$--$78\%$ while a
+few sit near chance---and average 60.1\%.  This spread is a partition
+effect, not an architecture effect (all local clients share the
+small-tier model): replaying the seeded Dirichlet draw shows the best
+client (78.3\%) holds a mid-sized two-class partition (103 samples, 54\%
+dominant-class share), while the worst (27.8\%) has only 21 samples,
+67\% dominated by one class; dominant-class share correlates with local
+accuracy at $r{=}{-}0.36$.  The KD-based methods'
+\emph{global} accuracy matches that local mean almost exactly (FedMD
+63.2\%, FedAKD 61.0\%), and the per-client spread is preserved as well:
+each client keeps its own model, so the shared soft labels act as a
+regulariser rather than replacing the local solution.  Weight sharing behaves
+qualitatively differently because every client evaluates the \emph{same}
+averaged model: in the two failed seeds all twenty clients sit at
+${\approx}33\%$ together, while in the surviving seed clients average
+70.0\% after their local updates and only two fall below 40\%.  Weight averaging
+therefore does not interpolate between strong and weak local models; it
+produces a single global model whose fate is sealed by whether the
+first-round average escapes the majority-class basin, which in turn
+depends on how many clients' local minima are dominated by compatible
+classes.  FedMKS lies between the extremes: its small-tier cluster is
+dragged to $35$--$48\%$ by intra-tier averaging while the medium and
+large tiers remain healthy, yielding 53.8\%.  On MNIST, where every
+local client exceeds 58\%, the same mechanism is harmless---the shared
+model (97.6\%) lifts \emph{all} clients above the local mean (85.4\%).
+Client drift is thus fatal only when local models are both weak and
+mutually incompatible, which is precisely the regime where the
+distillation channel earns its keep.
+Fig.~\ref{fig:clientseeds} shows the same effect per seed: in the two
+failed seeds every FedAvg client sits at chance, while the surviving
+seed mirrors the Local spread.
+
+\textbf{MNIST.}
+IID: Central 99.0\%, FedMKS 97.5\%, FedAvg/FedProx 97.0\%/97.1\%,
+FedMD/FedAKD/Local ${\approx}95.8\%$.  Non-IID: FedAvg 97.6\%, FedProx
+97.4\%, FedMKS 97.3\%, while FedMD/FedAKD/Local plateau at
+${\approx}85\%$---${\approx}12$ points below the all-small weight-sharing
+methods despite their larger architectures.
+
+\textbf{CIFAR-10.}
+Cross-domain public data (MNIST) gives little signal: all FL methods fall
+$10$--$30\%$ below centralised.  FedAvg (53.3\%) edges FedProx (52.1\%)
+and FedMKS (51.9\%) under IID; under non-IID the three are close
+(FedProx 47.3\%, FedAvg 47.0\%, FedMKS 46.1\%).  KD-only methods
+(FedMD 34.8\%, FedAKD 35.2\%) remain at Local level (35.1\%).
+
+\paragraph{Key observation.}
+Under non-IID, the better channel depends on the public--private domain
+match: on HomeOccupancy, soft-label distillation (FedMD 63.2\%, FedAKD
+61.0\%) beats smallest-model weight sharing (47.2\%), while on the
+image benchmarks weight sharing dominates (MNIST: ${\approx}97\%$ vs.\
+${\approx}85\%$).  FedMKS (53.8\%) sits between the two channels on
+HomeOccupancy---its intra-tier averaging inherits part of the drift
+penalty---but remains the only method that is competitive on both sides
+of the domain-match divide.
+
+\paragraph{What decides performance?}
+Three candidate factors emerge from our results, and they are not equal.
+(i)~\emph{Seed randomness}: under non-IID the partition draw alone
+decides whether weight averaging retains or destroys local
+structure---two of three seeds collapse, one survives
+(Fig.~\ref{fig:clientseeds}).  (ii)~\emph{Model capacity}: within every
+tier distribution the per-tier means differ by only a few points
+(Fig.~\ref{fig:tierablation}), so capacity is a second-order factor
+under soft-label sharing.  (iii)~\emph{Data distribution}: the dominant
+factor.  Fig.~\ref{fig:partition}(a) ties each client's accuracy to the
+dominant-class share of its partition ($r{=}{-}0.36$ for Local), and
+Fig.~\ref{fig:partition}(b) shows why the benchmarks behave so
+differently: HomeOccupancy clients sit in the high-skew/low-data corner
+(${\approx}52$ samples, ${\approx}65\%$ dominant share on average),
+where a single class can dominate both the local optimum and the first
+global average, while MNIST/CIFAR-10 clients hold
+${\approx}60{\times}$ more samples at lower shares.  How much data, and
+how balanced, is \emph{enough} for a given task difficulty is the
+natural next question (Sec.~\ref{sec:limitations}).
+
+\subsubsection{Ablation Studies}
+
+\paragraph{Tier heterogeneity.}
+Fig.~\ref{fig:tierablation} ablates the tier distribution for FedMD on
+HomeOccupancy.  Under IID all configurations converge to
+${\approx}86\%$; under non-IID \texttt{uniform} (61.5\%) beats
+\texttt{all\_small} (59.0\%) and \texttt{skewed} (58.8\%)---small-dominated
+tiers underperform a balanced mix under label skew.  The client-level
+panels show why the gap is small: within every configuration the tier
+means differ by only a few points, so per-client accuracy under
+soft-label sharing is governed by the data partition rather than model
+capacity.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    xlabels at=edge bottom,
+    ylabels at=edge left,
+    group size=2 by 2,
+    horizontal sep=1.3cm,
+    vertical sep=1.1cm,
   },
   p1panel,
   width=0.42\textwidth,
+  height=3.6cm,
 ]
-\nextgroupplot[ymin=30, ymax=95,
+\nextgroupplot[ymin=25, ymax=95,
   legend to name=legendPtwo,
   legend style={legend columns=3, font=\tiny}]
+\addplot[draw=none, fill=clOrange!15, forget plot] coordinates {
+  (1,40.90) (2,28.96) (3,36.13) (4,58.18) (5,56.23) (6,54.56) (7,56.72) (8,62.56) (9,62.41) (10,66.83)
+  (11,64.12) (12,65.74) (13,68.76) (14,70.63) (15,69.34) (16,71.87) (17,74.38) (18,74.43) (19,74.03) (20,77.99)
+  (21,77.14) (22,76.81) (23,76.36) (24,79.05) (25,76.15) (26,77.91) (27,78.13) (28,78.77) (29,77.71) (30,80.16)
+  (31,79.32) (32,79.31) (33,82.44) (34,80.36) (35,82.61) (36,82.95) (37,81.38) (38,83.22) (39,83.41) (40,84.00)
+  (41,85.19) (42,84.59) (43,84.85) (44,85.14) (45,85.27) (46,85.77) (47,85.83) (48,85.25) (49,85.43) (50,85.51)
+  (50,87.88) (49,86.55) (48,87.59) (47,88.24) (46,87.75) (45,88.14) (44,87.82) (43,88.00) (42,87.97) (41,87.70)
+  (40,88.25) (39,88.68) (38,88.48) (37,87.83) (36,88.31) (35,89.01) (34,89.32) (33,88.06) (32,88.42) (31,88.21)
+  (30,88.84) (29,88.90) (28,87.81) (27,88.64) (26,89.19) (25,87.23) (24,89.37) (23,89.34) (22,88.91) (21,89.02)
+  (20,89.55) (19,87.40) (18,88.41) (17,88.02) (16,87.86) (15,87.21) (14,87.95) (13,87.31) (12,85.57) (11,85.37)
+  (10,81.98) (9,82.09) (8,75.95) (7,63.83) (6,62.77) (5,64.41) (4,61.90) (3,53.99) (2,40.29) (1,42.74)};
+\addplot[draw=none, fill=clBlue!15, forget plot] coordinates {
+  (1,36.86) (2,37.54) (3,48.19) (4,48.87) (5,53.70) (6,55.72) (7,59.87) (8,60.45) (9,65.36) (10,70.04)
+  (11,72.23) (12,73.18) (13,73.95) (14,73.81) (15,76.86) (16,77.98) (17,78.05) (18,79.32) (19,81.17) (20,82.50)
+  (21,83.15) (22,84.55) (23,85.75) (24,87.22) (25,86.77) (26,87.09) (27,86.74) (28,86.52) (29,86.73) (30,86.41)
+  (31,86.52) (32,86.98) (33,86.05) (34,86.76) (35,86.36) (36,85.87) (37,86.37) (38,85.96) (39,86.14) (40,86.68)
+  (41,86.95) (42,86.69) (43,86.95) (44,86.91) (45,86.73) (46,87.20) (47,86.68) (48,86.98) (49,84.41) (50,84.94)
+  (50,87.23) (49,87.32) (48,87.45) (47,87.43) (46,87.49) (45,87.49) (44,87.46) (43,87.51) (42,86.95) (41,87.89)
+  (40,87.53) (39,87.50) (38,87.09) (37,87.29) (36,87.32) (35,86.90) (34,87.12) (33,87.97) (32,87.26) (31,86.93)
+  (30,88.15) (29,87.93) (28,88.57) (27,88.11) (26,88.06) (25,87.14) (24,88.78) (23,89.14) (22,88.55) (21,88.33)
+  (20,87.77) (19,86.18) (18,85.64) (17,82.38) (16,79.41) (15,78.33) (14,77.93) (13,75.77) (12,73.77) (11,73.46)
+  (10,70.30) (9,69.16) (8,67.05) (7,63.14) (6,64.42) (5,59.44) (4,50.62) (3,52.49) (2,41.42) (1,38.56)};
+\addplot[draw=none, fill=clGreen!15, forget plot] coordinates {
+  (1,40.17) (2,39.32) (3,53.55) (4,54.89) (5,62.95) (6,66.73) (7,67.22) (8,67.20) (9,71.35) (10,69.10)
+  (11,72.63) (12,72.30) (13,75.31) (14,75.24) (15,75.90) (16,78.58) (17,76.50) (18,79.14) (19,80.77) (20,80.73)
+  (21,80.64) (22,82.05) (23,81.77) (24,80.62) (25,81.96) (26,83.12) (27,81.91) (28,82.94) (29,83.50) (30,83.53)
+  (31,82.95) (32,84.94) (33,83.88) (34,84.03) (35,84.62) (36,84.77) (37,85.28) (38,84.45) (39,83.92) (40,84.37)
+  (41,84.62) (42,84.40) (43,84.34) (44,84.89) (45,85.49) (46,83.87) (47,84.81) (48,84.31) (49,83.96) (50,86.09)
+  (50,87.32) (49,86.66) (48,86.92) (47,87.38) (46,87.00) (45,86.40) (44,86.66) (43,86.99) (42,86.40) (41,87.06)
+  (40,87.61) (39,87.48) (38,87.82) (37,86.49) (36,87.98) (35,87.32) (34,87.86) (33,87.92) (32,86.57) (31,86.39)
+  (30,87.34) (29,86.14) (28,86.43) (27,86.46) (26,86.37) (25,85.42) (24,85.79) (23,84.84) (22,83.72) (21,81.75)
+  (20,84.17) (19,82.15) (18,80.95) (17,81.60) (16,81.88) (15,79.23) (14,78.82) (13,77.95) (12,78.32) (11,73.25)
+  (10,71.62) (9,72.71) (8,69.59) (7,69.12) (6,67.57) (5,65.66) (4,58.65) (3,55.42) (2,44.66) (1,41.68)};
 \addplot[clOrange] coordinates {
   (1,41.55) (2,36.48) (3,47.35) (4,59.50) (5,59.88) (6,59.51) (7,59.48) (8,67.32) (9,71.36) (10,73.32)
   (11,75.65) (12,76.59) (13,79.61) (14,81.60) (15,80.04) (16,81.49) (17,83.15) (18,83.54) (19,82.60) (20,84.71)
@@ -928,7 +2098,29 @@ tiers underperform a balanced mix under label skew.
   (31,84.67) (32,85.75) (33,85.90) (34,85.95) (35,85.97) (36,86.37) (37,85.88) (38,86.14) (39,85.70) (40,85.99)
   (41,85.84) (42,85.40) (43,85.67) (44,85.77) (45,85.94) (46,85.44) (47,86.09) (48,85.61) (49,85.31) (50,86.70)};
 \addlegendentry{Skewed}
-\nextgroupplot[ymin=30, ymax=70,]
+\nextgroupplot[ymin=25, ymax=95]
+\addplot[draw=none, fill=clOrange!15, forget plot] coordinates {
+  (1,33.15) (2,33.26) (3,33.27) (4,33.26) (5,33.26) (6,33.48) (7,34.22) (8,34.89) (9,34.75) (10,34.24)
+  (11,35.86) (12,37.02) (13,35.87) (14,35.86) (15,36.35) (16,37.50) (17,37.84) (18,39.05) (19,39.26) (20,38.90)
+  (21,40.62) (22,43.31) (23,44.30) (24,44.55) (25,44.77) (26,45.56) (27,46.39) (28,46.19) (29,45.85) (30,46.85)
+  (31,46.95) (32,47.10) (33,48.49) (34,48.31) (35,48.76) (36,49.57) (37,49.77) (38,51.77) (39,53.53) (40,53.46)
+  (41,54.26) (42,54.34) (43,55.00) (44,55.32) (45,55.77) (46,56.06) (47,55.49) (48,57.02) (49,56.16) (50,56.05)
+  (50,61.37) (49,60.43) (48,61.05) (47,61.65) (46,60.03) (45,60.99) (44,60.50) (43,60.86) (42,60.46) (41,60.50)
+  (40,60.14) (39,58.38) (38,58.42) (37,58.32) (36,58.07) (35,57.32) (34,56.97) (33,56.86) (32,55.23) (31,55.90)
+  (30,53.76) (29,53.28) (28,54.24) (27,52.47) (26,52.03) (25,51.70) (24,51.07) (23,49.81) (22,49.04) (21,48.32)
+  (20,45.56) (19,44.74) (18,44.32) (17,43.50) (16,43.11) (15,43.11) (14,42.63) (13,42.50) (12,42.66) (11,40.12)
+  (10,38.96) (9,38.77) (8,38.72) (7,37.09) (6,36.54) (5,34.68) (4,33.29) (3,33.45) (2,34.58) (1,33.79)};
+\addplot[draw=none, fill=clBlue!15, forget plot] coordinates {
+  (1,32.78) (2,33.00) (3,33.25) (4,33.26) (5,33.16) (6,34.06) (7,35.24) (8,36.14) (9,37.33) (10,37.44)
+  (11,39.37) (12,40.60) (13,42.00) (14,43.68) (15,45.54) (16,45.27) (17,46.12) (18,48.35) (19,49.50) (20,50.84)
+  (21,51.58) (22,51.50) (23,54.41) (24,54.82) (25,54.94) (26,56.46) (27,56.25) (28,56.61) (29,57.05) (30,57.38)
+  (31,57.81) (32,59.57) (33,58.94) (34,58.91) (35,60.14) (36,59.15) (37,58.91) (38,60.41) (39,60.98) (40,61.50)
+  (41,59.71) (42,62.36) (43,60.85) (44,60.98) (45,60.77) (46,59.52) (47,60.64) (48,61.11) (49,61.26) (50,60.95)
+  (50,61.95) (49,61.71) (48,62.92) (47,61.92) (46,62.60) (45,62.57) (44,62.75) (43,62.77) (42,62.70) (41,62.84)
+  (40,63.09) (39,61.44) (38,62.13) (37,60.92) (36,60.63) (35,61.51) (34,59.87) (33,59.49) (32,60.60) (31,59.32)
+  (30,58.66) (29,59.01) (28,59.42) (27,57.14) (26,58.70) (25,56.21) (24,56.36) (23,54.87) (22,54.17) (21,54.46)
+  (20,54.34) (19,53.94) (18,51.96) (17,51.75) (16,50.94) (15,50.43) (14,48.42) (13,44.82) (12,43.21) (11,42.82)
+  (10,41.20) (9,39.91) (8,38.79) (7,36.36) (6,34.41) (5,33.34) (4,34.85) (3,33.37) (2,33.17) (1,33.26)};
 \addplot[clOrange] coordinates {
   (1,33.51) (2,33.74) (3,33.36) (4,33.27) (5,33.89) (6,34.64) (7,35.89) (8,36.61) (9,37.05) (10,37.14)
   (11,37.92) (12,39.31) (13,38.79) (14,38.91) (15,39.94) (16,40.94) (17,41.24) (18,42.18) (19,42.89) (20,43.09)
@@ -947,15 +2139,128 @@ tiers underperform a balanced mix under label skew.
   (21,45.29) (22,48.26) (23,48.01) (24,48.35) (25,49.10) (26,49.32) (27,48.96) (28,49.22) (29,49.56) (30,52.21)
   (31,52.84) (32,52.42) (33,52.82) (34,54.11) (35,53.95) (36,55.11) (37,53.99) (38,56.31) (39,57.99) (40,58.06)
   (41,58.50) (42,58.05) (43,58.27) (44,59.10) (45,58.67) (46,58.71) (47,58.77) (48,59.14) (49,58.58) (50,58.57)};
+\nextgroupplot[ymin=25, ymax=95, xmin=0.5, xmax=3.5,
+  xtick={1,2,3},
+  xticklabels={\texttt{all\_small},\texttt{uniform},\texttt{skewed}},
+  x tick label style={font=\tiny},
+  legend to name=legendTier,
+  legend style={legend columns=3, font=\tiny},
+  ylabel={Val.\ Acc.\ (\%)}]
+\addplot[only marks, mark=*, mark size=0.9pt, clOrange, opacity=0.6, forget plot] coordinates {
+  (0.985,83.14) (1.040,90.31) (0.910,86.52) (0.964,83.57) (0.936,91.89) (0.927,79.71) (0.944,85.15) (0.972,89.41) (0.981,87.57) (1.007,86.49)
+  (0.985,89.66) (1.033,86.95) (0.947,87.21) (1.068,89.62) (0.915,89.08) (1.031,86.85) (0.985,89.08) (1.011,86.31) (0.935,81.33) (0.946,88.36)
+  (1.054,86.13) (1.084,92.47) (0.966,86.09) (1.035,90.45) (1.068,93.15) (1.071,69.91) (0.925,89.37) (0.917,80.86) (0.941,81.91) (1.068,85.87)
+  (0.928,73.87) (0.986,87.21) (1.082,88.07) (1.006,90.38) (1.035,82.16) (0.967,87.17) (1.034,92.22) (1.060,90.13) (0.913,83.57) (1.045,80.22)
+  (1.088,80.86) (1.045,82.34) (0.960,80.14) (1.052,87.21) (0.929,86.20) (0.991,90.16) (1.074,89.41) (0.963,89.19) (0.962,88.72) (0.933,91.68)
+  (0.913,86.05) (1.032,90.63) (0.948,85.19) (0.958,88.07) (0.998,90.05) (0.920,92.32) (1.013,91.39) (0.936,85.66) (1.016,87.32) (1.036,88.32)};
+\addplot[clOrange!55!black, thick, forget plot] coordinates {(0.88,86.67) (1.12,86.67)};
+\addplot[black, thick, forget plot] coordinates {(0.68,86.67) (1.32,86.67)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOrange, opacity=0.6, forget plot] coordinates {
+  (1.668,88.04) (1.725,89.84) (1.775,91.93) (1.725,84.86) (1.659,91.78) (1.746,91.50) (1.769,86.09) (1.743,92.50) (1.820,93.44) (1.756,84.22)
+  (1.813,92.04) (1.675,92.43) (1.675,87.75) (1.795,89.95)};
+\addplot[clOrange!55!black, thick, forget plot] coordinates {(1.62,89.74) (1.8599999999999999,89.74)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (1.982,86.85) (1.940,86.59) (2.077,81.59) (1.973,83.24) (2.045,66.88) (2.041,87.46) (2.069,87.32) (2.022,83.28) (2.045,77.12) (1.973,86.13)
+  (1.959,83.86) (2.071,90.77) (1.987,86.59) (2.084,85.37)};
+\addplot[clTeal!55!black, thick, forget plot] coordinates {(1.88,83.79) (2.12,83.79)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (2.289,85.55) (2.282,90.77) (2.191,86.02) (2.341,89.51) (2.251,84.68) (2.274,83.39) (2.243,84.54) (2.213,89.30) (2.333,87.60) (2.273,86.02)
+  (2.171,87.68) (2.281,84.07)};
+\addplot[clPurple!55!black, thick, forget plot] coordinates {(2.1399999999999997,86.59) (2.38,86.59)};
+\addplot[black, thick, forget plot] coordinates {(1.6800000000000002,86.71) (2.3200000000000003,86.71)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOrange, opacity=0.6, forget plot] coordinates {
+  (2.709,84.47) (2.745,89.98) (2.809,90.59) (2.714,85.23) (2.814,87.86) (2.762,87.60) (2.653,84.29) (2.817,88.94) (2.774,88.04) (2.830,86.70)
+  (2.681,91.53) (2.675,91.93) (2.818,86.70) (2.775,92.32) (2.662,82.56) (2.786,89.55) (2.786,90.95) (2.816,69.95) (2.778,90.63) (2.672,85.41)
+  (2.654,83.53) (2.655,91.71) (2.655,69.66) (2.694,88.40)};
+\addplot[clOrange!55!black, thick, forget plot] coordinates {(2.62,86.61) (2.8600000000000003,86.61)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (3.065,87.32) (3.007,87.42) (3.010,83.68) (3.062,82.56) (2.932,88.29) (2.960,85.23) (3.015,88.68) (3.085,84.65) (3.011,82.85) (2.913,86.23)
+  (3.054,84.18) (2.952,84.94)};
+\addplot[clTeal!55!black, thick, forget plot] coordinates {(2.88,85.50) (3.12,85.50)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (3.315,82.56) (3.240,86.88) (3.325,82.41) (3.304,76.86)};
+\addplot[clPurple!55!black, thick, forget plot] coordinates {(3.1399999999999997,82.18) (3.38,82.18)};
+\addplot[black, thick, forget plot] coordinates {(2.68,85.83) (3.3200000000000003,85.83)};
+\addlegendimage{only marks, mark=*, clOrange}
+\addlegendentry{Small}
+\addlegendimage{only marks, mark=*, clTeal}
+\addlegendentry{Medium}
+\addlegendimage{only marks, mark=*, clPurple}
+\addlegendentry{Large}
+\nextgroupplot[ymin=25, ymax=95, xmin=0.5, xmax=3.5,
+  xtick={1,2,3},
+  xticklabels={\texttt{all\_small},\texttt{uniform},\texttt{skewed}},
+  x tick label style={font=\tiny},
+  ylabel={Val.\ Acc.\ (\%)}]
+\addplot[only marks, mark=*, mark size=0.9pt, clOrange, opacity=0.6, forget plot] coordinates {
+  (0.985,64.54) (1.040,51.82) (0.910,65.23) (0.964,32.61) (0.936,32.61) (0.927,55.32) (0.944,64.54) (0.972,67.39) (0.981,65.23) (1.007,65.23)
+  (0.985,52.07) (1.033,64.22) (0.947,73.41) (1.068,53.91) (0.915,44.25) (1.031,76.72) (0.985,19.46) (1.011,65.55) (0.935,32.61) (0.946,76.40)
+  (1.054,65.23) (1.084,65.23) (0.966,32.61) (1.035,86.09) (1.068,69.87) (1.071,48.94) (0.925,69.62) (0.917,73.12) (0.941,65.23) (1.068,34.77)
+  (0.928,87.10) (0.986,32.61) (1.082,65.23) (1.006,65.23) (1.035,52.07) (0.967,64.54) (1.034,65.23) (1.060,64.65) (0.913,53.69) (1.045,36.14)
+  (1.088,57.87) (1.045,52.07) (0.960,65.23) (1.052,66.95) (0.929,21.37) (0.991,50.31) (1.074,65.30) (0.963,55.24) (0.962,77.95) (0.933,80.90)
+  (0.913,32.61) (1.032,32.61) (0.948,51.64) (0.958,65.23) (0.998,85.62) (0.920,77.69) (1.013,65.87) (0.936,68.50) (1.016,65.23) (1.036,79.68)};
+\addplot[clOrange!55!black, thick, forget plot] coordinates {(0.88,58.97) (1.12,58.97)};
+\addplot[black, thick, forget plot] coordinates {(0.68,58.97) (1.32,58.97)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOrange, opacity=0.6, forget plot] coordinates {
+  (1.668,65.23) (1.725,52.07) (1.775,65.23) (1.725,65.23) (1.659,65.15) (1.746,56.90) (1.769,66.02) (1.743,65.23) (1.820,65.23) (1.756,32.61)
+  (1.813,85.01) (1.675,72.83) (1.675,46.09) (1.795,70.95)};
+\addplot[clOrange!55!black, thick, forget plot] coordinates {(1.62,62.41) (1.8599999999999999,62.41)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (1.982,73.44) (1.940,65.23) (2.077,72.18) (1.973,52.29) (2.045,70.27) (2.041,77.80) (2.069,54.52) (2.022,76.68) (2.045,65.23) (1.973,34.77)
+  (1.959,78.49) (2.071,52.07) (1.987,65.23) (2.084,65.23)};
+\addplot[clTeal!55!black, thick, forget plot] coordinates {(1.88,64.53) (2.12,64.53)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (2.289,49.08) (2.282,72.40) (2.191,22.99) (2.341,66.16) (2.251,65.23) (2.274,65.23) (2.243,56.22) (2.213,52.07) (2.333,65.23) (2.273,65.62)
+  (2.171,52.47) (2.281,48.50)};
+\addplot[clPurple!55!black, thick, forget plot] coordinates {(2.1399999999999997,56.77) (2.38,56.77)};
+\addplot[black, thick, forget plot] coordinates {(1.6800000000000002,61.46) (2.3200000000000003,61.46)};
+\addplot[only marks, mark=*, mark size=0.9pt, clOrange, opacity=0.6, forget plot] coordinates {
+  (2.709,65.23) (2.745,52.00) (2.809,65.23) (2.714,32.61) (2.814,32.61) (2.762,53.19) (2.653,66.20) (2.817,67.03) (2.774,65.23) (2.830,65.19)
+  (2.681,52.07) (2.675,64.68)};
+\addplot[clOrange!55!black, thick, forget plot] coordinates {(2.62,56.77) (2.8600000000000003,56.77)};
+\addplot[only marks, mark=*, mark size=0.9pt, clTeal, opacity=0.6, forget plot] coordinates {
+  (3.078,81.37) (3.035,55.03) (2.922,48.47) (3.046,69.19) (3.046,32.50) (3.076,66.38)};
+\addplot[clTeal!55!black, thick, forget plot] coordinates {(2.88,58.82) (3.12,58.82)};
+\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.6, forget plot] coordinates {
+  (3.298,65.23) (3.192,75.68)};
+\addplot[clPurple!55!black, thick, forget plot] coordinates {(3.1399999999999997,70.45) (3.38,70.45)};
+\addplot[black, thick, forget plot] coordinates {(2.68,58.75) (3.3200000000000003,58.75)};
 \end{groupplot}
 \end{tikzpicture}
 \par\vspace{4pt}
-\ref{legendPtwo}
-\caption{FedMD tier-heterogeneity ablation on HomeOccupancy, IID (left)
-  and non-IID (right): \texttt{all\_small} (100\%~S), \texttt{uniform}
-  (35/35/30), \texttt{skewed} (60/30/10).}
+\ref{legendPtwo}\hspace{1.5em}\ref{legendTier}
+\caption{FedMD tier-heterogeneity ablation on HomeOccupancy.
+  Top: mean validation-accuracy curves over completed seeds (shaded
+  bands: seed range), IID (left) and non-IID (right) on a shared
+  y-axis.  Bottom: per-client final accuracy (mean of the last five
+  rounds, seeds pooled).  Each distribution column is subdivided
+  by architecture tier---small (orange), medium (teal), large
+  (purple)---so tier counts are visible (e.g.\ \texttt{skewed}:
+  12/6/2); short coloured dashes mark tier means, the long black
+  dash the column mean.  Tier means differ by only a few points
+  within every setting: under soft-label sharing, per-client
+  accuracy is governed by the data partition, not by model
+  capacity.}
 \label{fig:tierablation}
 \end{figure*}
+
+\begin{table}[t]
+\centering\small
+\caption{FedMD tier-heterogeneity ablation on HomeOccupancy: final
+  validation accuracy (\%), mean of the last five rounds over completed
+  seeds.  Corresponds to Fig.~\ref{fig:tierablation}.}
+\label{tab:tierscores}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Tier distribution} & \textbf{IID} & \textbf{non-IID}\\
+\midrule
+\texttt{all\_small} & 86.7$\pm$0.8 & 59.0$\pm$2.0 \\
+\texttt{uniform} & 86.7$\pm$0.5 & 61.5$\pm$0.7 \\
+\texttt{skewed} & 85.8$\pm$1.2 & 58.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{FedMKS vs.\ FedDF.}
 Fig.~\ref{fig:feddf} and Table~\ref{tab:efficiency} compare FedMKS and
@@ -967,9 +2272,11 @@ spends ${\approx}243$~s/round on server-side ensemble training, whereas
 FedMKS does essentially no server compute (${\approx}0.06$~s) and
 distributes distillation across parallel clients (${\approx}93$~s vs.\
 ${\approx}25$~s per client).  FedMKS removes the serial server bottleneck
-at ${\approx}22\%$ higher communication (37.9 vs.\ 31.0~MB/round); the whole ${\approx}6.9$~MB overhead is the soft-label exchange
-($|\mathcal{D}^{\text{pub}}|{\times}d$ each way), which FedDF avoids by
-distilling on the server.  The dashed curve in Fig.~\ref{fig:feddf} shows
+at ${\approx}22\%$ higher communication (37.9 vs.\ 31.0~MB/round);
+the whole ${\approx}6.9$~MB overhead is the soft-label
+exchange---$|\mathcal{D}^{\text{pub}}|{\times}d = 1\,375{\times}64$
+floats (${\approx}0.34$~MB) uploaded and broadcast per client per
+round---which FedDF avoids by distilling on the server.  The dashed curve in Fig.~\ref{fig:feddf} shows
 FedMKS with Mixup disabled on the public set: convergence is comparable
 and the final accuracy drops only ${\approx}1$~pp (87.3\% vs.\ 88.2\% at
 round~30), indicating that Mixup yields a modest regularisation benefit
@@ -1076,21 +2383,37 @@ We presented \textbf{FedMKS}, a heterogeneous federated
 knowledge-distillation algorithm for CSI-based indoor sensing that couples
 intra-tier weight sharing with cross-tier soft-label distillation.  FedMKS
 reaches near-centralised accuracy on HomeOccupancy
-($\Delta{\approx}0.5\%$ under IID) while preserving architectural
-heterogeneity, and matches FedDF accuracy (87.1\% vs.\ 89.0\%) while
+($\Delta{\approx}1.3$ points under IID) while preserving architectural
+heterogeneity, and approaches FedDF accuracy (87.1\% vs.\ 89.0\%) while
 eliminating its ${\approx}243$~s/round server bottleneck
 (${\approx}0.06$~s/round) at ${\approx}22\%$ higher communication.
+FedMKS allows heterogeneity; it exceeds model sharing when model sharing
+collapses (HomeOccupancy non-IID), and it follows model sharing when
+model sharing significantly outperforms knowledge distillation (MNIST,
+CIFAR-10).
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section{Limitations and Future Work}
 \label{sec:limitations}
 
-The main comparison uses a single uniform tier distribution; FedMKS also incurs
-higher communication than FedMD, motivating weight compression
-(quantisation, top-$k$).  Cross-domain public data gave little signal on
-CIFAR-10, so domain-adapted or synthetic public sets remain open.
-Finally, HomeSenseKD assumes synchronous rounds; asynchronous aggregation
-under dropouts is an important extension.
+In this study, we did not characterise the impact of
+public--private domain alignment on soft-label distillation.  As Fig.~\ref{fig:mainiid} shows, the soft-label-only algorithms (FedMD, FedAKD) remain competitive
+on HomeOccupancy, where the public HomeHAR pool shares the same CSI
+sensing modality, but degrade to near-local performance on the image
+benchmarks, where the public set is cross-domain
+(MNIST $\leftrightarrow$ CIFAR-10).  A systematic evaluation of KD-based
+algorithms with public datasets whose characteristics match those of the
+private task is needed to quantify this effect.
+Finally, our results suggest that the effectiveness of federated
+averaging is governed by the ratio between task difficulty and the
+quantity and distribution of per-client data
+(Fig.~\ref{fig:partition}(b)); formalising this into a predictive
+difficulty metric---e.g.\ the minimum per-client sample count and
+maximum tolerable dominant-class share for a task of a given
+difficulty---is a promising direction for a future extension of this
+work.
+
+
 
 % â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 \section*{Code and Data Availability}

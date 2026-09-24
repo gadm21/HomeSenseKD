@@ -39,7 +39,7 @@ except ImportError:
 
 from utils import (
     # data
-    load_homeoccupancy, load_homehar, load_mnist, load_cifar10,
+    load_homeoccupancy, load_homehar, load_mnist, load_cifar10, load_cifar100,
     resize_images, prepare_datasets, split_dataset,
     iid_partition, dirichlet_partition,
     # models
@@ -199,6 +199,8 @@ def get_dataset(dc):
         x_tr, y_tr, x_te, y_te = load_mnist()
     elif ds == "cifar10":
         x_tr, y_tr, x_te, y_te = load_cifar10()
+    elif ds == "cifar100":
+        x_tr, y_tr, x_te, y_te = load_cifar100()
     else:
         raise ValueError(f"Unknown dataset: {ds!r}")
 
@@ -217,6 +219,8 @@ def get_dataset(dc):
         pub_x, pub_y, _, _ = load_mnist()
     elif pub_ds == "cifar10":
         pub_x, pub_y, _, _ = load_cifar10()
+    elif pub_ds == "cifar100":
+        pub_x, pub_y, _, _ = load_cifar100()
     else:
         raise ValueError(f"Unknown public_dataset: {pub_ds!r}")
 

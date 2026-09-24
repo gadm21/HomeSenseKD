@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  22 SEP 2026 06:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  24 SEP 2026 10:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -925,20 +925,20 @@ File: tikzlibrarybackgrounds.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ) (paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 92.
+LaTeX Font Info:    ... okay on input line 92.
 
 -- Lines per column: 56 (exact).
 
@@ -970,13 +970,13 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
-LaTeX Info: Redefining \microtypecontext on input line 93.
-Package microtype Info: Applying patch `item' on input line 93.
-Package microtype Info: Applying patch `toc' on input line 93.
-Package microtype Info: Applying patch `eqnum' on input line 93.
-Package microtype Info: Applying patch `footnote' on input line 93.
-Package microtype Info: Applying patch `verbatim' on input line 93.
-LaTeX Info: Redefining \microtypesetup on input line 93.
+LaTeX Info: Redefining \microtypecontext on input line 92.
+Package microtype Info: Applying patch `item' on input line 92.
+Package microtype Info: Applying patch `toc' on input line 92.
+Package microtype Info: Applying patch `eqnum' on input line 92.
+Package microtype Info: Applying patch `footnote' on input line 92.
+Package microtype Info: Applying patch `verbatim' on input line 92.
+LaTeX Info: Redefining \microtypesetup on input line 92.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -990,13 +990,13 @@ Package microtype Info: No adjustment of character kerning.
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-ptm.cfg
 File: mt-ptm.cfg 2006/04/20 v1.7 microtype config. file: Times (RS)
 )
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 94.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 93.
 
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 94.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 93.
 
 
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
@@ -1005,7 +1005,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 94.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 93.
 
 
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
@@ -1014,71 +1014,78 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-<assets/feddf_v2.pdf, id=4, 414.47046pt x 212.54407pt>
-File: assets/feddf_v2.pdf Graphic file (type pdf)
-<use assets/feddf_v2.pdf>
-Package pdftex.def Info: assets/feddf_v2.pdf  used on input line 170.
-(pdftex.def)             Requested size: 255.41748pt x 130.97813pt.
-<assets/fedmks_v2.pdf, id=5, 424.42865pt x 212.54407pt>
-File: assets/fedmks_v2.pdf Graphic file (type pdf)
-<use assets/fedmks_v2.pdf>
-Package pdftex.def Info: assets/fedmks_v2.pdf  used on input line 176.
-(pdftex.def)             Requested size: 255.41748pt x 127.90686pt.
-<assets/FL_literature.png, id=6, 646.05pt x 428.145pt>
-File: assets/FL_literature.png Graphic file (type png)
-<use assets/FL_literature.png>
-Package pdftex.def Info: assets/FL_literature.png  used on input line 199.
-(pdftex.def)             Requested size: 268.3222pt x 177.82059pt.
+LaTeX Font Info:    Trying to load font information for OMS+ptm on input line 2
+79.
 
-[1{C:/Users/ggad/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/gga
-d/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
+(C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsptm.fd
+File: omsptm.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ptm/b/n' in size <5> not available
+(Font)              Font shape `OMS/cmsy/b/n' tried instead on input line 279.
+LaTeX Font Info:    Trying to load font information for U+fontawesomefree3 on i
+nput line 279.
+
+(C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/fontawesome5\ufontawesom
+efree3.fd)
+LaTeX Font Info:    Trying to load font information for U+fontawesomefree0 on i
+nput line 279.
+
+(C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/fontawesome5\ufontawesom
+efree0.fd)
+LaTeX Font Info:    Trying to load font information for U+fontawesomefree2 on i
+nput line 279.
+
+(C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/fontawesome5\ufontawesom
+efree2.fd) [1{C:/Users/ggad/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C
+:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
-] [2 <./assets/feddf_v2.pdf> <./assets/fedmks_v2.pdf> <./assets/FL_literature.p
-ng>]
+]
+[2{C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/fontawesome5/fa5
+free3.enc}{C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/fontawes
+ome5/fa5free0.enc}{C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/
+fontawesome5/fa5free2.enc}]
 
 LaTeX Font Warning: Font shape `OT1/ptm/m/scit' undefined
-(Font)              using `OT1/ptm/m/it' instead on input line 400.
+(Font)              using `OT1/ptm/m/it' instead on input line 657.
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 526--532
-[]\OT1/ptm/b/n/10 (+20) Datasets. \OT1/ptm/m/it/10 (+20) Home-Oc-cu-pancy \OT1/
-ptm/m/n/10 (+20) [22]: 3-class CSI
- []
-
-
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 5
-36.
-
-(C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
-File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-)
-LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 5
-65.
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 8
+29.
 
 (C:\Users\ggad\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
-Underfull \hbox (badness 4391) in paragraph at lines 864--870
-[]\OT1/ptm/b/n/10 (+20) MNIST. \OT1/ptm/m/n/10 (+20) IID: Cen-tral 99.0%, FedMK
-S 97.7%, Fe-
- []
-
-[4]
-Package pgfplots info on input line 1030: Using 'lua backend=false' for axis: y
+Package pgfplots info on input line 1850: Using 'lua backend=false' for axis: x
 mode=log unsupported (yet).
 
-Underfull \hbox (badness 5592) in paragraph at lines 1075--1083
-[]\OT1/ptm/m/n/10 (+20) We pre-sented \OT1/ptm/b/n/10 (+20) FedMKS\OT1/ptm/m/n/
-10 (+20) , a het-ero-ge-neous fed-er-ated
- []
+[4]
+Underfull \vbox (badness 2418) has occurred while \output is active []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- (paper.bbl [5])
+ [5]
+Underfull \hbox (badness 4391) in paragraph at lines 1972--1978
+[]\OT1/ptm/b/n/10 (+20) MNIST. \OT1/ptm/m/n/10 (+20) IID: Cen-tral 99.0%, FedMK
+S 97.5%, Fe-
+ []
+
+
+Underfull \vbox (badness 1838) has occurred while \output is active []
+
+ [6]
+Package pgfplots info on input line 2337: Using 'lua backend=false' for axis: y
+mode=log unsupported (yet).
+
+Underfull \hbox (badness 5592) in paragraph at lines 2382--2394
+[]\OT1/ptm/m/n/10 (+20) We pre-sented \OT1/ptm/b/n/10 (+20) FedMKS\OT1/ptm/m/n/
+10 (+20) , a het-ero-ge-neous fed-er-ated
+ []
+
+(paper.bbl [7] [8])
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -1090,63 +1097,64 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[6] (paper.aux)
+[9
+
+] (paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 34260 strings out of 467871
- 849975 string characters out of 5418861
- 1528173 words of memory out of 5000000
- 62208 multiletter control sequences out of 15000+600000
- 699021 words of font info for 397 fonts, out of 8000000 for 9000
+ 34648 strings out of 467871
+ 857538 string characters out of 5418861
+ 2088449 words of memory out of 5000000
+ 62506 multiletter control sequences out of 15000+600000
+ 707602 words of font info for 454 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,19n,104p,11112b,2403s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,19n,104p,11118b,2493s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/fontawesome5/
 FontAwesome5Free-Solid.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/t
-ype1/public/amsfonts/cm/cmbx10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/amsfonts/cm/cmbx5.pfb><C:/Users/ggad/AppData/Local/Programs
-/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx7.pfb><C:/Users/ggad/AppData/Local/P
-rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/ggad/AppData/
-Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx9.pfb><C:/Users/ggad/A
-ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/User
-s/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex8.
+ype1/public/amsfonts/cmextra/cmbsy5.pfb><C:/Users/ggad/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/ggad/AppData/Local/Pr
+ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/ggad/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx9.pfb><C:/Users/ggad/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users
+/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex7.p
+fb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cme
+xtra/cmex8.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/
+amsfonts/cmextra/cmex9.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmmi10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/ggad/AppData/Local/Programs
+/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/ggad/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/ggad/AppData/
+Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/ggad/A
+ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users
+/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C
+:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.
 pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
-extra/cmex9.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public
-/amsfonts/cm/cmmi10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type
-1/public/amsfonts/cm/cmmi5.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fon
-ts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/ggad/AppData/Local/Programs/MiK
-TeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/ggad/AppData/Local/Progr
-ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/ggad/AppData/Loca
-l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users/ggad/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/gga
-d/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Use
-rs/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><
-C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7
-.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
-m/cmr8.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsf
-onts/cm/cmr9.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/publi
-c/amsfonts/cm/cmsy10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/public/amsfonts/cm/cmsy5.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fo
-nts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/ggad/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/ggad/AppData/Local/Prog
-rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/ggad/AppData/Loc
-al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/ggad/AppD
-ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti7.pfb><C:/Users/gg
-ad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb
-><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbo
-ls/msbm10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/a
-msfonts/symbols/msbm7.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/ty
-pe1/urw/courier/ucrr8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/t
-ype1/urw/times/utmb8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/ty
-pe1/urw/times/utmbi8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/ty
-pe1/urw/times/utmr8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (6 pages, 629414 bytes).
+/cmr6.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmr7.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr8.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/cm/cmr9.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/ggad/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/ggad/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/ggad/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/ggad/
+AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/User
+s/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10
+.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/s
+ymbols/msbm10.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/publ
+ic/amsfonts/symbols/msbm7.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
+s/type1/urw/courier/ucrr8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fon
+ts/type1/urw/times/utmb8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
+s/type1/urw/times/utmbi8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
+s/type1/urw/times/utmr8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts
+/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (9 pages, 659771 bytes).
 PDF statistics:
- 294 PDF objects out of 1000 (max. 8388607)
+ 220 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 85532 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 90637 words of extra memory for PDF output out of 106986 (max. 10000000)
 

@@ -1,0 +1,4 @@
+INCOMPLETE RUN - do not use in paper
+Expected rounds per seed: 40
+Rounds present (min over client CSVs): 96
+Complete seeds: 2; partial remainder: 16 rounds

@@ -1,0 +1,3 @@
+These MNIST runs use n_samples_per_class=30, R=40, E_loc=3, E_kd=2 (old mnist.yaml),
+which does NOT match the paper's Table III image config (n_c=100, R=50, E_loc=5, E_kd=3).
+The paper's MNIST/CIFAR-10 results come from oldresults/phase1 (correct config). Do not use these in the paper.

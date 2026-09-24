@@ -1,0 +1,16 @@
+# CIFAR-10 private + CIFAR-100 public KD pool — same-domain ablation
+# Same configuration as the main image benchmark (Table III):
+#   K=20 clients, R=50 rounds, E_loc=5, E_kd=3, 100 samples/class/client
+data:
+  dataset: cifar10
+  public_dataset: cifar100
+  n_classes: 10
+  n_parties: 20
+  n_samples_per_class: 100
+  img_size: 32
+
+federated:
+  n_rounds: 50
+  local_epochs: 5
+  kd_epochs: 3
+  n_alignment: 10000
