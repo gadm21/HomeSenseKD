@@ -13,8 +13,8 @@
   ylabel={Acc.\ drop vs.\ IID (pts)},
   xmin=30, xmax=105, ymin=-12, ymax=68, grid=major,
   grid style={gray!18, line width=0.3pt},
-  tick label style={font=\tiny}, label style={font=\tiny}
-  , legend to name=legendImb,
+  tick label style={font=\tiny}, label style={font=\tiny},
+  legend to name=legendImb,
   legend style={legend columns=6, font=\tiny}]
 \addplot[only marks, mark=*, mark size=0.8pt, clGray, opacity=0.3, forget plot] coordinates {
   (76.9,16.16) (75.0,29.31) (56.0,14.36) (94.1,16.16) (87.2,41.31) (54.4,3.08) (59.6,14.32) (74.0,18.72) (70.5,16.16) (52.4,14.65) (96.6,28.81) (64.3,23.73)
@@ -49,40 +49,34 @@
 \addplot[black!50, dashed, forget plot] coordinates {(30,0) (105,0)};
 \addplot[black!60, dotted, thick, forget plot] coordinates {(30,56) (105,56)};
 \node[font=\tiny, black!60, anchor=south west] at (rel axis cs:0.02,0.86) {collapsed seeds};
-\nextgroupplot[xlabel={Samples per client},
-  ylabel={Acc.\ drop vs.\ IID (pts)},
-  xmode=log, xmin=8, xmax=300, ymin=-12, ymax=68, grid=major,
+\nextgroupplot[xmode=log, xlabel={Samples per client},
+  xmin=8, xmax=300, ymin=-12, ymax=68, grid=major,
   grid style={gray!18, line width=0.3pt},
-  tick label style={font=\tiny}, label style={font=\tiny}]
-\addplot[only marks, mark=*, mark size=0.8pt, clGray, opacity=0.3, forget plot] coordinates {
-  (13.0,16.16) (12.0,29.31) (25.0,14.36) (17.0,16.16) (47.0,41.31) (103.0,3.08) (52.0,14.32) (73.0,18.72) (88.0,16.16) (21.0,14.65) (203.0,28.81) (28.0,23.73)
-  (71.0,22.21) (136.0,33.78) (22.0,21.42) (74.0,10.25) (21.0,53.56) (9.0,12.77) (17.0,20.48) (16.0,14.11)};
-\addplot[clGray, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,18.17) (28.3,25.54) (56.6,21.36) (113.1,17.67)};
-\addplot[only marks, mark=*, mark size=0.8pt, clBlue, opacity=0.3, forget plot] coordinates {
-  (13.0,21.56) (12.0,34.72) (25.0,21.56) (17.0,21.56) (47.0,21.82) (103.0,34.57) (52.0,21.28) (73.0,13.42) (88.0,21.56) (21.0,16.52) (203.0,33.74) (28.0,14.18)
-  (71.0,8.48) (136.0,29.64) (22.0,35.19) (74.0,15.22) (21.0,45.35) (9.0,20.77) (17.0,21.56) (16.0,19.80)};
-\addplot[clBlue, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,23.33) (28.3,26.56) (56.6,16.04) (113.1,28.59)};
-\addplot[only marks, mark=diamond*, mark size=0.8pt, clTeal, opacity=0.3, forget plot] coordinates {
-  (13.0,21.74) (12.0,34.89) (25.0,21.74) (17.0,29.19) (47.0,39.32) (103.0,29.59) (52.0,21.41) (73.0,15.65) (88.0,21.74) (21.0,19.68) (203.0,33.88) (28.0,15.93)
-  (71.0,14.28) (136.0,30.10) (22.0,33.05) (74.0,16.69) (21.0,57.05) (9.0,20.15) (17.0,21.74) (16.0,20.73)};
-\addplot[clTeal, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,24.74) (28.3,29.49) (56.6,21.47) (113.1,27.14)};
-\addplot[only marks, mark=pentagon*, mark size=0.8pt, clRed, opacity=0.3, forget plot] coordinates {
-  (13.0,43.68) (12.0,55.61) (25.0,42.46) (17.0,54.60) (47.0,51.65) (103.0,44.80) (52.0,55.61) (73.0,23.61) (88.0,25.16) (21.0,10.46) (203.0,38.49) (28.0,23.43)
-  (71.0,18.64) (136.0,42.28) (22.0,55.25) (74.0,16.12) (21.0,55.61) (9.0,25.16) (17.0,25.16) (16.0,23.68)};
-\addplot[clRed, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,37.98) (28.3,37.44) (56.6,33.12) (113.1,37.41)};
-\addplot[only marks, mark=square*, mark size=0.8pt, clPurple, opacity=0.3, forget plot] coordinates {
-  (109.0,25.05) (68.0,25.05) (1.0,16.69) (52.0,-0.61) (48.0,2.52) (36.0,51.24) (38.0,5.95) (84.0,1.30) (14.0,13.41) (29.0,55.50) (214.0,9.87) (24.0,22.27)
-  (30.0,25.01) (93.0,23.93) (54.0,35.39) (38.0,22.96) (13.0,24.94) (11.0,23.78) (79.0,2.45) (13.0,19.57)};
-\addplot[clPurple, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,20.42) (28.3,30.49) (56.6,12.96) (113.1,16.76)};
-\addplot[only marks, mark=triangle*, mark size=0.8pt, clOlive, opacity=0.3, forget plot] coordinates {
-  (109.0,23.66) (68.0,23.62) (1.0,40.16) (52.0,8.74) (48.0,9.03) (36.0,29.42) (38.0,29.64) (84.0,22.14) (14.0,23.69) (29.0,54.07) (214.0,21.53) (24.0,47.44)
-  (30.0,23.19) (93.0,23.62) (54.0,30.25) (38.0,21.64) (13.0,23.66) (11.0,21.68) (79.0,26.22) (13.0,22.50)};
-\addplot[clOlive, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,22.88) (28.3,34.23) (56.6,19.57) (113.1,23.14)};
+  tick label style={font=\tiny}, label style={font=\tiny},
+  legend to name=legendImbB,
+  legend style={legend columns=2, font=\tiny}]
+\addplot[only marks, mark=*, mark size=0.8pt, clTeal, opacity=0.25, forget plot] coordinates {
+  (25,14.36) (103,3.08) (52,14.32) (21,14.65) (28,23.73) (71,22.21) (22,21.42) (74,10.25) (16,14.11) (25,21.56) (103,34.57) (52,21.28)
+  (21,16.52) (28,14.18) (71,8.48) (22,35.19) (74,15.22) (16,19.80) (25,21.74) (103,29.59) (52,21.41) (21,19.68) (28,15.93) (71,14.28)
+  (22,33.05) (74,16.69) (16,20.73) (25,42.46) (103,44.80) (52,55.61) (21,10.46) (28,23.43) (71,18.64) (22,55.25) (74,16.12) (16,23.68)
+  (68,25.05) (52,-0.61) (48,2.52) (36,51.24) (38,5.95) (84,1.30) (214,9.87) (30,25.01) (13,24.94) (11,23.78) (13,19.57) (68,23.62)
+  (52,8.74) (48,9.03) (36,29.42) (38,29.64) (84,22.14) (214,21.53) (30,23.19) (13,23.66) (11,21.68) (13,22.50)};
+\addplot[clTeal, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,21.44) (28.3,24.91) (56.6,16.82) (113.1,22.58)};
+\addlegendentry{balanced ($<$65\% share)}
+\addplot[only marks, mark=*, mark size=0.8pt, clRed, opacity=0.25, forget plot] coordinates {
+  (13,16.16) (12,29.31) (17,16.16) (47,41.31) (73,18.72) (88,16.16) (203,28.81) (136,33.78) (21,53.56) (9,12.77) (17,20.48) (13,21.56)
+  (12,34.72) (17,21.56) (47,21.82) (73,13.42) (88,21.56) (203,33.74) (136,29.64) (21,45.35) (9,20.77) (17,21.56) (13,21.74) (12,34.89)
+  (17,29.19) (47,39.32) (73,15.65) (88,21.74) (203,33.88) (136,30.10) (21,57.05) (9,20.15) (17,21.74) (13,43.68) (12,55.61) (17,54.60)
+  (47,51.65) (73,23.61) (88,25.16) (203,38.49) (136,42.28) (21,55.61) (9,25.16) (17,25.16) (109,25.05) (1,16.69) (14,13.41) (29,55.50)
+  (24,22.27) (93,23.93) (54,35.39) (38,22.96) (79,2.45) (109,23.66) (1,40.16) (14,23.69) (29,54.07) (24,47.44) (93,23.62) (54,30.25)
+  (38,21.64) (79,26.22)};
+\addplot[clRed, very thick, mark=*, mark size=1.1pt] coordinates {(12.6,26.55) (28.3,43.54) (56.6,26.65) (113.1,26.39) (226.3,33.73)};
+\addlegendentry{skewed ($\geq$65\% share)}
 \addplot[black!50, dashed, forget plot] coordinates {(8,0) (300,0)};
 \end{groupplot}
 \end{tikzpicture}
 \par\vspace{4pt}
-\ref{legendImb}
+\ref{legendImb}\\[2pt]\ref{legendImbB}
 \caption{Partition imbalance, not partition size, drives the
   per-client accuracy decline under non-IID (HomeOccupancy).
   Dots are individual clients; thick lines are binned means.
@@ -94,8 +88,10 @@
   range ($r{=}{+}0.73$ for FedProx)---while the collapsed
   FedAvg/FedProx seeds form a flat band at ${\approx}56$ points
   (dotted): their bias is total and independent of the partition.
-  (b)~The same decline is uncorrelated with the number of samples
-  a client holds ($r{\approx}0$): at this scale, balance matters
-  and quantity does not.}
+  (b)~The same decline vs.\ samples per client, pooled over
+  methods and split by partition balance.  More data helps only
+  when the partition is balanced (teal line declines); for
+  skewed clients extra samples are mostly more of the dominant
+  class and the drop stays high at every size.}
 \label{fig:imbalance}
 \end{figure*}
