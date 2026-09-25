@@ -2095,9 +2095,10 @@ sustains 63.2\% (FedMD) and 61.0\% (FedAKD)---at or above local
 training---and the hybrid FedMKS reaches 53.8\%, still above both
 weight-sharing methods.  The gap is not graceful degradation:
 in two of three seeds the averaged model converges to a single-class
-predictor (validation accuracy ${\approx}33\%$, the test majority
-share) within the first round and never recovers.  With only
-${\approx}90$ samples per client, most local datasets are dominated by
+predictor (validation accuracy ${\approx}33\%$, near the $34.8\%$ test
+majority share) within the first round and never recovers.  With only
+${\approx}52$ samples per client on average, most local datasets are
+dominated by
 one class, so each round's local optimum is a majority-class predictor;
 averaging twenty incompatible single-class models keeps the global
 model in that basin, and skewed local updates cannot escape it.
@@ -2147,7 +2148,7 @@ methods despite their larger architectures.
 
 \textbf{CIFAR-10.}
 Cross-domain public data (MNIST) gives little signal: all FL methods fall
-$10$--$30\%$ below centralised.  FedAvg (53.3\%) edges FedProx (52.1\%)
+$14$--$40$ points below centralised.  FedAvg (53.3\%) edges FedProx (52.1\%)
 and FedMKS (51.9\%) under IID; under non-IID the three are close
 (FedProx 47.3\%, FedAvg 47.0\%, FedMKS 46.1\%).  KD-only methods
 (FedMD 34.8\%, FedAKD 35.2\%) remain at Local level (35.1\%).
