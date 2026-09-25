@@ -58,7 +58,7 @@
   grid style={gray!18, line width=0.3pt},
   tick label style={font=\tiny}, label style={font=\tiny},
   legend to name=legendPartDS,
-  legend style={legend columns=4, font=\tiny}]
+  legend style={legend columns=3, font=\tiny}]
 \addplot[only marks, mark=*, mark size=1.0pt, clRed, opacity=0.55] coordinates {
   (13,76.9) (12,75.0) (25,56.0) (17,94.1) (47,87.2) (103,54.4) (52,59.6) (73,74.0) (88,70.5) (21,52.4) (203,96.6) (28,64.3)
   (71,47.9) (136,72.8) (22,59.1) (74,50.0) (21,66.7) (9,66.7) (17,94.1) (16,56.2) (109,71.6) (68,51.5) (1,100.0) (52,42.3)
@@ -67,14 +67,6 @@
   (80,51.2) (139,74.1) (32,100.0) (18,77.8) (82,57.3) (64,78.1) (88,44.3) (7,42.9) (7,57.1) (79,59.5) (57,54.4) (75,44.0)};
 \addlegendentry{HomeOcc (3 cls)}
 \addplot[only marks, mark=*, mark size=2.4pt, clRed!45!black, forget plot] coordinates {(36,66.7)};
-\addplot[only marks, mark=square*, mark size=1.0pt, clOrange, opacity=0.55] coordinates {
-  (38,50.0) (47,70.2) (178,43.3) (67,58.2) (33,51.5) (48,29.2) (37,43.2) (83,48.2) (24,41.7) (26,46.2) (29,41.4) (26,65.4)
-  (45,44.4) (76,57.9) (139,53.2) (39,46.2) (37,67.6) (35,25.7) (37,48.6) (56,73.2) (55,67.3) (36,36.1) (108,38.0) (64,60.9)
-  (32,40.6) (27,44.4) (53,35.8) (28,71.4) (50,46.0) (80,46.2) (2,100.0) (50,48.0) (83,28.9) (49,44.9) (43,32.6) (32,71.9)
-  (92,63.0) (75,73.3) (82,65.9) (59,55.9) (31,29.0) (57,38.6) (90,43.3) (74,33.8) (54,50.0) (69,43.5) (42,59.5) (61,42.6)
-  (52,38.5) (26,46.2) (63,57.1) (46,32.6) (54,68.5) (62,32.3) (14,28.6) (45,51.1) (71,52.1) (66,68.2) (32,59.4) (91,63.7)};
-\addlegendentry{HomeHAR (7 cls)}
-\addplot[only marks, mark=square*, mark size=2.4pt, clOrange!45!black, forget plot] coordinates {(48,50.3)};
 \addplot[only marks, mark=triangle*, mark size=1.0pt, clBlue, opacity=0.55] coordinates {
   (1734,31.9) (2154,46.7) (2590,29.6) (4453,34.3) (2361,60.3) (3880,23.9) (3936,26.0) (1574,27.4) (837,33.0) (1494,28.2) (2163,34.1) (1412,44.4)
   (5429,32.6) (3457,34.1) (1519,55.6) (4998,39.3) (3250,52.4) (3988,31.5) (2830,35.4) (5941,45.8) (1886,37.6) (2320,47.8) (3390,31.6) (4628,44.2)
@@ -110,8 +102,6 @@
   (c)~Per-client partitions of all benchmarks in the
   (samples, dominant-share) plane (all seeds pooled; large marks
   are dataset means).  HomeOccupancy alone occupies the
-  high-skew/low-data corner; HomeHAR has equally few samples but
-  more classes, so no single class dominates---and averaging
-  survives there.}
+  high-skew/low-data corner.}
 \label{fig:partition}
 \end{figure*}

@@ -35,7 +35,6 @@ For each benchmark we compute three quantities:
 | Dataset  | Silhouette | Fisher | n/client (non-IID) | Dom-class share | Central | Local | FedAvg | FA/Loc | FA/Cen |
 |----------|-----------:|-------:|-----------------:|----------------:|--------:|------:|-------:|-------:|-------:|
 | HomeOcc  | 0.038      | 0.084  | **52** (1–214)   | **0.67** (max 1.00) | 91.7 | 60.1 | 47.2 | **0.79** | **0.52** |
-| HomeHAR  | −0.003     | 1.261  | — (public pool)  | —               | 30.9    | 16.5  | 21.0   | 1.27   | 0.68   |
 | MNIST    | 0.044      | 0.272  | 3000 (353–7219)  | 0.38            | 99.0    | 85.4  | 97.6   | 1.14   | 0.99   |
 | CIFAR-10 | −0.063     | 0.080  | 2500 (716–7374)  | 0.39            | 67.2    | 35.1  | 47.0   | 1.34   | 0.70   |
 
@@ -45,8 +44,8 @@ clients hold far more data than the IID `n_samples_per_class` cap suggests
 (window_size=1500), leaving ~52 samples/client.
 
 A composite difficulty-per-sample proxy `(1 − silhouette)/n_client`
-yields **0.0107** for HomeOccupancy vs 0.0032–0.0048 for the other
-benchmarks — a ~3× gap that correctly identifies the only setting where
+yields **0.0184** for HomeOccupancy vs 0.0003–0.0004 for the image
+benchmarks — a ~45× gap that correctly identifies the only setting where
 `FA/Loc < 1` and `FA/Cen ≈ 0.5`.
 
 The sharper predictor of *collapse specifically* is the combination of
@@ -63,7 +62,7 @@ the worst (27.8%) has 21 samples at 67% share.
 ## Plots (`plots/`)
 
 - `difficulty_vs_effectiveness.png` — difficulty-per-sample vs FA/Cen;
-  monotone ranking across the four benchmarks.
+  monotone ranking across the three benchmarks.
 - `dirichlet_dominant_share.png` — dominant-class share per dataset;
   only HomeOccupancy exceeds the single-class-optimum regime.
 - `data_vs_difficulty_plane.png` — benchmarks in the
@@ -77,9 +76,6 @@ the worst (27.8%) has 21 samples at 67% share.
   fine). A journal version should use representation-space difficulty
   (e.g., silhouette on features of a pretrained encoder, or
   Fisher information of a trained model).
-- HomeHAR's low absolute accuracies partly reflect task hardness rather
-  than FL effectiveness; a normalised difficulty metric should
-  decouple the two.
 - Candidate formalisation: predict `FA/Loc` (or collapse probability)
   from `(difficulty, n_client, dominant-class share)` — e.g., a
   per-client effective-sample-size measure weighted by class coverage.

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  24 SEP 2026 22:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.7)  24 SEP 2026 23:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1060,8 +1060,14 @@ File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 Package pgfplots info on input line 1870: Using 'lua backend=false' for axis: x
 mode=log unsupported (yet).
-Package pgfplots info on input line 1984: Using 'lua backend=false' for axis: x
+Package pgfplots info on input line 1974: Using 'lua backend=false' for axis: x
 mode=log unsupported (yet).
+Package pgfplots info on input line 2031: Using 'lua backend=false' for axis: x
+ coord trafo unsupported.
+Package pgfplots info on input line 2036: Using 'lua backend=false' for axis: x
+ coord trafo unsupported.
+Package pgfplots info on input line 2041: Using 'lua backend=false' for axis: x
+ coord trafo unsupported.
 
 [4]
 Underfull \vbox (badness 2418) has occurred while \output is active []
@@ -1070,28 +1076,28 @@ Underfull \vbox (badness 2418) has occurred while \output is active []
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [5]
-Underfull \hbox (badness 4391) in paragraph at lines 2105--2111
+Underfull \hbox (badness 4391) in paragraph at lines 2141--2147
 []\OT1/ptm/b/n/10 (+20) MNIST. \OT1/ptm/m/n/10 (+20) IID: Cen-tral 99.0%, FedMK
 S 97.5%, Fe-
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 1394) has occurred while \output is active []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [6]
 [7]
-Package pgfplots info on input line 2494: Using 'lua backend=false' for axis: y
+Package pgfplots info on input line 2534: Using 'lua backend=false' for axis: y
 mode=log unsupported (yet).
 
-Underfull \hbox (badness 5592) in paragraph at lines 2539--2555
+Underfull \hbox (badness 5592) in paragraph at lines 2579--2595
 []\OT1/ptm/m/n/10 (+20) We pre-sented \OT1/ptm/b/n/10 (+20) FedMKS\OT1/ptm/m/n/
 10 (+20) , a het-ero-ge-neous fed-er-ated
  []
 
-[8] (paper.bbl)
+(paper.bbl [8] [9])
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -1103,20 +1109,22 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[9] (paper.aux)
+[10
+
+] (paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 34691 strings out of 467871
- 858344 string characters out of 5418861
- 2157654 words of memory out of 5000000
- 62543 multiletter control sequences out of 15000+600000
+ 34715 strings out of 467871
+ 858880 string characters out of 5418861
+ 2164808 words of memory out of 5000000
+ 62567 multiletter control sequences out of 15000+600000
  707922 words of font info for 458 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,19n,104p,11118b,2403s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,19n,104p,11118b,2435s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/type1/public/fontawesome5/
 FontAwesome5Free-Solid.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts/t
 ype1/public/amsfonts/cmextra/cmbsy5.pfb><C:/Users/ggad/AppData/Local/Programs/M
@@ -1156,9 +1164,9 @@ ts/type1/urw/times/utmb8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
 s/type1/urw/times/utmbi8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/font
 s/type1/urw/times/utmr8a.pfb><C:/Users/ggad/AppData/Local/Programs/MiKTeX/fonts
 /type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (9 pages, 672894 bytes).
+Output written on paper.pdf (10 pages, 678843 bytes).
 PDF statistics:
- 220 PDF objects out of 1000 (max. 8388607)
+ 223 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  90637 words of extra memory for PDF output out of 106986 (max. 10000000)
 

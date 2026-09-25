@@ -444,9 +444,8 @@ tex += ['\\nextgroupplot[xmode=log,',
         '  grid style={gray!18, line width=0.3pt},',
         '  tick label style={font=\\tiny}, label style={font=\\tiny},',
         '  legend to name=legendPartDS,',
-        '  legend style={legend columns=4, font=\\tiny}]']
+        '  legend style={legend columns=3, font=\\tiny}]']
 DSCOL = {'home_occupancy': ('clRed', 'mark=*', 'HomeOcc (3 cls)'),
-         'home_har': ('clOrange', 'mark=square*', 'HomeHAR (7 cls)'),
          'mnist': ('clBlue', 'mark=triangle*', 'MNIST (10 cls)'),
          'cifar10': ('clOlive', 'mark=diamond*', 'CIFAR-10 (10 cls)')}
 for ds, (col, mk, nm) in DSCOL.items():
@@ -476,9 +475,7 @@ tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
         '  (c)~Per-client partitions of all benchmarks in the',
         '  (samples, dominant-share) plane (all seeds pooled; large marks',
         '  are dataset means).  HomeOccupancy alone occupies the',
-        '  high-skew/low-data corner; HomeHAR has equally few samples but',
-        '  more classes, so no single class dominates---and averaging',
-        '  survives there.}',
+        '  high-skew/low-data corner.}',
         '\\label{fig:partition}', '\\end{figure*}']
 open('fig_partition.tex', 'w').write('\n'.join(tex))
 
@@ -590,4 +587,54 @@ tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
         '  class and the drop stays high at every size.}',
         '\\label{fig:imbalance}', '\\end{figure*}']
 open('fig_imbalance.tex', 'w').write('\n'.join(tex))
+
+# ---------- FIG difficulty ----------
+# Why HomeOccupancy breaks weight averaging: three bars per dataset.
+# (a) mean dominant-class share per client (Dirichlet a=0.5, verified).
+# (b) FedAvg/Local accuracy ratio under non-IID.
+# (c) difficulty per sample = (1 - silhouette)/n_client x10^3.
+DSETS = ['HomeOcc', 'MNIST', 'CIFAR-10']
+DCOL  = ['clRed', 'clBlue', 'clOlive']
+share = [66.7, 38.2, 38.9]          # mean dominant share, %
+ratio = [0.79, 1.14, 1.34]          # FedAvg / Local, non-IID
+sil   = [0.038, 0.044, -0.063]      # input-space silhouette
+ncl   = [52.4, 3000.0, 2500.0]      # mean samples per client
+dps   = [(1 - s) / n * 1e3 for s, n in zip(sil, ncl)]   # difficulty/sample
+xtick = ('symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data,'
+         ' ybar, bar width=9pt,')
+tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
+       '  group style={', '    group size=3 by 1,', '    horizontal sep=1.1cm,', '  },',
+       '  width=0.31\\textwidth,', '  height=4.6cm,',
+       '  tick label style={font=\\tiny},',
+       '  label style={font=\\tiny},', '  grid=major,',
+       '  grid style={gray!18, line width=0.3pt},', ']']
+# (a) dominant share
+tex.append(f'\\nextgroupplot[{xtick} ylabel={{Mean dominant share (\\%)}}, ymin=0, ymax=95]')
+for d, c, v in zip(DSETS, DCOL, share):
+    tex.append(f'\\addplot[{c}, fill={c}!55] coordinates {{({d},{v})}};')
+tex.append('\\addplot[black!60, dashed, forget plot] coordinates {(HomeOcc,60) (CIFAR-10,60)};')
+# (b) FedAvg/Local
+tex.append(f'\\nextgroupplot[{xtick} ylabel={{FedAvg / Local (non-IID)}}, ymin=0, ymax=1.6]')
+for d, c, v in zip(DSETS, DCOL, ratio):
+    tex.append(f'\\addplot[{c}, fill={c}!55] coordinates {{({d},{v})}};')
+tex.append('\\addplot[black!60, dashed, forget plot] coordinates {(HomeOcc,1) (CIFAR-10,1)};')
+# (c) difficulty per sample
+tex.append(f'\\nextgroupplot[{xtick} ylabel={{Difficulty per sample}}, ymin=0, ymax=21]')
+for d, c, v in zip(DSETS, DCOL, dps):
+    tex.append(f'\\addplot[{c}, fill={c}!55] coordinates {{({d},{v:.2f})}};')
+tex += ['\\end{groupplot}', '\\end{tikzpicture}',
+        '\\caption{Why weight averaging fails on HomeOccupancy.',
+        '  (a)~Mean dominant-class share per client under',
+        '  $\\mathrm{Dir}(\\alpha{=}0.5)$: only HomeOccupancy crosses the',
+        '  ${\\approx}60\\%$ level at which a single class dominates the',
+        '  local optimum.  (b)~FedAvg-to-Local accuracy ratio under',
+        '  non-IID: sharing beats local training on MNIST and CIFAR-10',
+        '  but loses ${\\approx}21\\%$ on HomeOccupancy.  (c)~Difficulty',
+        '  per sample, $(1{-}\\mathrm{silhouette})/n_{\\mathrm{client}}$',
+        '  ($\\times10^{3}$): combining low input-space separability with',
+        '  the smallest per-client partitions makes HomeOccupancy',
+        '  ${\\approx}45{\\times}$ harder per sample than the image',
+        '  benchmarks.}',
+        '\\label{fig:difficulty}', '\\end{figure*}']
+open('fig_difficulty.tex', 'w').write('\n'.join(tex))
 print('done')

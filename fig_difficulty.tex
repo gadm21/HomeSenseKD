@@ -1,0 +1,45 @@
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    group size=3 by 1,
+    horizontal sep=1.1cm,
+  },
+  width=0.31\textwidth,
+  height=4.6cm,
+  tick label style={font=\tiny},
+  label style={font=\tiny},
+  grid=major,
+  grid style={gray!18, line width=0.3pt},
+]
+\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, ylabel={Mean dominant share (\%)}, ymin=0, ymax=95]
+\addplot[clRed, fill=clRed!55] coordinates {(HomeOcc,66.7)};
+\addplot[clBlue, fill=clBlue!55] coordinates {(MNIST,38.2)};
+\addplot[clOlive, fill=clOlive!55] coordinates {(CIFAR-10,38.9)};
+\addplot[black!60, dashed, forget plot] coordinates {(HomeOcc,60) (CIFAR-10,60)};
+\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, ylabel={FedAvg / Local (non-IID)}, ymin=0, ymax=1.6]
+\addplot[clRed, fill=clRed!55] coordinates {(HomeOcc,0.79)};
+\addplot[clBlue, fill=clBlue!55] coordinates {(MNIST,1.14)};
+\addplot[clOlive, fill=clOlive!55] coordinates {(CIFAR-10,1.34)};
+\addplot[black!60, dashed, forget plot] coordinates {(HomeOcc,1) (CIFAR-10,1)};
+\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, ylabel={Difficulty per sample}, ymin=0, ymax=21]
+\addplot[clRed, fill=clRed!55] coordinates {(HomeOcc,18.36)};
+\addplot[clBlue, fill=clBlue!55] coordinates {(MNIST,0.32)};
+\addplot[clOlive, fill=clOlive!55] coordinates {(CIFAR-10,0.43)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Why weight averaging fails on HomeOccupancy.
+  (a)~Mean dominant-class share per client under
+  $\mathrm{Dir}(\alpha{=}0.5)$: only HomeOccupancy crosses the
+  ${\approx}60\%$ level at which a single class dominates the
+  local optimum.  (b)~FedAvg-to-Local accuracy ratio under
+  non-IID: sharing beats local training on MNIST and CIFAR-10
+  but loses ${\approx}21\%$ on HomeOccupancy.  (c)~Difficulty
+  per sample, $(1{-}\mathrm{silhouette})/n_{\mathrm{client}}$
+  ($\times10^{3}$): combining low input-space separability with
+  the smallest per-client partitions makes HomeOccupancy
+  ${\approx}45{\times}$ harder per sample than the image
+  benchmarks.}
+\label{fig:difficulty}
+\end{figure*}

@@ -12,14 +12,14 @@ OUT = os.path.join(os.path.dirname(__file__), 'plots')
 os.makedirs(OUT, exist_ok=True)
 
 # ---- measured values (see difficulty_ratio.py / README.md) ----
-DS = ['HomeOcc', 'HomeHAR', 'MNIST', 'CIFAR-10']
-sil       = np.array([0.038, -0.003, 0.044, -0.063])   # silhouette (3k subsample)
-fisher    = np.array([0.084, 1.261, 0.272, 0.080])     # trace(Sb)/trace(Sw)
-n_client  = np.array([90, 210, 300, 300])              # samples per client
-maxshare  = np.array([0.79, 0.46, 0.44, 0.34])         # Dirichlet a=0.5 dominant share
-fa_loc    = np.array([0.79, 1.27, 1.14, 1.34])         # FedAvg/Local non-IID
-fa_cen    = np.array([0.52, 0.68, 0.99, 0.70])         # FedAvg/Central
-colors    = ['#d62728', '#ff7f0e', '#2ca02c', '#1f77b4']
+DS = ['HomeOcc', 'MNIST', 'CIFAR-10']
+sil       = np.array([0.038, 0.044, -0.063])           # silhouette (3k subsample)
+fisher    = np.array([0.084, 0.272, 0.080])            # trace(Sb)/trace(Sw)
+n_client  = np.array([52, 3000, 2500])                 # mean samples per client (non-IID)
+maxshare  = np.array([0.67, 0.38, 0.39])               # Dirichlet a=0.5 dominant share
+fa_loc    = np.array([0.79, 1.14, 1.34])               # FedAvg/Local non-IID
+fa_cen    = np.array([0.52, 0.99, 0.70])               # FedAvg/Central
+colors    = ['#d62728', '#2ca02c', '#1f77b4']
 
 diff_per_sample = (1 - sil) / n_client * 1e3           # x1000 for readability
 

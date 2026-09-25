@@ -51,6 +51,15 @@ else:
     src = (src[:e] + '\n\n' +
            open('fig_imbalance.tex', encoding='utf-8').read() + src[e:])
 
+# fig:difficulty — replace if present, else insert right after fig:imbalance
+if '\\label{fig:difficulty}' in src:
+    replace_figure('fig:difficulty', 'fig_difficulty.tex')
+else:
+    li = src.index('\\label{fig:imbalance}')
+    e = src.index('\\end{figure*}', li) + len('\\end{figure*}')
+    src = (src[:e] + '\n\n' +
+           open('fig_difficulty.tex', encoding='utf-8').read() + src[e:])
+
 src = src.replace('\\usepgfplotslibrary{groupplots}\n\\usepgfplotslibrary{fillbetween}',
                   '\\usepgfplotslibrary{groupplots}')
 out = src.replace('\n', '\r\n') if crlf else src

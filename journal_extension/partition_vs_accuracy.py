@@ -19,8 +19,6 @@ R, GS = 50, 4          # rounds per seed, local epochs per round (CSV rows/round
 # HomeOcc counts measured from load_homeoccupancy(window_size=1500) output.
 DS = {
     'home_occupancy': dict(counts=[375, 380, 293], n_cls=3,  spc=30),
-    'home_har':       dict(counts=[210, 198, 190, 199, 198, 105, 0],
-                           n_cls=7, spc=30),  # 80% train split of 1375
     'mnist':          dict(counts=[6000]*10,       n_cls=10, spc=30),
     'cifar10':        dict(counts=[5000]*10,       n_cls=10, spc=30),
 }
