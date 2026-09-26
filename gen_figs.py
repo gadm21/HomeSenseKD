@@ -323,11 +323,11 @@ R = 50
 loc_pts = (loc_a[:, R-5:R].mean(axis=1) * 100).tolist()
 tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
        '  group style={', '    xlabels at=edge bottom,', '    ylabels at=edge left,',
-       '    group size=4 by 1,', '    horizontal sep=0.9cm,', '  },',
-       '  width=0.23\\textwidth,', '  height=4.2cm,', ']']
+       '    group size=3 by 1,', '    horizontal sep=0.9cm,', '  },',
+       '  width=0.30\\textwidth,', '  height=4.2cm,', ']']
 rng3 = np.random.RandomState(2)
-for p in range(4):
-    title = 'Local' if p == 0 else f'FedAvg seed {p}'
+for p in range(1, 4):
+    title = f'FedAvg seed {p}'
     tex.append(f'\\nextgroupplot[ymin=20, ymax=95, xmin=0.4, xmax=2.6,')
     tex.append('  xtick={1,2}, xticklabels={Local,FedAvg},')
     tex.append('  x tick label style={font=\\tiny},')
@@ -341,13 +341,12 @@ for p in range(4):
                   for k in range(0, len(loc_pts), 10))
     tex.append(f'\\addplot[only marks, mark=*, mark size=0.9pt, clGray, opacity=0.55, forget plot] coordinates {{\n{pc}}};')
     tex.append(f'\\addplot[black, thick, forget plot] coordinates {{(0.7,{np.mean(loc_pts):.2f}) (1.3,{np.mean(loc_pts):.2f})}};')
-    if p > 0:
-        fa_pts = (fa_a[:, p*R - 5:p*R].mean(axis=1) * 100).tolist()
-        xs = [2 + rng3.uniform(-0.25, 0.25) for _ in fa_pts]
-        pc = '\n'.join('  ' + ' '.join(f'({x:.3f},{y:.2f})' for x, y in zip(xs[k:k+10], fa_pts[k:k+10]))
-                      for k in range(0, len(fa_pts), 10))
-        tex.append(f'\\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {{\n{pc}}};')
-        tex.append(f'\\addplot[black, thick, forget plot] coordinates {{(1.7,{np.mean(fa_pts):.2f}) (2.3,{np.mean(fa_pts):.2f})}};')
+    fa_pts = (fa_a[:, p*R - 5:p*R].mean(axis=1) * 100).tolist()
+    xs = [2 + rng3.uniform(-0.25, 0.25) for _ in fa_pts]
+    pc = '\n'.join('  ' + ' '.join(f'({x:.3f},{y:.2f})' for x, y in zip(xs[k:k+10], fa_pts[k:k+10]))
+                   for k in range(0, len(fa_pts), 10))
+    tex.append(f'\\addplot[only marks, mark=*, mark size=0.9pt, clPurple, opacity=0.65, forget plot] coordinates {{\n{pc}}};')
+    tex.append(f'\\addplot[black, thick, forget plot] coordinates {{(1.7,{np.mean(fa_pts):.2f}) (2.3,{np.mean(fa_pts):.2f})}};')
 tex += ['\\end{groupplot}', '\\end{tikzpicture}',
         '\\caption{HomeOccupancy non-IID, per-client final accuracy by seed',
         "  (each client's model evaluated after its local update).",
@@ -462,11 +461,12 @@ tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
         '\\ref{legendPartA}\\hspace{1.2em}\\ref{legendPart}\\\\[2pt]\\ref{legendPartDS}',
         '\\caption{Data distribution decides whether weight averaging',
         '  survives.  (a)~HomeOccupancy non-IID: per-client final accuracy',
-        "  vs.\\ each client's dominant-class share.  Local and FedMD",
-        '  degrade as the partition approaches a single class',
-        '  ($r{=}{-}0.36$ for Local); FedAvg clients in the two collapsed',
-        '  seeds sit at chance at \\emph{every} share---collapse is a',
-        "  property of the averaged model, not of any client's data.",
+        '  vs.\\ each client\'s dominant-class share.  FedAvg clients in',
+        '  the two collapsed seeds sit at chance at \\emph{every} share,',
+        '  including nearly balanced ones---collapse is a property of the',
+        '  averaged model, not of any client\'s data.  Per-client models',
+        '  (Local, FedMD) never collapse; their degradation with share is',
+        '  quantified in Fig.~\\ref{fig:imbalance}.',
         '  (b)~Mean accuracy per seed: FedAvg and FedProx collapse in two',
         '  of three seeds while the KD-based methods and Local (single',
         '  seed, dashed references) hold ${\\approx}54$--$63\\%$; FedMKS',
@@ -480,111 +480,158 @@ tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
 open('fig_partition.tex', 'w').write('\n'.join(tex))
 
 # ---------- FIG imbalance ----------
-# Partition imbalance vs accuracy decline (bias), HomeOccupancy non-IID.
-# (a) accuracy drop vs IID mean vs dominant-class share.
-# (b) same drop vs samples per client -- flat: balance, not size, predicts.
-# FedAvg/FedProx: only the surviving seed (123) is shown as a trend; the
-# two collapsed seeds form the dashed band at ~57 pts.
-IMB = [('local', 'Local', f'{HO}/local/uniform/noniid', None),
-       ('fedmd', 'FedMD', 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid', None),
-       ('fedakd', 'FedAKD', f'{HO}/fedakd/uniform/noniid', None),
-       ('mks', 'FedMKS', f'{HO}/mks/uniform/noniid', None),
-       ('fedavg', 'FedAvg', f'{HO}/fedavg/uniform/noniid', 1),
-       ('fedprox', 'FedProx', f'{HO}/fedprox/uniform/noniid', 1)]
-BINX = {'dom': ([30, 50, 65, 80, 106], lambda lo, hi: (lo + hi) / 2),
-        'n':   ([8, 20, 40, 80, 160, 320], lambda lo, hi: (lo * hi) ** 0.5)}
-# collect (n, share, drop) per client per method; FedAvg/FedProx: seed 123
-POOL = []
-per_method = {}
-for algo, nm, folder, sonly in IMB:
-    a = load(folder)
-    if a is None:
-        continue
-    iidm = np.mean(seed_means(folder.replace('noniid', 'iid')))
-    C, T = a.shape
-    pts = []
-    for s in range(T // R):
-        if sonly is not None and s != sonly:
-            continue
-        acc = a[:, s*R + R - 5:(s+1)*R].mean(axis=1) * 100
-        for c in range(C):
-            pts.append((ho[s]['n'][c], ho[s]['dom_share'][c] * 100,
-                        iidm - acc[c]))
-    per_method[algo] = pts
-    POOL += pts
-POOL = np.array(POOL)
+# Per-client accuracy decline (drop vs own IID mean) under non-IID, all
+# three benchmarks.  Top row: decline vs dominant-class share, per method.
+# Bottom row: same decline vs samples per client, pooled over methods and
+# split at the dataset's median share.
+# HomeOccupancy FedAvg/FedProx: only the surviving seed (123) is drawn;
+# the collapsed seeds form the dotted band at ~56 pts.
+IMBDS = [
+    # (title, pstats key, method->folder, seed-only per method,
+    #  xmin xmax ymin ymax share_edges, n_xmin n_xmax n_edges)
+    ('HomeOccupancy', 'home_occupancy',
+     {'local': f'{HO}/local/uniform/noniid',
+      'fedmd': 'oldresults/phase1/home_occupancy/fedmd/uniform/noniid',
+      'fedakd': f'{HO}/fedakd/uniform/noniid',
+      'mks': f'{HO}/mks/uniform/noniid',
+      'fedavg': f'{HO}/fedavg/uniform/noniid',
+      'fedprox': f'{HO}/fedprox/uniform/noniid'},
+     {'fedavg': 1, 'fedprox': 1},
+     30, 105, -12, 68, [30, 50, 65, 80, 106], 8, 300, [8, 20, 40, 80, 160, 320]),
+    ('MNIST', 'mnist',
+     {a: f'oldresults/phase1/mnist/{a}/uniform/noniid' for a in
+      ['local', 'fedmd', 'fedakd', 'mks', 'fedavg', 'fedprox']}, {},
+     10, 75, -8, 42, [10, 30, 45, 55, 75], 300, 9000,
+     [300, 900, 1800, 3600, 7200, 9000]),
+    ('CIFAR-10', 'cifar10',
+     {a: f'oldresults/phase1/cifar10/{a}/uniform/noniid' for a in
+      ['local', 'fedmd', 'fedakd', 'mks', 'fedavg', 'fedprox']}, {},
+     10, 80, -12, 24, [10, 30, 45, 60, 80], 500, 9000,
+     [500, 1200, 2400, 4800, 9600]),
+]
+METHODS = ['local', 'fedmd', 'fedakd', 'mks', 'fedavg', 'fedprox']
+MNAMES = {'local': 'Local', 'fedmd': 'FedMD', 'fedakd': 'FedAKD',
+          'mks': 'FedMKS', 'fedavg': 'FedAvg', 'fedprox': 'FedProx'}
 
-tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
-       '  group style={', '    group size=2 by 1,', '    horizontal sep=1.5cm,', '  },',
-       '  width=0.44\\textwidth,', '  height=4.6cm,', ']']
-# ---- (a) drop vs dominant-class share, per method ----
-tex += ['\\nextgroupplot[xlabel={Dominant-class share (\\%)},',
-        '  ylabel={Acc.\\ drop vs.\\ IID (pts)},',
-        '  xmin=30, xmax=105, ymin=-12, ymax=68, grid=major,',
-        '  grid style={gray!18, line width=0.3pt},',
-        '  tick label style={font=\\tiny}, label style={font=\\tiny},',
-        '  legend to name=legendImb,',
-        '  legend style={legend columns=6, font=\\tiny}]']
-edges, centre = BINX['dom']
-for algo, nm, folder, sonly in IMB:
-    if algo not in per_method:
-        continue
-    pts = per_method[algo]
-    pc = '\n'.join('  ' + ' '.join(f'({p[1]:.1f},{p[2]:.2f})' for p in pts[k:k+12])
-                   for k in range(0, len(pts), 12))
-    tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=0.8pt, {FILL[algo]}, opacity=0.3, forget plot] coordinates {{\n{pc}}};')
-    xs = np.array([p[1] for p in pts]); ys = np.array([p[2] for p in pts])
+def imb_pool(ds, folders, sonly):
+    """per-method and pooled lists of (n, share%, drop pts) per client."""
+    st = pstats[ds]
+    per_method, pool = {}, []
+    for algo in METHODS:
+        a = load(folders[algo])
+        if a is None:
+            continue
+        iidm = np.mean(seed_means(folders[algo].replace('noniid', 'iid')))
+        C, T = a.shape
+        pts = []
+        for s in range(T // R):
+            if algo in sonly and s != sonly[algo]:
+                continue
+            acc = a[:, s*R + R - 5:(s+1)*R].mean(axis=1) * 100
+            for c in range(C):
+                pts.append((st[s]['n'][c], st[s]['dom_share'][c] * 100,
+                            iidm - acc[c]))
+        per_method[algo] = pts
+        pool += pts
+    return per_method, np.array(pool)
+
+def binned(xs, ys, edges, centre, min_n=2):
     line = []
     for lo, hi in zip(edges[:-1], edges[1:]):
         m = (xs >= lo) & (xs < hi)
-        if m.sum() >= 2:
+        if m.sum() >= min_n:
             line.append(f'({centre(lo, hi):.1f},{ys[m].mean():.2f})')
-    tex.append(f'\\addplot[{FILL[algo]}, very thick, mark=*, mark size=1.1pt] coordinates {{{" ".join(line)}}};')
-    tex.append(f'\\addlegendentry{{{nm}}}')
-tex.append('\\addplot[black!50, dashed, forget plot] coordinates {(30,0) (105,0)};')
-tex.append('\\addplot[black!60, dotted, thick, forget plot] coordinates {(30,56) (105,56)};')
-tex.append('\\node[font=\\tiny, black!60, anchor=south west] at (rel axis cs:0.02,0.86) {collapsed seeds};')
-# ---- (b) drop vs samples per client, stratified by share ----
-tex += ['\\nextgroupplot[xmode=log, xlabel={Samples per client},',
-        '  xmin=8, xmax=300, ymin=-12, ymax=68, grid=major,',
-        '  grid style={gray!18, line width=0.3pt},',
-        '  tick label style={font=\\tiny}, label style={font=\\tiny},',
-        '  legend to name=legendImbB,',
-        '  legend style={legend columns=2, font=\\tiny}]']
-edges, centre = BINX['n']
-for lo_s, hi_s, col, nm in [(0, 65, 'clTeal', 'balanced ($<$65\\% share)'),
-                            (65, 105, 'clRed', 'skewed ($\\geq$65\\% share)')]:
-    m = (POOL[:, 1] >= lo_s) & (POOL[:, 1] < hi_s)
-    sub = POOL[m]
-    pc = '\n'.join('  ' + ' '.join(f'({p[0]:.0f},{p[2]:.2f})' for p in sub[k:k+12])
-                   for k in range(0, len(sub), 12))
-    tex.append(f'\\addplot[only marks, mark=*, mark size=0.8pt, {col}, opacity=0.25, forget plot] coordinates {{\n{pc}}};')
-    line = []
-    for lo, hi in zip(edges[:-1], edges[1:]):
-        mm = (sub[:, 0] >= lo) & (sub[:, 0] < hi)
-        if mm.sum() >= 3:
-            line.append(f'({centre(lo, hi):.1f},{sub[mm, 2].mean():.2f})')
-    tex.append(f'\\addplot[{col}, very thick, mark=*, mark size=1.1pt] coordinates {{{" ".join(line)}}};')
-    tex.append(f'\\addlegendentry{{{nm}}}')
-tex.append('\\addplot[black!50, dashed, forget plot] coordinates {(8,0) (300,0)};')
+    return line
+
+tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
+       '  group style={', '    xlabels at=edge bottom,', '    ylabels at=edge left,',
+       '    group size=3 by 2,', '    horizontal sep=1.15cm,',
+       '    vertical sep=1.2cm,', '  },',
+       '  width=0.31\\textwidth,', '  height=4.0cm,', ']']
+# ---- top row: drop vs dominant-class share, per method ----
+for i, (nm, ds, folders, sonly, xmn, xmx, ymn, ymx, sedges,
+        nmn, nmx, nedges) in enumerate(IMBDS):
+    per_method, pool = imb_pool(ds, folders, sonly)
+    hdr = f'\\nextgroupplot[xlabel={{Dominant-class share (\\%)}},'
+    if i == 0:
+        hdr += '\n  ylabel={Acc.\\ drop vs.\\ IID (pts)},'
+    hdr += (f'\n  title={{\\footnotesize {nm}}}, title style={{yshift=-2pt}},'
+            f'\n  xmin={xmn}, xmax={xmx}, ymin={ymn}, ymax={ymx}, grid=major,'
+            '\n  grid style={gray!18, line width=0.3pt},'
+            '\n  tick label style={font=\\tiny}, label style={font=\\tiny}')
+    hdr += (',\n  legend to name=legendImb,'
+            '\n  legend style={legend columns=6, font=\\tiny}]' if i == 0 else ']')
+    tex.append(hdr)
+    centre = lambda lo, hi: (lo + hi) / 2
+    for algo in METHODS:
+        if algo not in per_method:
+            continue
+        pts = per_method[algo]
+        pc = '\n'.join('  ' + ' '.join(f'({p[1]:.1f},{p[2]:.2f})' for p in pts[k:k+12])
+                       for k in range(0, len(pts), 12))
+        tex.append(f'\\addplot[only marks, {MK[algo]}, mark size=0.8pt, {FILL[algo]}, opacity=0.3, forget plot] coordinates {{\n{pc}}};')
+        xs = np.array([p[1] for p in pts]); ys = np.array([p[2] for p in pts])
+        tex.append(f'\\addplot[{FILL[algo]}, very thick, mark=*, mark size=1.1pt] coordinates {{{" ".join(binned(xs, ys, sedges, centre))}}};')
+        if i == 0:
+            tex.append(f'\\addlegendentry{{{MNAMES[algo]}}}')
+    tex.append(f'\\addplot[black!50, dashed, forget plot] coordinates {{({xmn},0) ({xmx},0)}};')
+    if ds == 'home_occupancy':
+        tex.append('\\addplot[black!60, dotted, thick, forget plot] coordinates {(30,56) (105,56)};')
+        tex.append('\\node[font=\\tiny, black!60, anchor=south west] at (rel axis cs:0.02,0.86) {collapsed seeds};')
+# ---- bottom row: drop vs samples per client, split at median share ----
+for i, (nm, ds, folders, sonly, xmn, xmx, ymn, ymx, sedges,
+        nmn, nmx, nedges) in enumerate(IMBDS):
+    per_method, pool = imb_pool(ds, folders, sonly)
+    med = float(np.median(pool[:, 1]))
+    hdr = f'\\nextgroupplot[xmode=log, xlabel={{Samples per client}},'
+    hdr += (f'\n  xmin={nmn}, xmax={nmx}, ymin={ymn}, ymax={ymx}, grid=major,'
+            '\n  grid style={gray!18, line width=0.3pt},'
+            '\n  tick label style={font=\\tiny}, label style={font=\\tiny}')
+    hdr += (',\n  legend to name=legendImbB,'
+            '\n  legend style={legend columns=2, font=\\tiny}]' if i == 0 else ']')
+    tex.append(hdr)
+    centre = lambda lo, hi: (lo * hi) ** 0.5
+    sub_lo = pool[pool[:, 1] < med]
+    sub_hi = pool[pool[:, 1] >= med]
+    # shared x positions: a bin appears on both lines only if BOTH halves
+    # have >=3 points in it, so the two means are always comparable.
+    shared = [i for i in range(len(nedges) - 1)
+              if ((sub_lo[:, 0] >= nedges[i]) & (sub_lo[:, 0] < nedges[i+1])).sum() >= 3
+              and ((sub_hi[:, 0] >= nedges[i]) & (sub_hi[:, 0] < nedges[i+1])).sum() >= 3]
+    for col, lab, sub in [('clGreen', 'below-median share', sub_lo),
+                          ('clOrange', 'above-median share', sub_hi)]:
+        pc = '\n'.join('  ' + ' '.join(f'({p[0]:.0f},{p[2]:.2f})' for p in sub[k:k+12])
+                       for k in range(0, len(sub), 12))
+        tex.append(f'\\addplot[only marks, mark=*, mark size=0.8pt, {col}, opacity=0.25, forget plot] coordinates {{\n{pc}}};')
+        line = []
+        for j in shared:
+            m = (sub[:, 0] >= nedges[j]) & (sub[:, 0] < nedges[j+1])
+            line.append(f'({centre(nedges[j], nedges[j+1]):.1f},{sub[m, 2].mean():.2f})')
+        tex.append(f'\\addplot[{col}, very thick, mark=*, mark size=1.1pt] coordinates {{{" ".join(line)}}};')
+        if i == 0:
+            tex.append(f'\\addlegendentry{{{lab}}}')
+    tex.append(f'\\addplot[black!50, dashed, forget plot] coordinates {{({nmn},0) ({nmx},0)}};')
 tex += ['\\end{groupplot}', '\\end{tikzpicture}', '\\par\\vspace{4pt}',
         '\\ref{legendImb}\\\\[2pt]\\ref{legendImbB}',
-        '\\caption{Partition imbalance, not partition size, drives the',
-        '  per-client accuracy decline under non-IID (HomeOccupancy).',
-        '  Dots are individual clients; thick lines are binned means.',
-        '  The y-axis is the drop from',
-        "  the method's own IID mean.  (a)~The decline grows steadily with",
-        '  the dominant-class share for every method that keeps per-client',
-        '  models---e.g.\\ FedAvg in its surviving seed falls from',
-        '  ${\\approx}0$ to ${\\approx}24$ points of drop across the share',
-        '  range ($r{=}{+}0.73$ for FedProx)---while the collapsed',
-        '  FedAvg/FedProx seeds form a flat band at ${\\approx}56$ points',
-        '  (dotted): their bias is total and independent of the partition.',
-        '  (b)~The same decline vs.\\ samples per client, pooled over',
-        '  methods and split by partition balance.  More data helps only',
-        '  when the partition is balanced (teal line declines); for',
-        '  skewed clients extra samples are mostly more of the dominant',
-        '  class and the drop stays high at every size.}',
+        '\\caption{Per-client accuracy decline under non-IID, measured as',
+        "  the drop from each method's own IID mean (dots: individual",
+        '  clients, seeds pooled; thick lines: binned means).  Top:',
+        '  decline vs.\\ dominant-class share, per method.',
+        '  (a)~HomeOccupancy: the drop grows with share for every method',
+        "  that keeps per-client models ($r{=}{+}0.73$ for FedProx's",
+        '  surviving seed), while the two collapsed FedAvg/FedProx seeds',
+        '  form a flat band at ${\\approx}56$ points (dotted)---their bias',
+        '  is total and independent of the partition.  (b)~MNIST: weight',
+        '  sharing loses essentially nothing; only local-model methods',
+        '  drop ${\\approx}9$ points.  (c)~CIFAR-10: the share--decline',
+        '  link is the strongest of any benchmark ($r{\\approx}{+}0.6$).',
+        '  Bottom: the same decline vs.\\ samples per client, pooled over',
+        "  methods and split at each dataset's median share.  On",
+        '  HomeOccupancy (d)~more data does not rescue the above-median',
+        '  half (extra samples are mostly more of the dominant class);',
+        '  on MNIST (e)~drops are negligible at every size; on CIFAR-10',
+        '  (f)~larger partitions reduce the drop for both halves---size',
+        '  helps only where samples are already plentiful.}',
         '\\label{fig:imbalance}', '\\end{figure*}']
 open('fig_imbalance.tex', 'w').write('\n'.join(tex))
 
@@ -601,7 +648,7 @@ sil   = [0.038, 0.044, -0.063]      # input-space silhouette
 ncl   = [52.4, 3000.0, 2500.0]      # mean samples per client
 dps   = [(1 - s) / n * 1e3 for s, n in zip(sil, ncl)]   # difficulty/sample
 xtick = ('symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data,'
-         ' ybar, bar width=9pt,')
+         ' ybar, bar width=9pt, enlarge x limits=0.3,')
 tex = ['\\begin{figure*}[t]', '\\centering', '\\begin{tikzpicture}', '\\begin{groupplot}[',
        '  group style={', '    group size=3 by 1,', '    horizontal sep=1.1cm,', '  },',
        '  width=0.31\\textwidth,', '  height=4.6cm,',

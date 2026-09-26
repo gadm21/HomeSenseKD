@@ -40,11 +40,6 @@ S.~Yousefi, H.~Narui, S.~Dayal, S.~Ermon, and S.~Valaee, ``A survey on behavior
   recognition using {WiFi} channel state information,'' \emph{IEEE Commun.
   Mag.}, vol.~55, no.~10, pp. 98--104, 2017.
 
-\bibitem{lin2020ensemble}
-T.~Lin, L.~Kong, S.~U. Stich, and M.~Jaggi, ``Ensemble distillation for robust
-  model fusion in federated learning,'' in \emph{Proc. NeurIPS}, 2020, pp.
-  2351--2363.
-
 \bibitem{li2020fedprox}
 T.~Li, A.~K. Sahu, M.~Zaheer, M.~Sanjabi, A.~Talwalkar, and V.~Smith,
   ``Federated optimization in heterogeneous networks,'' in \emph{Proc. MLSys},
@@ -87,6 +82,11 @@ G.~Hinton, O.~Vinyals, and J.~Dean, ``Distilling the knowledge in a neural
 \bibitem{shen2020fedml}
 T.~Shen, J.~Zhang, X.~Jia, F.~Zhang, G.~Huang, P.~Zhou, K.~Cheng, and F.~Wu,
   ``Federated mutual learning,'' arXiv preprint arXiv:2006.16765, 2020.
+
+\bibitem{lin2020ensemble}
+T.~Lin, L.~Kong, S.~U. Stich, and M.~Jaggi, ``Ensemble distillation for robust
+  model fusion in federated learning,'' in \emph{Proc. NeurIPS}, 2020, pp.
+  2351--2363.
 
 \bibitem{zhao2018noniid}
 Y.~Zhao, M.~Li, L.~Lai, N.~Suda, D.~Civin, and V.~Chandra, ``Federated learning

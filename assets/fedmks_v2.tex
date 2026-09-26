@@ -79,6 +79,11 @@
   \draw[black!20,dashed] (\x,2.75) -- (\x,-1.55);
 
 % ===================== tier rows =====================
+% dashed box bounds each client (icon + private data)
+\foreach \y in {2.0,0.6,-0.8}{
+  \draw[black!40, dashed, rounded corners=2pt] (-1.05,\y-0.35) rectangle (-0.42,\y+0.35);
+  \draw[black!40, dashed, rounded corners=2pt] (-0.30,\y-0.35) rectangle (0.35,\y+0.35);
+}
 % ---- row S (y=2.0) ----
 \pic at (-0.80,2.0) {clientS}; \pic at (-0.10,2.0) {clientS};
 \pic at (-0.80,1.45) {privdata}; \pic at (-0.10,1.45) {privdata};

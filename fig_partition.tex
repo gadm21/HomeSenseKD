@@ -89,11 +89,12 @@
 \ref{legendPartA}\hspace{1.2em}\ref{legendPart}\\[2pt]\ref{legendPartDS}
 \caption{Data distribution decides whether weight averaging
   survives.  (a)~HomeOccupancy non-IID: per-client final accuracy
-  vs.\ each client's dominant-class share.  Local and FedMD
-  degrade as the partition approaches a single class
-  ($r{=}{-}0.36$ for Local); FedAvg clients in the two collapsed
-  seeds sit at chance at \emph{every} share---collapse is a
-  property of the averaged model, not of any client's data.
+  vs.\ each client's dominant-class share.  FedAvg clients in
+  the two collapsed seeds sit at chance at \emph{every} share,
+  including nearly balanced ones---collapse is a property of the
+  averaged model, not of any client's data.  Per-client models
+  (Local, FedMD) never collapse; their degradation with share is
+  quantified in Fig.~\ref{fig:imbalance}.
   (b)~Mean accuracy per seed: FedAvg and FedProx collapse in two
   of three seeds while the KD-based methods and Local (single
   seed, dashed references) hold ${\approx}54$--$63\%$; FedMKS

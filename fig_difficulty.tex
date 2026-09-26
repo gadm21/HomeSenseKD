@@ -13,17 +13,17 @@
   grid=major,
   grid style={gray!18, line width=0.3pt},
 ]
-\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, ylabel={Mean dominant share (\%)}, ymin=0, ymax=95]
+\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, enlarge x limits=0.3, ylabel={Mean dominant share (\%)}, ymin=0, ymax=95]
 \addplot[clRed, fill=clRed!55] coordinates {(HomeOcc,66.7)};
 \addplot[clBlue, fill=clBlue!55] coordinates {(MNIST,38.2)};
 \addplot[clOlive, fill=clOlive!55] coordinates {(CIFAR-10,38.9)};
 \addplot[black!60, dashed, forget plot] coordinates {(HomeOcc,60) (CIFAR-10,60)};
-\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, ylabel={FedAvg / Local (non-IID)}, ymin=0, ymax=1.6]
+\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, enlarge x limits=0.3, ylabel={FedAvg / Local (non-IID)}, ymin=0, ymax=1.6]
 \addplot[clRed, fill=clRed!55] coordinates {(HomeOcc,0.79)};
 \addplot[clBlue, fill=clBlue!55] coordinates {(MNIST,1.14)};
 \addplot[clOlive, fill=clOlive!55] coordinates {(CIFAR-10,1.34)};
 \addplot[black!60, dashed, forget plot] coordinates {(HomeOcc,1) (CIFAR-10,1)};
-\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, ylabel={Difficulty per sample}, ymin=0, ymax=21]
+\nextgroupplot[symbolic x coords={HomeOcc, MNIST, CIFAR-10}, xtick=data, ybar, bar width=9pt, enlarge x limits=0.3, ylabel={Difficulty per sample}, ymin=0, ymax=21]
 \addplot[clRed, fill=clRed!55] coordinates {(HomeOcc,18.36)};
 \addplot[clBlue, fill=clBlue!55] coordinates {(MNIST,0.32)};
 \addplot[clOlive, fill=clOlive!55] coordinates {(CIFAR-10,0.43)};
